@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+    --error: #ff5f5f; --success: #5fff9a; --warning: orange;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; }
+
+  .sidebar {
+    width: 240px; min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 1.5rem;
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+  }
+  .logo { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); text-decoration: none; margin-bottom: 0.5rem; display: block; }
+  .logo span { color: var(--accent); }
+  .role-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #ff5f5f; background: rgba(255,95,95,0.1); border: 1px solid rgba(255,95,95,0.2); padding: 3px 8px; border-radius: 99px; display: inline-block; margin-bottom: 2rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; text-decoration: none; border: none; background: none; font-family: var(--font-body); width: 100%; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(200,245,90,0.1); color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .admin-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .admin-name { font-size: 14px; font-weight: 500; }
+
+  .main { margin-left: 240px; flex: 1; padding: 2.5rem; }
+  .page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2.5rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-val { font-family: var(--font-display); font-size: 32px; font-weight: 700; }
+  .stat-val.green { color: var(--accent); }
+  .stat-val.orange { color: var(--warning); }
+
+  .section { margin-bottom: 2.5rem; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+  .badge-count { background: var(--warning); color: #0a0a0a; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  th { text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+  td { padding: 13px 16px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
+  .status-badge.active { background: rgba(95,255,154,0.1); color: var(--success); border: 1px solid rgba(95,255,154,0.2); }
+  .status-badge.pending { background: rgba(255,165,0,0.1); color: var(--warning); border: 1px solid rgba(255,165,0,0.2); }
+  .status-badge.rejected { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); }
+
+  .action-btns { display: flex; gap: 6px; }
+  .btn-approve { background: rgba(95,255,154,0.1); color: var(--success); border: 1px solid rgba(95,255,154,0.2); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .btn-approve:hover { background: rgba(95,255,154,0.2); }
+  .btn-reject { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .btn-reject:hover { background: rgba(255,95,95,0.2); }
+  .btn-view { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .btn-view:hover { color: var(--text); }
+
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 4px; width: fit-content; margin-bottom: 1rem; }
+  .tab { padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-radius: 6px; border: none; background: none; font-family: var(--font-body); transition: all 0.2s; }
+  .tab.active { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+
+  .empty-row td { text-align: center; color: var(--muted); padding: 2.5rem !important; }
+
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+  <span class="role-badge">Admin</span>
+  <button class="nav-item active" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
+  <button class="nav-item" onclick="showSection('agenti', this)"><span class="nav-icon">🤖</span> Agenti <span id="pending-agents-count" style="margin-left:auto; background: var(--warning); color:#0a0a0a; font-size:10px; font-weight:700; padding:2px 6px; border-radius:99px; display:none;">0</span></button>
+  <button class="nav-item" onclick="showSection('vendor', this)"><span class="nav-icon">👨‍💻</span> Vendor</button>
+  <button class="nav-item" onclick="showSection('utenti', this)"><span class="nav-icon">👥</span> Utenti</button>
+  <button class="nav-item" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
+  <div class="sidebar-bottom">
+    <div class="admin-label">Connesso come</div>
+    <div class="admin-name">Admin</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page-section active" id="section-dashboard">
+    <div class="page-title">Pannello Admin</div>
+    <div class="page-sub">Panoramica generale di Shop Your Agent</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Utenti totali</div>
+        <div class="stat-val" id="stat-utenti">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Agenti attivi</div>
+        <div class="stat-val" id="stat-agenti-attivi">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">In attesa approvazione</div>
+        <div class="stat-val orange" id="stat-pending">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Abbonamenti attivi</div>
+        <div class="stat-val green" id="stat-subs">—</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Agenti in attesa di approvazione</div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Azioni</th></tr>
+        </thead>
+        <tbody id="pending-agents-tbody">
+          <tr class="empty-row"><td colspan="5">Nessun agente in attesa</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- AGENTI -->
+  <div class="page-section" id="section-agenti">
+    <div class="page-title">Gestione Agenti</div>
+    <div class="page-sub">Approva, rifiuta e gestisci tutti gli agenti</div>
+    <div class="tabs">
+      <button class="tab active" onclick="filterAgents('tutti', this)">Tutti</button>
+      <button class="tab" onclick="filterAgents('pending', this)">In attesa</button>
+      <button class="tab" onclick="filterAgents('attivi', this)">Attivi</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr>
+      </thead>
+      <tbody id="all-agents-tbody">
+        <tr class="empty-row"><td colspan="6">Caricamento...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VENDOR -->
+  <div class="page-section" id="section-vendor">
+    <div class="page-title">Gestione Vendor</div>
+    <div class="page-sub">Approva e gestisci gli sviluppatori sulla piattaforma</div>
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Email</th><th>Stato</th><th>Agenti</th><th>Azioni</th></tr>
+      </thead>
+      <tbody id="vendors-tbody">
+        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- UTENTI -->
+  <div class="page-section" id="section-utenti">
+    <div class="page-title">Gestione Utenti</div>
+    <div class="page-sub">Tutti gli utenti registrati sulla piattaforma</div>
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Email</th><th>Registrato il</th><th>Agenti attivi</th><th>Azioni</th></tr>
+      </thead>
+      <tbody id="users-tbody">
+        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ABBONAMENTI -->
+  <div class="page-section" id="section-abbonamenti">
+    <div class="page-title">Abbonamenti</div>
+    <div class="page-sub">Tutti gli abbonamenti attivi sulla piattaforma</div>
+    <table>
+      <thead>
+        <tr><th>Utente</th><th>Agente</th><th>Stato</th><th>Data inizio</th><th>Azioni</th></tr>
+      </thead>
+      <tbody id="subs-tbody">
+        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzYxNDE0OCwiZXhwIjoyMDkzMTkwMTQ4fQ.2N2Atp7s6M18vU56BMnKf7I99WD71Ov2NI5K-_f4SGo'; // Usa la service key per l'admin!
+
+  let allAgents = [];
+
+  function showSection(name, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`section-${name}`).classList.add('active');
+    el.classList.add('active');
+    if (name === 'agenti') loadAllAgents();
+    if (name === 'vendor') loadVendors();
+    if (name === 'utenti') loadUsers();
+    if (name === 'abbonamenti') loadSubs();
+  }
+
+  function filterAgents(filter, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    let filtered = allAgents;
+    if (filter === 'pending') filtered = allAgents.filter(a => !a.attivo);
+    if (filter === 'attivi') filtered = allAgents.filter(a => a.attivo);
+    renderAllAgents(filtered);
+  }
+
+  async function loadDashboard() {
+    try {
+      const [agentsRes, subsRes, vendorsRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/agents?select=*,vendors(nome,cognome)`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+        fetch(`${SUPABASE_URL}/rest/v1/subscriptions?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+      ]);
+      const agents = await agentsRes.json();
+      const subs = await subsRes.json();
+      const profiles = await vendorsRes.json();
+
+      allAgents = agents;
+      const pending = agents.filter(a => !a.attivo);
+      const active = agents.filter(a => a.attivo);
+      const activeSubs = subs.filter(s => s.stato === 'attiva');
+
+      document.getElementById('stat-utenti').textContent = profiles.length;
+      document.getElementById('stat-agenti-attivi').textContent = active.length;
+      document.getElementById('stat-pending').textContent = pending.length;
+      document.getElementById('stat-subs').textContent = activeSubs.length;
+
+      // Pending count badge
+      if (pending.length > 0) {
+        const badge = document.getElementById('pending-agents-count');
+        badge.textContent = pending.length;
+        badge.style.display = 'inline';
+      }
+
+      // Render pending agents
+      const tbody = document.getElementById('pending-agents-tbody');
+      if (pending.length === 0) return;
+      tbody.innerHTML = pending.map(a => `
+        <tr>
+          <td><strong>${a.icona || '🤖'} ${a.nome}</strong></td>
+          <td>${a.vendors ? `${a.vendors.nome} ${a.vendors.cognome}` : '—'}</td>
+          <td>${a.categoria}</td>
+          <td>€${a.prezzo_mensile}/mese</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>
+              <button class="btn-reject" onclick="rejectAgent('${a.id}', this)">✕ Rifiuta</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadAllAgents() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/agents?select=*,vendors(nome,cognome)`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      allAgents = await res.json();
+      renderAllAgents(allAgents);
+    } catch(e) {}
+  }
+
+  function renderAllAgents(agents) {
+    const tbody = document.getElementById('all-agents-tbody');
+    if (!agents || agents.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun agente trovato</td></tr>';
+      return;
+    }
+    tbody.innerHTML = agents.map(a => `
+      <tr>
+        <td><strong>${a.icona || '🤖'} ${a.nome}</strong></td>
+        <td>${a.vendors ? `${a.vendors.nome} ${a.vendors.cognome}` : '—'}</td>
+        <td>${a.categoria}</td>
+        <td>€${a.prezzo_mensile}/mese</td>
+        <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In attesa'}</span></td>
+        <td>
+          <div class="action-btns">
+            ${!a.attivo ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>` : ''}
+            <button class="btn-reject" onclick="rejectAgent('${a.id}', this)">✕ Rimuovi</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadVendors() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/vendors?select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const vendors = await res.json();
+      const tbody = document.getElementById('vendors-tbody');
+      if (!vendors || vendors.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun vendor ancora</td></tr>';
+        return;
+      }
+      tbody.innerHTML = vendors.map(v => `
+        <tr>
+          <td><strong>${v.nome} ${v.cognome}</strong></td>
+          <td>${v.email}</td>
+          <td><span class="status-badge ${v.approvato ? 'active' : 'pending'}">${v.approvato ? 'Approvato' : 'In attesa'}</span></td>
+          <td>—</td>
+          <td>
+            <div class="action-btns">
+              ${!v.approvato ? `<button class="btn-approve" onclick="approveVendor('${v.id}', this)">✓ Approva</button>` : ''}
+              <button class="btn-view">Vedi</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    } catch(e) {}
+  }
+
+  async function loadUsers() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const users = await res.json();
+      const tbody = document.getElementById('users-tbody');
+      if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun utente ancora</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td>${u.nome || '—'} ${u.cognome || ''}</td>
+          <td>—</td>
+          <td>${new Date(u.created_at).toLocaleDateString('it-IT')}</td>
+          <td>—</td>
+          <td><button class="btn-view">Vedi</button></td>
+        </tr>
+      `).join('');
+    } catch(e) {}
+  }
+
+  async function loadSubs() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?select=*,agents(nome)`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const subs = await res.json();
+      const tbody = document.getElementById('subs-tbody');
+      if (!subs || subs.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun abbonamento ancora</td></tr>';
+        return;
+      }
+      tbody.innerHTML = subs.map(s => `
+        <tr>
+          <td>—</td>
+          <td>${s.agents?.nome || '—'}</td>
+          <td><span class="status-badge ${s.stato === 'attiva' ? 'active' : 'rejected'}">${s.stato}</span></td>
+          <td>${new Date(s.data_inizio).toLocaleDateString('it-IT')}</td>
+          <td><button class="btn-view">Vedi</button></td>
+        </tr>
+      `).join('');
+    } catch(e) {}
+  }
+
+  async function approveAgent(id, btn) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ attivo: true })
+      });
+      btn.closest('tr').remove();
+      loadDashboard();
+    } catch(e) {}
+  }
+
+  async function rejectAgent(id, btn) {
+    if (!confirm('Sei sicuro di voler rimuovere questo agente?')) return;
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      btn.closest('tr').remove();
+    } catch(e) {}
+  }
+
+  async function approveVendor(id, btn) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/vendors?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ approvato: true })
+      });
+      btn.closest('tr').cells[2].innerHTML = '<span class="status-badge active">Approvato</span>';
+      btn.remove();
+    } catch(e) {}
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; }
+  
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 1.5rem;
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+  }
+  .logo { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); text-decoration: none; margin-bottom: 2.5rem; display: block; }
+  .logo span { color: var(--accent); }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 8px; color: var(--muted); font-size: 14px; font-weight: 400;
+    cursor: pointer; transition: all 0.2s; margin-bottom: 4px; text-decoration: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(200,245,90,0.1); color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; }
+  .user-info { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem; }
+  .avatar { width: 32px; height: 32px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #0a0a0a; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-email { font-size: 11px; color: var(--muted); }
+  .logout-btn { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 8px; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; display: block; text-align: center; border: 1px solid var(--border); }
+  .logout-btn:hover { color: var(--text); border-color: var(--border2); }
+
+  /* MAIN */
+  .main { margin-left: 240px; flex: 1; padding: 2.5rem; }
+  .page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
+  
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* AGENTS */
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
+  .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .agent-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; transition: border-color 0.2s; }
+  .agent-card:hover { border-color: var(--border2); }
+  .agent-icon { font-size: 24px; margin-bottom: 10px; }
+  .agent-name { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .agent-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .agent-footer { display: flex; align-items: center; justify-content: space-between; }
+  .agent-status { font-size: 11px; padding: 4px 10px; border-radius: 99px; }
+  .agent-status.active { background: rgba(95,255,154,0.1); color: #5fff9a; border: 1px solid rgba(95,255,154,0.2); }
+  .agent-status.paused { background: rgba(255,165,0,0.1); color: orange; border: 1px solid rgba(255,165,0,0.2); }
+  .agent-btn { font-size: 12px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+  
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; margin-bottom: 1.5rem; }
+  .btn-main { background: var(--accent); color: #0a0a0a; font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-main:hover { background: var(--accent-dark); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 4px; margin-bottom: 1.5rem; width: fit-content; }
+  .tab { padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-radius: 6px; border: none; background: none; font-family: var(--font-body); transition: all 0.2s; }
+  .tab.active { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1.5rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+  <a class="nav-item active" href="dashboard-utente.html"><span class="nav-icon">⚡</span> I miei agenti</a>
+  <a class="nav-item" href="index.html#agenti"><span class="nav-icon">🛒</span> Catalogo</a>
+  <a class="nav-item" href="#"><span class="nav-icon">💳</span> Abbonamenti</a>
+  <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Impostazioni</a>
+  <div class="sidebar-bottom">
+    <div class="user-info">
+      <div class="avatar" id="avatar-initials">?</div>
+      <div>
+        <div class="user-name" id="user-name">Caricamento...</div>
+        <div class="user-email" id="user-email"></div>
+      </div>
+    </div>
+    <a class="logout-btn" onclick="logout()">Esci</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">I miei agenti</div>
+  <div class="page-sub">Gestisci tutti gli agenti attivi nel tuo account</div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Agenti attivi</div>
+      <div class="stat-val" id="stat-attivi">0</div>
+      <div class="stat-sub">Su questo account</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Spesa mensile</div>
+      <div class="stat-val" id="stat-spesa">€0</div>
+      <div class="stat-sub">Totale abbonamenti</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Prossimo rinnovo</div>
+      <div class="stat-val" id="stat-rinnovo">—</div>
+      <div class="stat-sub">Data prossima fattura</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('attivi', this)">Attivi</button>
+    <button class="tab" onclick="switchTab('tutti', this)">Tutti</button>
+  </div>
+
+  <div id="agents-container">
+    <div class="empty-state">
+      <div class="empty-icon">🤖</div>
+      <div class="empty-title">Nessun agente ancora</div>
+      <div class="empty-sub">Esplora il catalogo e attiva il tuo primo agente AI</div>
+      <a href="index.html#agenti" class="btn-main">Esplora il catalogo</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTQxNDgsImV4cCI6MjA5MzE5MDE0OH0.Sa1KJGVGNL9m7m60FNup3SF66u8HudYFo9AR0CSSuik';
+
+  function logout() {
+    localStorage.removeItem('sya_token');
+    localStorage.removeItem('sya_user');
+    window.location.href = 'login.html';
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  async function init() {
+    const token = localStorage.getItem('sya_token');
+    const user = JSON.parse(localStorage.getItem('sya_user') || '{}');
+    if (!token) return window.location.href = 'login.html';
+
+    // Mostra info utente
+    const email = user.email || '';
+    document.getElementById('user-email').textContent = email;
+    document.getElementById('avatar-initials').textContent = email.charAt(0).toUpperCase();
+
+    // Carica profilo
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${user.id}&select=nome,cognome`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+      });
+      const profiles = await res.json();
+      if (profiles[0]) {
+        const nome = `${profiles[0].nome} ${profiles[0].cognome}`;
+        document.getElementById('user-name').textContent = nome;
+        document.getElementById('avatar-initials').textContent = profiles[0].nome?.charAt(0).toUpperCase() || email.charAt(0).toUpperCase();
+      }
+    } catch(e) {}
+
+    // Carica subscriptions
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${user.id}&stato=eq.attiva&select=*,agents(*)`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+      });
+      const subs = await res.json();
+      renderAgents(subs);
+    } catch(e) {}
+  }
+
+  function renderAgents(subs) {
+    const container = document.getElementById('agents-container');
+    if (!subs || subs.length === 0) return;
+
+    let spesa = 0;
+    const cards = subs.map(sub => {
+      const agent = sub.agents;
+      if (!agent) return '';
+      spesa += parseFloat(agent.prezzo_mensile || 0);
+      return `
+        <div class="agent-card">
+          <div class="agent-icon">${agent.icona || '🤖'}</div>
+          <div class="agent-name">${agent.nome}</div>
+          <div class="agent-desc">${agent.descrizione_breve || agent.descrizione}</div>
+          <div class="agent-footer">
+            <span class="agent-status active">● Attivo</span>
+            <span class="agent-btn">Gestisci →</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('stat-attivi').textContent = subs.length;
+    document.getElementById('stat-spesa').textContent = `€${spesa.toFixed(0)}`;
+    container.innerHTML = `<div class="agents-grid">${cards}</div>`;
+  }
+
+  init();
+</script>
+</body>
+</html>
