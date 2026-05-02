@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accedi — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --muted: #888;
+    --accent: #c8f55a;
+    --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --error: #ff5f5f;
+    --success: #5fff9a;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -300px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(200,245,90,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .logo {
+    position: fixed;
+    top: 1.5rem; left: 2rem;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 2rem;
+  }
+  .tab {
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    font-family: var(--font-body);
+  }
+  .tab.active {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .form-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .form-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+  }
+  .field {
+    margin-bottom: 1rem;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #555; }
+  .btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.25rem 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .btn-google {
+    width: 100%;
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+  }
+  .btn-google:hover { border-color: var(--border2); }
+  .msg {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 1rem;
+    display: none;
+  }
+  .msg.error { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); display: block; }
+  .msg.success { background: rgba(95,255,154,0.1); color: var(--success); border: 1px solid rgba(95,255,154,0.2); display: block; }
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+  .forgot {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 6px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .forgot:hover { color: var(--text); }
+</style>
+</head>
+<body>
+<a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+
+<div class="card">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Accedi</button>
+    <button class="tab" onclick="switchTab('register')">Registrati</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="form-section active" id="login-section">
+    <div class="form-title">Bentornato 👋</div>
+    <div class="form-sub">Accedi al tuo account Shop Your Agent</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="tua@email.it">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+      <div class="forgot">Password dimenticata?</div>
+    </div>
+    <button class="btn" onclick="handleLogin()">Accedi</button>
+    <div class="divider">oppure</div>
+    <button class="btn-google">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
+      Continua con Google
+    </button>
+    <div class="msg" id="login-msg"></div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="form-section" id="register-section">
+    <div class="form-title">Crea account</div>
+    <div class="form-sub">Inizia ad automatizzare la tua azienda</div>
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="reg-nome" placeholder="Mario">
+    </div>
+    <div class="field">
+      <label>Cognome</label>
+      <input type="text" id="reg-cognome" placeholder="Rossi">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="tua@email.it">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="reg-password" placeholder="min. 8 caratteri">
+    </div>
+    <button class="btn" onclick="handleRegister()">Crea account</button>
+    <div class="msg" id="register-msg"></div>
+  </div>
+</div>
+
+<script>
+  // Inserisci qui le tue credenziali Supabase
+  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MTQxNDgsImV4cCI6MjA5MzE5MDE0OH0.Sa1KJGVGNL9m7m60FNup3SF66u8HudYFo9AR0CSSuik';
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.querySelector(`#${tab}-section`).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg ${type}`;
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    if (!email || !password) return showMsg('login-msg', 'Compila tutti i campi', 'error');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem('sya_token', data.access_token);
+        localStorage.setItem('sya_user', JSON.stringify(data.user));
+        showMsg('login-msg', 'Accesso effettuato! Reindirizzamento...', 'success');
+        setTimeout(() => window.location.href = 'dashboard-utente.html', 1000);
+      } else {
+        showMsg('login-msg', 'Email o password errati', 'error');
+      }
+    } catch(e) {
+      showMsg('login-msg', 'Errore di connessione', 'error');
+    }
+  }
+
+  async function handleRegister() {
+    const nome = document.getElementById('reg-nome').value;
+    const cognome = document.getElementById('reg-cognome').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    if (!nome || !cognome || !email || !password) return showMsg('register-msg', 'Compila tutti i campi', 'error');
+    if (password.length < 8) return showMsg('register-msg', 'La password deve essere di almeno 8 caratteri', 'error');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.id || data.user) {
+        // Salva il profilo
+        const userId = data.id || data.user?.id;
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({ user_id: userId, nome, cognome })
+        });
+        showMsg('register-msg', 'Account creato! Controlla la tua email per confermare.', 'success');
+      } else {
+        showMsg('register-msg', data.msg || 'Errore durante la registrazione', 'error');
+      }
+    } catch(e) {
+      showMsg('register-msg', 'Errore di connessione', 'error');
+    }
+  }
+</script>
+</body>
+</html>

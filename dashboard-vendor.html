@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Vendor — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; }
+
+  .sidebar {
+    width: 240px; min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 1.5rem;
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+  }
+  .logo { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); text-decoration: none; margin-bottom: 0.5rem; display: block; }
+  .logo span { color: var(--accent); }
+  .role-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); background: rgba(200,245,90,0.1); border: 1px solid rgba(200,245,90,0.2); padding: 3px 8px; border-radius: 99px; display: inline-block; margin-bottom: 2rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; text-decoration: none; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(200,245,90,0.1); color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; }
+  .user-info { display: flex; align-items: center; gap: 10px; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .avatar { width: 32px; height: 32px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #0a0a0a; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-email { font-size: 11px; color: var(--muted); }
+  .logout-btn { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 8px; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; display: block; text-align: center; border: 1px solid var(--border); }
+  .logout-btn:hover { color: var(--text); border-color: var(--border2); }
+
+  .main { margin-left: 240px; flex: 1; padding: 2.5rem; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; }
+  .page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
+  .page-sub { font-size: 14px; color: var(--muted); }
+  .btn-main { background: var(--accent); color: #0a0a0a; font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .btn-main:hover { background: var(--accent-dark); }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-val.green { color: var(--accent); }
+
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  th { text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+  td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 99px; }
+  .status-badge.active { background: rgba(95,255,154,0.1); color: #5fff9a; border: 1px solid rgba(95,255,154,0.2); }
+  .status-badge.pending { background: rgba(255,165,0,0.1); color: orange; border: 1px solid rgba(255,165,0,0.2); }
+  .status-badge.rejected { background: rgba(255,95,95,0.1); color: #ff5f5f; border: 1px solid rgba(255,95,95,0.2); }
+  .table-action { font-size: 13px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .mb-2 { margin-bottom: 2rem; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 500px; }
+  .modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 1.5rem; }
+  .field { margin-bottom: 1rem; }
+  label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  input, textarea, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.2s; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--surface2); }
+  .modal-btns { display: flex; gap: 10px; margin-top: 1.5rem; }
+  .btn-ghost { background: transparent; color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 11px 20px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; flex: 1; transition: all 0.2s; }
+  .btn-ghost:hover { border-color: var(--border2); }
+  .btn-main-full { flex: 2; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+  <span class="role-badge">Vendor</span>
+  <a class="nav-item active" href="#"><span class="nav-icon">📊</span> Dashboard</a>
+  <a class="nav-item" href="#" onclick="openModal()"><span class="nav-icon">➕</span> Nuovo agente</a>
+  <a class="nav-item" href="#"><span class="nav-icon">💰</span> Guadagni</a>
+  <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Impostazioni</a>
+  <div class="sidebar-bottom">
+    <div class="user-info">
+      <div class="avatar" id="avatar-initials">V</div>
+      <div>
+        <div class="user-name" id="user-name">Vendor</div>
+        <div class="user-email" id="user-email"></div>
+      </div>
+    </div>
+    <a class="logout-btn" onclick="logout()">Esci</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dashboard Vendor</div>
+      <div class="page-sub">Gestisci i tuoi agenti e monitora le vendite</div>
+    </div>
+    <button class="btn-main" onclick="openModal()">+ Nuovo agente</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Agenti pubblicati</div>
+      <div class="stat-val" id="stat-agenti">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Abbonamenti attivi</div>
+      <div class="stat-val" id="stat-subs">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Guadagno mensile</div>
+      <div class="stat-val green" id="stat-guadagno">€0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Guadagno totale</div>
+      <div class="stat-val green" id="stat-totale">€0</div>
+    </div>
+  </div>
+
+  <div class="section-title mb-2">I tuoi agenti</div>
+  <div class="mb-2">
+    <table id="agents-table">
+      <thead>
+        <tr>
+          <th>Agente</th>
+          <th>Categoria</th>
+          <th>Prezzo</th>
+          <th>Stato</th>
+          <th>Abbonamenti</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody id="agents-tbody">
+        <tr><td colspan="6" style="text-align:center; color: var(--muted); padding: 2rem;">Nessun agente ancora — clicca "Nuovo agente" per iniziare</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL NUOVO AGENTE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">Aggiungi nuovo agente</div>
+    <div class="field">
+      <label>Nome agente</label>
+      <input type="text" id="new-nome" placeholder="es. Agente Ristorante">
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="new-categoria">
+        <option value="">Seleziona categoria</option>
+        <option>Marketing</option>
+        <option>Vendite</option>
+        <option>Ospitalità</option>
+        <option>E-commerce</option>
+        <option>Professioni</option>
+        <option>Real Estate</option>
+        <option>Crescita</option>
+        <option>Altro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Descrizione breve</label>
+      <input type="text" id="new-desc-breve" placeholder="Una riga che descrive l'agente">
+    </div>
+    <div class="field">
+      <label>Descrizione completa</label>
+      <textarea id="new-desc" placeholder="Descrivi cosa fa l'agente, come funziona, per chi è pensato..."></textarea>
+    </div>
+    <div class="field">
+      <label>Prezzo mensile (€)</label>
+      <input type="number" id="new-prezzo" placeholder="29" min="1">
+    </div>
+    <div class="field">
+      <label>Icona (emoji)</label>
+      <input type="text" id="new-icona" placeholder="🤖" maxlength="2">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-ghost" onclick="closeModal()">Annulla</button>
+      <button class="btn-main btn-main-full" onclick="submitAgent()">Invia per approvazione</button>
+    </div>
+    <div id="modal-msg" style="font-size:13px; margin-top:1rem; display:none;"></div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MTQxNDgsImV4cCI6MjA5MzE5MDE0OH0.Sa1KJGVGNL9m7m60FNup3SF66u8HudYFo9AR0CSSuik';
+
+  function logout() {
+    localStorage.removeItem('sya_token');
+    localStorage.removeItem('sya_user');
+    window.location.href = 'login.html';
+  }
+
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  async function init() {
+    const token = localStorage.getItem('sya_token');
+    const user = JSON.parse(localStorage.getItem('sya_user') || '{}');
+    if (!token) return window.location.href = 'login.html';
+    document.getElementById('user-email').textContent = user.email || '';
+    document.getElementById('avatar-initials').textContent = user.email?.charAt(0).toUpperCase() || 'V';
+
+    try {
+      // Carica vendor info
+      const vRes = await fetch(`${SUPABASE_URL}/rest/v1/vendors?user_id=eq.${user.id}&select=*`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+      });
+      const vendors = await vRes.json();
+      if (vendors[0]) {
+        document.getElementById('user-name').textContent = `${vendors[0].nome} ${vendors[0].cognome}`;
+
+        // Carica agenti del vendor
+        const aRes = await fetch(`${SUPABASE_URL}/rest/v1/agents?vendor_id=eq.${vendors[0].id}&select=*`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+        });
+        const agents = await aRes.json();
+        renderAgents(agents);
+        document.getElementById('stat-agenti').textContent = agents.filter(a => a.attivo).length;
+      }
+    } catch(e) {}
+  }
+
+  function renderAgents(agents) {
+    const tbody = document.getElementById('agents-tbody');
+    if (!agents || agents.length === 0) return;
+    tbody.innerHTML = agents.map(a => `
+      <tr>
+        <td><strong>${a.icona || '🤖'} ${a.nome}</strong></td>
+        <td>${a.categoria}</td>
+        <td>€${a.prezzo_mensile}/mese</td>
+        <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In revisione'}</span></td>
+        <td>—</td>
+        <td><span class="table-action">Modifica</span></td>
+      </tr>
+    `).join('');
+  }
+
+  async function submitAgent() {
+    const token = localStorage.getItem('sya_token');
+    const user = JSON.parse(localStorage.getItem('sya_user') || '{}');
+    const nome = document.getElementById('new-nome').value;
+    const categoria = document.getElementById('new-categoria').value;
+    const desc = document.getElementById('new-desc').value;
+    const descBreve = document.getElementById('new-desc-breve').value;
+    const prezzo = document.getElementById('new-prezzo').value;
+    const icona = document.getElementById('new-icona').value;
+    const msg = document.getElementById('modal-msg');
+
+    if (!nome || !categoria || !desc || !prezzo) {
+      msg.textContent = 'Compila tutti i campi obbligatori';
+      msg.style.display = 'block';
+      msg.style.color = '#ff5f5f';
+      return;
+    }
+
+    try {
+      // Recupera vendor_id
+      const vRes = await fetch(`${SUPABASE_URL}/rest/v1/vendors?user_id=eq.${user.id}&select=id`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+      });
+      const vendors = await vRes.json();
+      if (!vendors[0]) return;
+
+      await fetch(`${SUPABASE_URL}/rest/v1/agents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          vendor_id: vendors[0].id,
+          nome, categoria,
+          descrizione: desc,
+          descrizione_breve: descBreve,
+          prezzo_mensile: parseFloat(prezzo),
+          icona: icona || '🤖',
+          attivo: false
+        })
+      });
+
+      msg.textContent = 'Agente inviato per approvazione!';
+      msg.style.color = '#5fff9a';
+      msg.style.display = 'block';
+      setTimeout(() => { closeModal(); init(); }, 1500);
+    } catch(e) {
+      msg.textContent = 'Errore durante il salvataggio';
+      msg.style.display = 'block';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
