@@ -123,6 +123,10 @@
     <div class="admin-label">Connesso come</div>
     <div class="admin-name" id="admin-name">Admin</div>
     <a class="logout-btn" onclick="signOut()">Esci</a>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
+      <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
+      <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
+    </div>
   </div>
 </div>
 
@@ -479,11 +483,23 @@
 
   async function approveVendor(id, btn) {
     btn.disabled = true;
-    const { error } = await db.from('vendors').update({ approvato: true }).eq('id', id);
+    const { data: vendor, error } = await db.from('vendors').update({ approvato: true }).eq('id', id).select('nome, cognome, email').single();
     if (error) { showToast('Errore', 'error'); btn.disabled = false; return; }
     showToast('Vendor approvato!', 'success');
     btn.closest('tr').cells[2].innerHTML = '<span class="status-badge active">Approvato</span>';
     btn.remove();
+
+    // Notify vendor via email (fire and forget)
+    if (vendor?.email) {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ type: 'vendor_approved', agentName: `${vendor.nome} ${vendor.cognome}`, vendorEmail: vendor.email }),
+        }).catch(() => {});
+      }
+    }
   }
 
   init();

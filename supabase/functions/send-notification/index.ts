@@ -37,11 +37,28 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (type === 'vendor_registered' && agentName) {
+      await sendEmail(RESEND_KEY, ADMIN_EMAIL,
+        `Nuovo vendor da approvare: ${agentName}`,
+        `<p>Un nuovo sviluppatore <strong>${agentName}</strong> ha creato un account vendor e attende approvazione.</p>
+         <p><a href="${SITE_URL}/admin.html">Approva dalla dashboard admin →</a></p>`
+      );
+    }
+
     if (type === 'agent_submitted' && agentName) {
       await sendEmail(RESEND_KEY, ADMIN_EMAIL,
         `Nuovo agente da approvare: ${agentName}`,
         `<p>Un vendor ha inviato un nuovo agente <strong>${agentName}</strong> in attesa di approvazione.</p>
          <p><a href="${SITE_URL}/admin.html">Vai alla dashboard admin →</a></p>`
+      );
+    }
+
+    if (type === 'vendor_approved' && agentName && vendorEmail) {
+      await sendEmail(RESEND_KEY, vendorEmail,
+        `Il tuo account vendor è stato approvato! 🎉`,
+        `<p>Ciao <strong>${agentName}</strong>,</p>
+         <p>Il tuo account vendor su Shop Your Agent è stato approvato. Puoi ora pubblicare i tuoi agenti.</p>
+         <p><a href="${SITE_URL}/dashboard-vendor.html">Accedi alla dashboard →</a></p>`
       );
     }
 

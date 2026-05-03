@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+    background: rgba(10,10,10,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-back { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 400; transition: color 0.2s; }
+  .nav-back:hover { color: var(--text); }
+
+  /* MAIN CONTENT */
+  .page-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 7rem 2rem 5rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* SECTIONS */
+  .section {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .section h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .section p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .section p:last-child { margin-bottom: 0; }
+  .section ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+  .section ul li {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    padding-left: 1.25rem;
+    position: relative;
+    margin-bottom: 0.35rem;
+  }
+  .section ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .section strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .rights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .rights-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .rights-card .rights-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+  }
+  .rights-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+  .contact-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    margin-top: 1rem;
+  }
+  .contact-box p {
+    margin-bottom: 0;
+  }
+  .contact-box a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .contact-box a:hover {
+    text-decoration: underline;
+  }
+  .badge-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(200,245,90,0.08);
+    border: 1px solid rgba(200,245,90,0.2);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.3px;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: var(--text); }
+  footer span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 540px) {
+    .rights-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+  <a href="shop_your_agent.html" class="nav-back">← Torna</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <h1>Privacy Policy</h1>
+    <p>Ultimo aggiornamento: Gennaio 2025 &nbsp;·&nbsp; Versione 1.0<br>
+    Informativa ai sensi degli artt. 13–14 del Regolamento UE 2016/679 (GDPR).</p>
+  </div>
+
+  <!-- 1. Titolare del trattamento -->
+  <div class="section">
+    <h2>1. Titolare del Trattamento</h2>
+    <p>Il Titolare del trattamento dei dati personali raccolti tramite la piattaforma ShopYourAgent è:</p>
+    <div class="contact-box">
+      <p><strong>ShopYourAgent</strong><br>
+      Email di contatto: <a href="mailto:privacy@shopyouragent.com">privacy@shopyouragent.com</a><br>
+      Responsabile della Protezione dei Dati (DPO): non nominato (esenzione PMI ai sensi dell'art. 37 GDPR).<br>
+      Per qualsiasi richiesta relativa al trattamento dei tuoi dati personali, puoi scrivere a <a href="mailto:privacy@shopyouragent.com">privacy@shopyouragent.com</a>. Risponderemo entro 30 giorni dalla ricezione della richiesta.</p>
+    </div>
+  </div>
+
+  <!-- 2. Dati raccolti -->
+  <div class="section">
+    <h2>2. Dati Personali Raccolti</h2>
+    <p>ShopYourAgent raccoglie i seguenti dati personali nell'ambito dell'erogazione del servizio:</p>
+    <p><strong>Dati forniti direttamente dall'utente:</strong></p>
+    <ul>
+      <li><strong>Nome e cognome</strong>: forniti in fase di registrazione o nelle impostazioni del profilo.</li>
+      <li><strong>Indirizzo email</strong>: utilizzato come identificativo principale dell'account e per le comunicazioni transazionali.</li>
+      <li><strong>Dati di pagamento</strong>: carta di credito/debito o IBAN. Tali dati vengono trasmessi direttamente a Stripe e non sono mai memorizzati sui server di ShopYourAgent. ShopYourAgent riceve da Stripe esclusivamente i dati tokenizzati (ultimi 4 cifre, scadenza, tipologia di carta).</li>
+      <li><strong>Dati fiscali</strong>: partita IVA o codice fiscale, richiesti per la fatturazione ai clienti business.</li>
+      <li><strong>Ragione sociale e indirizzo</strong>: per gli account aziendali, ai fini della fatturazione.</li>
+    </ul>
+    <p><strong>Dati raccolti automaticamente:</strong></p>
+    <ul>
+      <li><strong>Dati di utilizzo della piattaforma</strong>: pagine visitate, agenti visualizzati, azioni eseguite all'interno del dashboard, timestamp delle sessioni.</li>
+      <li><strong>Dati tecnici</strong>: indirizzo IP, tipo e versione del browser, sistema operativo, lingua preferita, fuso orario.</li>
+      <li><strong>Log di sistema</strong>: registrazioni delle attività per finalità di sicurezza e debug.</li>
+    </ul>
+  </div>
+
+  <!-- 3. Finalità del trattamento -->
+  <div class="section">
+    <h2>3. Finalità del Trattamento</h2>
+    <p>I dati personali raccolti da ShopYourAgent sono trattati per le seguenti finalità:</p>
+    <ul>
+      <li><strong>Erogazione del servizio</strong>: gestione dell'account, accesso agli agenti AI sottoscritti, dashboard utente e vendor, storico abbonamenti.</li>
+      <li><strong>Gestione dei pagamenti</strong>: elaborazione delle transazioni, rinnovi automatici degli abbonamenti, emissione di fatture e ricevute.</li>
+      <li><strong>Comunicazioni transazionali</strong>: email di conferma registrazione, notifiche di rinnovo, ricevute di pagamento, avvisi di manutenzione e aggiornamenti critici del servizio.</li>
+      <li><strong>Sicurezza e prevenzione delle frodi</strong>: monitoraggio delle sessioni, rilevamento di accessi anomali, protezione dell'integrità della piattaforma.</li>
+      <li><strong>Adempimenti legali e fiscali</strong>: conservazione delle fatture e dei dati contabili nei tempi previsti dalla normativa italiana.</li>
+      <li><strong>Miglioramento del servizio</strong>: analisi aggregate e anonimizzate dell'utilizzo della piattaforma per ottimizzare l'esperienza utente.</li>
+      <li><strong>Marketing (solo previo consenso)</strong>: invio di newsletter, aggiornamenti su nuovi agenti disponibili, offerte speciali e comunicazioni promozionali.</li>
+    </ul>
+  </div>
+
+  <!-- 4. Base giuridica -->
+  <div class="section">
+    <h2>4. Base Giuridica del Trattamento</h2>
+    <p>Il trattamento dei tuoi dati personali si fonda sulle seguenti basi giuridiche previste dall'art. 6 del GDPR:</p>
+    <ul>
+      <li><strong>Esecuzione del contratto (art. 6, par. 1, lett. b)</strong>: per i trattamenti necessari all'erogazione del servizio acquistato, alla gestione del tuo account e all'elaborazione dei pagamenti. Senza questi trattamenti non è possibile fornire il servizio.</li>
+      <li><strong>Adempimento di obblighi legali (art. 6, par. 1, lett. c)</strong>: per la conservazione di fatture e documentazione fiscale, richiesta dalla normativa italiana (D.P.R. 633/72 e D.P.R. 600/73).</li>
+      <li><strong>Legittimo interesse (art. 6, par. 1, lett. f)</strong>: per le finalità di sicurezza della piattaforma, prevenzione delle frodi, miglioramento del servizio tramite analisi aggregate e comunicazioni transazionali strettamente correlate al servizio erogato. L'interesse legittimo di ShopYourAgent non pregiudica i diritti e le libertà fondamentali degli interessati.</li>
+      <li><strong>Consenso (art. 6, par. 1, lett. a)</strong>: per l'invio di comunicazioni di marketing e newsletter. Il consenso è libero, specifico, informato e revocabile in qualsiasi momento senza pregiudizio per l'utilizzo del servizio.</li>
+    </ul>
+  </div>
+
+  <!-- 5. Conservazione dei dati -->
+  <div class="section">
+    <h2>5. Conservazione dei Dati</h2>
+    <p>ShopYourAgent conserva i dati personali per il tempo strettamente necessario alle finalità per cui sono stati raccolti, nel rispetto del principio di minimizzazione della conservazione (art. 5, par. 1, lett. e GDPR):</p>
+    <ul>
+      <li><strong>Dati dell'account</strong>: per tutta la durata dell'account attivo, più un periodo di 12 mesi successivi alla chiusura o cancellazione dell'account, per gestire eventuali contestazioni.</li>
+      <li><strong>Dati fiscali e di fatturazione</strong>: 10 anni dalla data di emissione della fattura, come previsto dalla normativa fiscale italiana.</li>
+      <li><strong>Dati di utilizzo e log tecnici</strong>: 12 mesi dalla raccolta, salvo necessità di conservazione più lunga per indagini su incidenti di sicurezza.</li>
+      <li><strong>Dati per marketing</strong>: fino alla revoca del consenso da parte dell'utente, o fino a 24 mesi dall'ultima interazione con le comunicazioni di marketing, se precedente.</li>
+    </ul>
+    <p>Alla scadenza dei periodi di conservazione indicati, i dati saranno cancellati in modo sicuro o resi definitivamente anonimi.</p>
+  </div>
+
+  <!-- 6. Condivisione con terzi -->
+  <div class="section">
+    <h2>6. Condivisione con Terzi</h2>
+    <p>ShopYourAgent non vende, noleggia né cede a titolo commerciale i tuoi dati personali a terze parti. I dati possono essere condivisi esclusivamente con i seguenti fornitori di servizi ("sub-responsabili del trattamento"), che li trattano per conto di ShopYourAgent nell'ambito delle attività necessarie all'erogazione del servizio:</p>
+    <ul>
+      <li><strong>Stripe, Inc.</strong> — processore di pagamento. Tratta i dati delle carte di credito/debito per autorizzare le transazioni e gestire i piani di abbonamento. Privacy Policy: <a href="https://stripe.com/it/privacy" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">stripe.com/it/privacy</a>.</li>
+      <li><strong>Supabase, Inc.</strong> — hosting del database e autenticazione utenti. Archivia i dati dell'account, degli abbonamenti e i log applicativi. Privacy Policy: <a href="https://supabase.com/privacy" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">supabase.com/privacy</a>.</li>
+      <li><strong>Resend, Inc.</strong> — servizio di invio email transazionale. Riceve indirizzo email e contenuto delle comunicazioni per la consegna. Privacy Policy: <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">resend.com/legal/privacy-policy</a>.</li>
+    </ul>
+    <p>I dati possono inoltre essere condivisi con autorità pubbliche, forze dell'ordine o organi giudiziari italiani o europei, esclusivamente in ottemperanza a obblighi di legge o provvedimenti delle autorità competenti.</p>
+    <p>I Vendor che distribuiscono agenti AI sulla piattaforma ricevono esclusivamente i dati minimi necessari all'erogazione del servizio dell'agente sottoscritto (es. identificativo utente anonimizzato), nel rispetto del principio di minimizzazione. I Vendor non ricevono dati anagrafici completi né dati di pagamento.</p>
+  </div>
+
+  <!-- 7. Diritti dell'interessato -->
+  <div class="section">
+    <h2>7. Diritti dell'Interessato</h2>
+    <p>In qualità di interessato, hai il diritto di esercitare in qualsiasi momento i seguenti diritti nei confronti di ShopYourAgent, ai sensi degli artt. 15–22 del GDPR:</p>
+    <div class="rights-grid">
+      <div class="rights-card">
+        <div class="rights-title">Diritto di accesso (art. 15)</div>
+        <p>Ottenere conferma che siano in corso trattamenti di dati che ti riguardano e ricevere una copia dei dati trattati.</p>
+      </div>
+      <div class="rights-card">
+        <div class="rights-title">Diritto di rettifica (art. 16)</div>
+        <p>Richiedere la correzione di dati personali inesatti o incompleti che ti riguardano.</p>
+      </div>
+      <div class="rights-card">
+        <div class="rights-title">Diritto alla cancellazione (art. 17)</div>
+        <p>Richiedere la cancellazione dei tuoi dati personali ("diritto all'oblio"), salvo obblighi di conservazione legale.</p>
+      </div>
+      <div class="rights-card">
+        <div class="rights-title">Diritto alla portabilità (art. 20)</div>
+        <p>Ricevere i tuoi dati in un formato strutturato, di uso comune e leggibile da dispositivo automatico.</p>
+      </div>
+      <div class="rights-card">
+        <div class="rights-title">Diritto di opposizione (art. 21)</div>
+        <p>Opporti al trattamento dei tuoi dati per finalità di marketing o basato sul legittimo interesse del Titolare.</p>
+      </div>
+      <div class="rights-card">
+        <div class="rights-title">Diritto di limitazione (art. 18)</div>
+        <p>Richiedere la limitazione del trattamento dei tuoi dati in determinati casi previsti dal GDPR.</p>
+      </div>
+    </div>
+    <p>Per esercitare i tuoi diritti, scrivi a <a href="mailto:privacy@shopyouragent.com" style="color:var(--accent);text-decoration:none;">privacy@shopyouragent.com</a>, indicando nome, cognome, email dell'account e il diritto che intendi esercitare. ShopYourAgent risponderà entro 30 giorni dalla ricezione della richiesta (termine prorogabile di ulteriori 60 giorni in caso di richieste particolarmente complesse).</p>
+    <p>Hai inoltre il diritto di proporre reclamo all'<strong>Autorità Garante per la protezione dei dati personali</strong> (Garante Privacy), con sede in Piazza Venezia 11, 00187 Roma — <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">garanteprivacy.it</a>.</p>
+  </div>
+
+  <!-- 8. Cookie -->
+  <div class="section">
+    <h2>8. Cookie e Tecnologie di Tracciamento</h2>
+    <p>ShopYourAgent utilizza esclusivamente <strong>cookie tecnici strettamente necessari</strong> al funzionamento della piattaforma. Non utilizziamo cookie di profilazione, cookie di terze parti a scopo pubblicitario, né tecnologie di tracciamento comportamentale.</p>
+    <p>I cookie tecnici utilizzati includono:</p>
+    <ul>
+      <li><strong>Cookie di sessione</strong>: necessari per mantenere lo stato di autenticazione dell'utente durante la navigazione nella piattaforma. Vengono eliminati automaticamente alla chiusura del browser.</li>
+      <li><strong>Cookie di preferenza</strong>: memorizzano impostazioni locali dell'utente (es. lingua, preferenze di visualizzazione). Durata massima: 12 mesi.</li>
+      <li><strong>Cookie di sicurezza</strong>: utilizzati per prevenire attacchi CSRF e garantire l'integrità delle sessioni autenticate.</li>
+    </ul>
+    <p>Poiché tutti i cookie impiegati sono tecnici e strettamente necessari, non è richiesto il consenso preventivo dell'utente ai sensi dell'art. 122 del Codice Privacy (D.Lgs. 196/2003, come modificato dal D.Lgs. 101/2018). È possibile configurare il proprio browser per rifiutare i cookie o essere avvisati prima di riceverli, ma si avverte che il rifiuto dei cookie tecnici potrebbe pregiudicare il corretto funzionamento della piattaforma.</p>
+  </div>
+
+  <!-- 9. Trasferimento extra-UE -->
+  <div class="section">
+    <h2>9. Trasferimento di Dati Extra-UE</h2>
+    <p>Alcuni dei fornitori di servizi con cui ShopYourAgent collabora hanno sede o trattano dati al di fuori dello Spazio Economico Europeo (SEE). In particolare:</p>
+    <ul>
+      <li><strong>Stripe, Inc.</strong> ha sede negli Stati Uniti. Il trasferimento dei dati avviene sulla base delle <em>Standard Contractual Clauses</em> (SCC) approvate dalla Commissione Europea ai sensi dell'art. 46, par. 2, lett. c GDPR, integrate dalle misure supplementari previste dalle Raccomandazioni EDPB 01/2020.</li>
+      <li><strong>Supabase, Inc.</strong> offre opzioni di hosting nell'Unione Europea (regione EU-West). ShopYourAgent utilizza data center ubicati nell'UE. In caso di eventuali trasferimenti tecnici di dati fuori SEE, si applicano le SCC della Commissione Europea.</li>
+      <li><strong>Resend, Inc.</strong> ha sede negli Stati Uniti. Il trasferimento avviene sulla base delle Standard Contractual Clauses. Resend è certificata conforme alle norme di sicurezza SOC 2 Type II.</li>
+    </ul>
+    <p>Su richiesta, ShopYourAgent può fornire copia delle SCC applicabili scrivendo a <a href="mailto:privacy@shopyouragent.com" style="color:var(--accent);text-decoration:none;">privacy@shopyouragent.com</a>.</p>
+  </div>
+
+  <!-- 10. Modifiche -->
+  <div class="section">
+    <h2>10. Modifiche alla Privacy Policy</h2>
+    <p>ShopYourAgent si riserva il diritto di aggiornare la presente Privacy Policy in qualsiasi momento, in particolare in caso di modifiche normative, aggiornamenti tecnologici o variazioni nell'organizzazione del servizio. La data dell'ultimo aggiornamento è sempre indicata in cima a questo documento.</p>
+    <p>In caso di modifiche sostanziali che incidano in modo significativo sui diritti degli interessati, ShopYourAgent provvederà a notificare gli utenti registrati via email con almeno 14 giorni di preavviso, così da consentire loro di prendere visione delle nuove condizioni prima della loro entrata in vigore.</p>
+    <p>Incoraggiamo gli utenti a consultare periodicamente questa pagina per rimanere informati sulle modalità con cui ShopYourAgent tratta i dati personali. Per qualsiasi domanda o segnalazione relativa alla presente informativa, è possibile contattarci:</p>
+    <div class="contact-box">
+      <p><strong>ShopYourAgent</strong> — Privacy &amp; Data Protection<br>
+      Email: <a href="mailto:privacy@shopyouragent.com">privacy@shopyouragent.com</a><br>
+      Risposta garantita entro 30 giorni dalla ricezione della richiesta.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="termini.html">Termini</a>
+  <a href="privacy.html">Privacy</a>
+  <span>© 2025 ShopYourAgent</span>
+</footer>
+
+</body>
+</html>

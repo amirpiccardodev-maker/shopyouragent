@@ -113,6 +113,14 @@
   .onboarding h2 { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: 0.75rem; }
   .onboarding p { font-size: 15px; color: var(--muted); margin-bottom: 2rem; line-height: 1.7; }
   .onboarding-form { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: left; }
+  /* PENDING */
+  .pending-box { max-width: 560px; margin: 6rem auto; text-align: center; }
+  .pending-box .p-icon { font-size: 56px; margin-bottom: 1.5rem; }
+  .pending-box h2 { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-bottom: 0.75rem; }
+  .pending-box p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+  /* SETTINGS BLOCK */
+  .settings-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; max-width: 600px; }
+  .block-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin-bottom: 1.5rem; }
 
   @media (max-width: 768px) {
     .main { margin-left: 0; padding: 1.5rem; }
@@ -132,6 +140,7 @@
   <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
   <button class="nav-item" onclick="openModal()"><span class="nav-icon">➕</span> Nuovo agente</button>
   <button class="nav-item" id="nav-guadagni" onclick="showSection('guadagni', this)"><span class="nav-icon">💰</span> Guadagni</button>
+  <button class="nav-item" id="nav-profilo" onclick="showSection('profilo', this)"><span class="nav-icon">👤</span> Profilo</button>
   <a class="nav-item" href="impostazioni.html"><span class="nav-icon">⚙️</span> Impostazioni</a>
   <div class="sidebar-bottom">
     <div class="user-info">
@@ -142,10 +151,24 @@
       </div>
     </div>
     <a class="logout-btn" onclick="signOut()">Esci</a>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
+      <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
+      <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
+    </div>
   </div>
 </div>
 
 <div class="main">
+
+  <!-- PENDING APPROVAL -->
+  <div class="page-section" id="section-pending">
+    <div class="pending-box">
+      <div class="p-icon">⏳</div>
+      <h2>Account in attesa di approvazione</h2>
+      <p>Il tuo profilo vendor è stato creato. Il nostro team lo revisionerà entro 24 ore e riceverai una email di conferma non appena sarà approvato.</p>
+      <p style="margin-top:1rem;font-size:13px;">Hai domande? Scrivi a <a href="mailto:support@shopyouragent.com" style="color:var(--accent);">support@shopyouragent.com</a></p>
+    </div>
+  </div>
 
   <!-- ONBOARDING -->
   <div class="page-section" id="section-onboarding">
@@ -186,6 +209,35 @@
         <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;">Caricamento...</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- PROFILO VENDOR -->
+  <div class="page-section" id="section-profilo">
+    <div class="page-title">Profilo vendor</div>
+    <div class="page-sub" style="margin-bottom:2rem;">Informazioni pubbliche e coordinate di pagamento</div>
+    <div class="settings-block">
+      <div class="block-title">Informazioni pubbliche</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;">
+        <div class="field"><label>Nome</label><input type="text" id="p-nome" placeholder="Mario"></div>
+        <div class="field"><label>Cognome</label><input type="text" id="p-cognome" placeholder="Rossi"></div>
+      </div>
+      <div class="field"><label>Bio (visibile agli acquirenti)</label><textarea id="p-bio" placeholder="Descrivi la tua esperienza con gli agenti AI..." style="min-height:80px;"></textarea></div>
+      <button class="btn-main" id="btn-save-profile" onclick="saveVendorProfile()">Salva profilo</button>
+    </div>
+    <div class="settings-block">
+      <div class="block-title">Coordinate di pagamento</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;">Inserisci dove vuoi ricevere il tuo 70%. Accettiamo IBAN, PayPal o Wise. I pagamenti vengono elaborati il 1° di ogni mese.</p>
+      <div class="field"><label>Metodo di pagamento preferito</label>
+        <select id="p-payout-method">
+          <option value="iban">Bonifico bancario (IBAN)</option>
+          <option value="paypal">PayPal</option>
+          <option value="wise">Wise</option>
+        </select>
+      </div>
+      <div class="field"><label id="p-payout-label">IBAN</label><input type="text" id="p-payout-value" placeholder="IT60 X054 2811 1010 0000 0123 456"></div>
+      <div class="field"><label>Intestatario / Nome account</label><input type="text" id="p-payout-name" placeholder="Mario Rossi"></div>
+      <button class="btn-main" id="btn-save-payout" onclick="savePayoutInfo()">Salva coordinate</button>
+    </div>
   </div>
 
   <!-- GUADAGNI -->
@@ -367,6 +419,22 @@
     document.getElementById('user-name').textContent = `${vendor.nome} ${vendor.cognome}`;
     document.getElementById('avatar-initials').textContent = vendor.nome?.charAt(0).toUpperCase() || 'V';
 
+    // Populate profile section
+    document.getElementById('p-nome').value = vendor.nome || '';
+    document.getElementById('p-cognome').value = vendor.cognome || '';
+    document.getElementById('p-bio').value = vendor.bio || '';
+    const meta = user.user_metadata || {};
+    if (meta.payout_method) document.getElementById('p-payout-method').value = meta.payout_method;
+    if (meta.payout_value) document.getElementById('p-payout-value').value = meta.payout_value;
+    if (meta.payout_name) document.getElementById('p-payout-name').value = meta.payout_name;
+    updatePayoutLabel();
+
+    if (!vendor.approvato) {
+      showSection('pending', null);
+      document.getElementById('section-pending').classList.add('active');
+      return;
+    }
+
     await loadDashboard();
     showSection('dashboard', document.getElementById('nav-dashboard'));
   }
@@ -389,7 +457,7 @@
       user_id: session.user.id,
       nome, cognome, bio,
       email: session.user.email,
-      approvato: true
+      approvato: false
     }).select().single();
 
     setBtnLoading(btn, false, 'Completa profilo →');
@@ -399,9 +467,17 @@
     currentVendorId = data.id;
     document.getElementById('user-name').textContent = `${nome} ${cognome}`;
     document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
-    showToast('Profilo creato! Benvenuto su Shop Your Agent.', 'success');
-    await loadDashboard();
-    showSection('dashboard', document.getElementById('nav-dashboard'));
+
+    // Notify admin of new vendor registration (fire and forget)
+    fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ type: 'vendor_registered', agentName: `${nome} ${cognome}` }),
+    }).catch(() => {});
+
+    showToast('Profilo creato! In attesa di approvazione (entro 24h).', 'info');
+    showSection('pending', null);
+    document.getElementById('section-pending').classList.add('active');
   }
 
   async function loadDashboard() {
@@ -626,6 +702,50 @@
     closeModal();
     showToast('Agente aggiornato con successo!', 'success');
     await loadDashboard();
+  }
+
+  function updatePayoutLabel() {
+    const method = document.getElementById('p-payout-method')?.value;
+    const labelMap = { iban: 'IBAN', paypal: 'Email PayPal', wise: 'Email Wise' };
+    const input = document.getElementById('p-payout-value');
+    const label = document.getElementById('p-payout-label');
+    if (label) label.textContent = labelMap[method] || 'Dettaglio';
+    if (input) {
+      const placeholders = { iban: 'IT60 X054 2811 1010 0000 0123 456', paypal: 'mario@paypal.com', wise: 'mario@wise.com' };
+      input.placeholder = placeholders[method] || '';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('p-payout-method');
+    if (sel) sel.addEventListener('change', updatePayoutLabel);
+  });
+
+  async function saveVendorProfile() {
+    const nome = document.getElementById('p-nome').value.trim();
+    const cognome = document.getElementById('p-cognome').value.trim();
+    const bio = document.getElementById('p-bio').value.trim();
+    if (!nome || !cognome) { showToast('Nome e cognome sono obbligatori', 'error'); return; }
+    const btn = document.getElementById('btn-save-profile');
+    setBtnLoading(btn, true, 'Salva profilo');
+    const { error } = await db.from('vendors').update({ nome, cognome, bio }).eq('id', currentVendorId);
+    setBtnLoading(btn, false, 'Salva profilo');
+    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
+    document.getElementById('user-name').textContent = `${nome} ${cognome}`;
+    document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
+    showToast('Profilo aggiornato!', 'success');
+  }
+
+  async function savePayoutInfo() {
+    const method = document.getElementById('p-payout-method').value;
+    const value = document.getElementById('p-payout-value').value.trim();
+    const name = document.getElementById('p-payout-name').value.trim();
+    if (!value || !name) { showToast('Compila tutti i campi per le coordinate di pagamento', 'error'); return; }
+    const btn = document.getElementById('btn-save-payout');
+    setBtnLoading(btn, true, 'Salva coordinate');
+    const { error } = await db.auth.updateUser({ data: { payout_method: method, payout_value: value, payout_name: name } });
+    setBtnLoading(btn, false, 'Salva coordinate');
+    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
+    showToast('Coordinate salvate!', 'success');
   }
 
   init();

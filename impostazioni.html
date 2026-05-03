@@ -89,6 +89,10 @@
       </div>
     </div>
     <a class="logout-btn" onclick="signOut()">Esci</a>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
+      <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
+      <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
+    </div>
   </div>
 </div>
 
@@ -146,7 +150,8 @@
 
     const user = session.user;
     const email = user.email || '';
-    const role = user.user_metadata?.role || 'buyer';
+    const isAdmin = user.app_metadata?.role === 'admin';
+    const role = isAdmin ? 'admin' : (user.user_metadata?.role || 'buyer');
 
     document.getElementById('info-email').textContent = email;
     document.getElementById('user-email').textContent = email;

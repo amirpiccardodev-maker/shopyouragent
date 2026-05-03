@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shop Your Agent — Il marketplace italiano degli agenti AI</title>
+<meta name="description" content="Scegli tra decine di agenti AI creati da sviluppatori italiani. Pronti all'uso, nessuna riga di codice. Automatizza la tua azienda oggi.">
+<meta property="og:title" content="Shop Your Agent — Il marketplace italiano degli agenti AI">
+<meta property="og:description" content="Scegli tra decine di agenti AI creati da sviluppatori italiani. Pronti all'uso, nessuna riga di codice.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shopyouragent.onrender.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shop Your Agent">
+<meta name="twitter:description" content="Il marketplace italiano degli agenti AI. Automatizza la tua azienda senza codice.">
+<link rel="canonical" href="https://shopyouragent.onrender.com/">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -486,25 +495,40 @@
     margin: 0;
   }
 
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-link-auth { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-link-auth:hover { color: var(--text); }
+
+  /* FOOTER */
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 13px; color: #555; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--muted); }
+
   @media (max-width: 640px) {
     nav { padding: 1rem 1.25rem; }
     .nav-links { display: none; }
     .vendor-cta { grid-template-columns: 1fr; }
     .revenue-badge { display: none; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Shop<span>Your</span>Agent</div>
+  <a href="index.html" class="logo" style="text-decoration:none;">Shop<span>Your</span>Agent</a>
   <ul class="nav-links">
-    <li><a href="shop_your_agent.html#agenti">Agenti</a></li>
+    <li><a href="shop_your_agent.html">Agenti</a></li>
     <li><a href="#come-funziona">Come funziona</a></li>
-    <li><a href="dashboard-vendor.html">Vendi</a></li>
+    <li><a href="#vendor">Vendi</a></li>
   </ul>
-  <a href="login.html" style="color:var(--muted);text-decoration:none;font-size:14px;margin-right:1rem;">Accedi</a><a href="shop_your_agent.html#agenti" class="nav-cta">Esplora il catalogo</a>
+  <div class="nav-right">
+    <span id="nav-auth"></span>
+    <a href="shop_your_agent.html" class="nav-cta">Esplora il catalogo</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -518,11 +542,11 @@
   </div>
   <div class="stats fade-in">
     <div class="stat">
-      <div class="stat-num">120+</div>
+      <div class="stat-num" id="stat-agenti">—</div>
       <div class="stat-label">Agenti</div>
     </div>
     <div class="stat">
-      <div class="stat-num">40+</div>
+      <div class="stat-num" id="stat-vendor">—</div>
       <div class="stat-label">Sviluppatori</div>
     </div>
     <div class="stat">
@@ -540,66 +564,11 @@
   <h2>Agenti in evidenza</h2>
   <p class="section-sub">Soluzioni pronte all'uso per le PMI italiane. Attivazione immediata.</p>
 
-  <div class="agents-grid">
-    <div class="agent-card" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">🍽️</div>
-      <div class="agent-name">Agente Ristorante</div>
-      <div class="agent-desc">Gestisce prenotazioni, risponde ai clienti su WhatsApp e aggiorna il menu automaticamente.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€29 <span>/mese</span></div>
-        <div class="agent-tag">Ospitalità</div>
-      </div>
-    </div>
-
-    <div class="agent-card featured" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">📧</div>
-      <div class="agent-name">Agente Email Marketing</div>
-      <div class="agent-desc">Crea e invia campagne email personalizzate basate sul comportamento dei tuoi clienti.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€39 <span>/mese</span></div>
-        <div class="agent-tag">Marketing</div>
-      </div>
-    </div>
-
-    <div class="agent-card" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">🛒</div>
-      <div class="agent-name">Agente E-commerce</div>
-      <div class="agent-desc">Risponde ai clienti, gestisce resi e invia follow-up automatici post acquisto.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€49 <span>/mese</span></div>
-        <div class="agent-tag">Vendite</div>
-      </div>
-    </div>
-
-    <div class="agent-card" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">⚖️</div>
-      <div class="agent-name">Agente Studio Legale</div>
-      <div class="agent-desc">Risponde alle FAQ dei clienti, qualifica le richieste e fissa appuntamenti in automatico.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€59 <span>/mese</span></div>
-        <div class="agent-tag">Professioni</div>
-      </div>
-    </div>
-
-    <div class="agent-card" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">🏠</div>
-      <div class="agent-name">Agente Immobiliare</div>
-      <div class="agent-desc">Qualifica i lead, invia schede immobili e prenota visite senza intervento umano.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€49 <span>/mese</span></div>
-        <div class="agent-tag">Real Estate</div>
-      </div>
-    </div>
-
-    <div class="agent-card" style="cursor:pointer;" onclick="window.location.href='dettaglio-agente.html'">
-      <div class="agent-icon">📊</div>
-      <div class="agent-name">Agente Lead Generation</div>
-      <div class="agent-desc">Trova, qualifica e contatta potenziali clienti in automatico ogni giorno.</div>
-      <div class="agent-footer">
-        <div class="agent-price">€69 <span>/mese</span></div>
-        <div class="agent-tag">Crescita</div>
-      </div>
-    </div>
+  <div class="agents-grid" id="featured-grid">
+    <!-- loaded dynamically -->
+  </div>
+  <div style="text-align:center; margin-top:2.5rem;">
+    <a href="shop_your_agent.html" class="btn-ghost">Vedi tutti gli agenti →</a>
   </div>
 </section>
 
@@ -643,7 +612,7 @@
       <h3>Tieni il 70% di ogni vendita</h3>
       <p>Noi gestiamo pagamenti, distribuzione e supporto. Tu ti concentri a costruire agenti straordinari.</p>
       <br>
-      <a href="#" class="btn-main">Registrati come sviluppatore</a>
+      <a href="dashboard-vendor.html" class="btn-main">Registrati come sviluppatore</a>
     </div>
     <div class="revenue-badge">
       <div class="revenue-num">70%</div>
@@ -655,9 +624,71 @@
 <!-- FOOTER -->
 <hr class="divider">
 <footer>
-  <div class="logo">Shop<span>Your</span>Agent</div>
+  <div class="logo" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;">Shop<span style="color:var(--accent)">Your</span>Agent</div>
   <p>© 2025 ShopYourAgent — Il marketplace italiano degli agenti AI</p>
+  <div class="footer-links">
+    <a href="termini.html">Termini</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="shop_your_agent.html">Catalogo</a>
+  </div>
 </footer>
 
+<script>
+  const STATIC_FEATURED = [
+    { id: null, icona: '📧', nome: 'Agente Email Marketing', descrizione_breve: 'Crea e invia campagne email personalizzate basate sul comportamento dei tuoi clienti.', prezzo_mensile: 39, categoria: 'Marketing', featured: true },
+    { id: null, icona: '🍽️', nome: 'Agente Ristorante', descrizione_breve: 'Gestisce prenotazioni, risponde ai clienti su WhatsApp e aggiorna il menu automaticamente.', prezzo_mensile: 29, categoria: 'Ospitalità', featured: false },
+    { id: null, icona: '🛒', nome: 'Agente E-commerce', descrizione_breve: 'Risponde ai clienti, gestisce resi e invia follow-up automatici post acquisto.', prezzo_mensile: 49, categoria: 'E-commerce', featured: false },
+    { id: null, icona: '📊', nome: 'Agente Lead Generation', descrizione_breve: 'Trova, qualifica e contatta potenziali clienti in automatico ogni giorno.', prezzo_mensile: 69, categoria: 'Crescita', featured: false },
+    { id: null, icona: '⚖️', nome: 'Agente Studio Legale', descrizione_breve: 'Risponde alle FAQ dei clienti, qualifica le richieste e fissa appuntamenti in automatico.', prezzo_mensile: 59, categoria: 'Professioni', featured: false },
+    { id: null, icona: '🏠', nome: 'Agente Immobiliare', descrizione_breve: 'Qualifica i lead, invia schede immobili e prenota visite senza intervento umano.', prezzo_mensile: 49, categoria: 'Real Estate', featured: false },
+  ];
+
+  function renderCard(a) {
+    const fc = a.featured ? 'featured' : '';
+    const onclick = a.id
+      ? `window.location.href='dettaglio-agente.html?id=${a.id}'`
+      : `window.location.href='shop_your_agent.html'`;
+    return `<div class="agent-card ${fc}" onclick="${onclick}">
+      <div class="agent-icon">${escHtml(a.icona || '🤖')}</div>
+      <div class="agent-name">${escHtml(a.nome)}</div>
+      <div class="agent-desc">${escHtml(a.descrizione_breve || '')}</div>
+      <div class="agent-footer">
+        <div class="agent-price">€${a.prezzo_mensile} <span>/mese</span></div>
+        <div class="agent-tag">${escHtml(a.categoria || '')}</div>
+      </div>
+    </div>`;
+  }
+
+  async function init() {
+    // Auth-aware nav
+    const { data: { session } } = await db.auth.getSession();
+    const navEl = document.getElementById('nav-auth');
+    if (session) {
+      const role = session.user.app_metadata?.role === 'admin' ? 'admin' : session.user.user_metadata?.role;
+      const href = role === 'vendor' ? 'dashboard-vendor.html' : role === 'admin' ? 'admin.html' : 'dashboard-utente.html';
+      navEl.innerHTML = `<a href="${href}" class="nav-link-auth">Dashboard</a>`;
+    } else {
+      navEl.innerHTML = `<a href="login.html" class="nav-link-auth">Accedi</a>`;
+    }
+
+    // Live stats
+    const [agentsRes, vendorsRes] = await Promise.all([
+      db.from('agents').select('id', { count: 'exact', head: true }).eq('attivo', true),
+      db.from('vendors').select('id', { count: 'exact', head: true }).eq('approvato', true),
+    ]);
+    const statA = document.getElementById('stat-agenti');
+    const statV = document.getElementById('stat-vendor');
+    if (statA) statA.textContent = agentsRes.count > 0 ? agentsRes.count + '+' : '10+';
+    if (statV) statV.textContent = vendorsRes.count > 0 ? vendorsRes.count + '+' : '5+';
+
+    // Featured agents from DB (up to 6)
+    const grid = document.getElementById('featured-grid');
+    const { data: agents } = await db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false }).limit(6);
+    const list = (agents && agents.length > 0) ? agents : STATIC_FEATURED;
+    grid.innerHTML = list.map(renderCard).join('');
+  }
+
+  init();
+</script>
 </body>
 </html>

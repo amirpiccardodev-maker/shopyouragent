@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termini di Servizio — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+    background: rgba(10,10,10,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-back { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 400; transition: color 0.2s; }
+  .nav-back:hover { color: var(--text); }
+
+  /* MAIN CONTENT */
+  .page-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 7rem 2rem 5rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* SECTIONS */
+  .section {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .section h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .section p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .section p:last-child { margin-bottom: 0; }
+  .section ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+  .section ul li {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    padding-left: 1.25rem;
+    position: relative;
+    margin-bottom: 0.35rem;
+  }
+  .section ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .section strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .contact-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    margin-top: 1rem;
+  }
+  .contact-box p {
+    margin-bottom: 0;
+  }
+  .contact-box a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .contact-box a:hover {
+    text-decoration: underline;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  footer a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: var(--text); }
+  footer span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+  <a href="shop_your_agent.html" class="nav-back">← Torna</a>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <h1>Termini di Servizio</h1>
+    <p>Ultimo aggiornamento: Gennaio 2025 &nbsp;·&nbsp; Versione 1.0<br>
+    Leggere attentamente prima di utilizzare la piattaforma ShopYourAgent.</p>
+  </div>
+
+  <!-- 1. Definizioni -->
+  <div class="section">
+    <h2>1. Definizioni</h2>
+    <p>Ai fini dei presenti Termini di Servizio, i seguenti termini hanno il significato di seguito indicato:</p>
+    <ul>
+      <li><strong>Marketplace</strong>: la piattaforma digitale ShopYourAgent, accessibile all'indirizzo shopyouragent.com, che consente l'incontro tra Vendor e Acquirenti per la distribuzione di agenti AI tramite abbonamento mensile.</li>
+      <li><strong>Vendor</strong>: il soggetto (persona fisica o giuridica) che pubblica, distribuisce e mantiene uno o più agenti AI sulla piattaforma, accettando condizioni specifiche per i fornitori di contenuto.</li>
+      <li><strong>Acquirente</strong>: il soggetto (persona fisica o giuridica) che si registra alla piattaforma con lo scopo di sottoscrivere un abbonamento a uno o più agenti AI resi disponibili dai Vendor.</li>
+      <li><strong>Agente AI</strong>: un programma software basato su intelligenza artificiale, configurato e distribuito da un Vendor, che esegue automaticamente attività specifiche per conto dell'Acquirente, secondo quanto descritto nella scheda prodotto dell'agente stesso.</li>
+      <li><strong>Abbonamento</strong>: il contratto a tempo determinato, rinnovabile automaticamente su base mensile, attraverso il quale l'Acquirente ottiene il diritto di utilizzo di uno o più agenti AI, previo pagamento del corrispettivo indicato al momento dell'acquisto.</li>
+      <li><strong>Piattaforma</strong>: l'insieme dei servizi, interfacce, API e infrastrutture tecnologiche che compongono ShopYourAgent.</li>
+    </ul>
+  </div>
+
+  <!-- 2. Accettazione dei termini -->
+  <div class="section">
+    <h2>2. Accettazione dei Termini</h2>
+    <p>L'utilizzo della piattaforma ShopYourAgent, inclusa la semplice navigazione del sito, la registrazione di un account, o la sottoscrizione di qualsiasi abbonamento, costituisce accettazione integrale e senza riserve dei presenti Termini di Servizio, della Privacy Policy e di qualsiasi altra politica pubblicata sulla piattaforma.</p>
+    <p>Se agisci per conto di un'azienda o di altro ente, dichiari e garantisci di avere l'autorità necessaria per vincolare tale soggetto ai presenti Termini. In caso contrario, non sei autorizzato a utilizzare la piattaforma.</p>
+    <p>ShopYourAgent si riserva il diritto di modificare i presenti Termini in qualsiasi momento. Le modifiche sostanziali saranno comunicate agli utenti registrati via email con almeno 14 giorni di preavviso. L'uso continuato della piattaforma dopo tale comunicazione costituirà accettazione delle modifiche.</p>
+  </div>
+
+  <!-- 3. Il servizio -->
+  <div class="section">
+    <h2>3. Il Servizio</h2>
+    <p>ShopYourAgent è un marketplace B2B dedicato alla distribuzione di agenti AI. La piattaforma mette in contatto sviluppatori e aziende (Vendor) che realizzano soluzioni di intelligenza artificiale con imprese e professionisti (Acquirenti) che desiderano adottarle tramite un modello di abbonamento mensile.</p>
+    <p>ShopYourAgent agisce esclusivamente come intermediario tecnologico e non è parte contrattuale nelle relazioni tra Vendor e Acquirenti per quanto concerne il funzionamento specifico dei singoli agenti AI. ShopYourAgent gestisce tuttavia l'infrastruttura di pagamento, l'onboarding degli utenti, il supporto di primo livello e la qualità generale della piattaforma.</p>
+    <p>La piattaforma si riserva il diritto di:</p>
+    <ul>
+      <li>Modificare, aggiornare o sospendere funzionalità del servizio con ragionevole preavviso.</li>
+      <li>Rimuovere agenti AI che violino le linee guida della piattaforma o le normative vigenti.</li>
+      <li>Sospendere o chiudere account che violino i presenti Termini.</li>
+    </ul>
+    <p>ShopYourAgent si impegna a garantire una disponibilità della piattaforma pari almeno al 99,0% su base mensile, salvo interventi di manutenzione programmata e cause di forza maggiore.</p>
+  </div>
+
+  <!-- 4. Registrazione e account -->
+  <div class="section">
+    <h2>4. Registrazione e Account</h2>
+    <p>Per accedere ai servizi di ShopYourAgent è necessario creare un account personale o aziendale, fornendo informazioni veritiere, accurate, aggiornate e complete. È vietato registrare account con dati falsi, identità altrui o tramite sistemi automatizzati.</p>
+    <p>L'utente è responsabile della riservatezza delle proprie credenziali di accesso (email e password) e di tutte le attività compiute tramite il proprio account. In caso di accesso non autorizzato o sospetta violazione della sicurezza dell'account, l'utente è tenuto a notificarlo immediatamente a <a href="mailto:legal@shopyouragent.com" style="color:var(--accent);text-decoration:none;">legal@shopyouragent.com</a>.</p>
+    <p>ShopYourAgent non sarà responsabile per eventuali danni derivanti dall'uso non autorizzato delle credenziali, salvo i casi in cui tale uso sia direttamente imputabile a negligenza della piattaforma. Ogni account è strettamente personale e non cedibile a terzi senza esplicita approvazione scritta di ShopYourAgent.</p>
+    <p>ShopYourAgent si riserva il diritto di sospendere o eliminare account inattivi per un periodo superiore a 12 mesi consecutivi, previo avviso via email.</p>
+  </div>
+
+  <!-- 5. Abbonamenti e pagamenti -->
+  <div class="section">
+    <h2>5. Abbonamenti e Pagamenti</h2>
+    <p>I servizi di ShopYourAgent sono accessibili tramite abbonamento mensile a pagamento. I prezzi sono espressi in Euro (EUR) e sono indicati inclusivi di IVA ove applicabile, salvo diversa indicazione nella scheda di ciascun agente AI.</p>
+    <p>I pagamenti vengono elaborati tramite <strong>Stripe</strong>, un processore di pagamento certificato PCI-DSS di livello 1. ShopYourAgent non memorizza direttamente i dati delle carte di credito o di debito degli utenti. Accettando i presenti Termini, l'utente accetta altresì i <a href="https://stripe.com/it/legal" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">Termini di Servizio di Stripe</a>.</p>
+    <p>Gli abbonamenti si rinnovano automaticamente al termine di ogni periodo mensile, addebitando il corrispettivo sul metodo di pagamento registrato dall'utente. ShopYourAgent invierà una notifica via email almeno 3 giorni prima di ogni rinnovo automatico. In caso di fallimento del pagamento, la piattaforma tenterà nuovamente l'addebito per un massimo di 3 volte nell'arco di 7 giorni; se tutti i tentativi falliscono, l'accesso all'agente sarà temporaneamente sospeso fino alla regolarizzazione del pagamento.</p>
+    <p>ShopYourAgent si riserva il diritto di modificare i prezzi degli abbonamenti, comunicando tale modifica con almeno 30 giorni di preavviso via email. La variazione di prezzo avrà effetto a partire dal ciclo di fatturazione successivo alla scadenza del periodo di preavviso.</p>
+  </div>
+
+  <!-- 6. Disdetta e rimborsi -->
+  <div class="section">
+    <h2>6. Disdetta e Rimborsi</h2>
+    <p>L'utente può disdire il proprio abbonamento in qualsiasi momento ("cancel anytime") direttamente dalla sezione "Impostazioni" del proprio account, senza necessità di contattare il supporto. La disdetta avrà effetto al termine del periodo di fatturazione corrente; l'utente conserverà l'accesso all'agente fino alla scadenza del periodo già pagato.</p>
+    <p>ShopYourAgent non effettua rimborsi parziali per il periodo di abbonamento già pagato, salvo i casi specifici descritti di seguito. Il pagamento del periodo mensile in corso non è rimborsabile in caso di disdetta anticipata.</p>
+    <p>È previsto il rimborso integrale esclusivamente nei seguenti casi:</p>
+    <ul>
+      <li>L'agente AI non ha funzionato secondo quanto descritto nella scheda prodotto e il problema non è stato risolto dal Vendor entro 7 giorni dalla segnalazione all'indirizzo <a href="mailto:legal@shopyouragent.com" style="color:var(--accent);text-decoration:none;">legal@shopyouragent.com</a>.</li>
+      <li>ShopYourAgent ha interrotto definitivamente la disponibilità dell'agente senza preavviso ragionevole.</li>
+      <li>Errore di doppia fatturazione direttamente imputabile alla piattaforma.</li>
+    </ul>
+    <p>Le richieste di rimborso devono essere presentate entro 7 giorni dall'evento che le origina, allegando documentazione sufficiente a identificare il problema. ShopYourAgent si impegna a rispondere entro 5 giorni lavorativi.</p>
+  </div>
+
+  <!-- 7. Responsabilità dei vendor -->
+  <div class="section">
+    <h2>7. Responsabilità dei Vendor</h2>
+    <p>I Vendor che pubblicano agenti AI sulla piattaforma ShopYourAgent assumono piena responsabilità per il corretto funzionamento, la manutenzione e l'aggiornamento dei propri agenti. In particolare, ogni Vendor si impegna a:</p>
+    <ul>
+      <li>Garantire che l'agente AI funzioni in conformità con la descrizione pubblicata sulla scheda prodotto.</li>
+      <li>Mantenere un livello di disponibilità dell'agente non inferiore al 99,0% su base mensile.</li>
+      <li>Risolvere tempestivamente (entro 48 ore) i malfunzionamenti segnalati dagli Acquirenti.</li>
+      <li>Non raccogliere dati degli Acquirenti in modo non conforme al GDPR e alle normative vigenti in materia di protezione dei dati.</li>
+      <li>Non distribuire agenti AI che producano contenuti illegali, discriminatori, o che violino diritti di proprietà intellettuale di terzi.</li>
+      <li>Comunicare a ShopYourAgent con almeno 30 giorni di anticipo l'eventuale intenzione di ritirare un agente dalla piattaforma.</li>
+    </ul>
+    <p>ShopYourAgent si riserva il diritto di sospendere o rimuovere dalla piattaforma qualsiasi agente AI in caso di violazione delle suddette condizioni, nonché di trattenere i pagamenti spettanti al Vendor per il periodo contestato qualora gli Acquirenti abbiano diritto a un rimborso imputabile a negligenza del Vendor stesso.</p>
+  </div>
+
+  <!-- 8. Diritti di proprietà intellettuale -->
+  <div class="section">
+    <h2>8. Diritti di Proprietà Intellettuale</h2>
+    <p>Tutto il contenuto della piattaforma ShopYourAgent — inclusi, a titolo non esaustivo, il codice sorgente, il design, i loghi, i testi, le interfacce grafiche e i marchi — è di esclusiva proprietà di ShopYourAgent o dei rispettivi licenziatari, ed è protetto dalla normativa italiana ed europea in materia di proprietà intellettuale.</p>
+    <p>I Vendor mantengono la titolarità dei diritti di proprietà intellettuale sui propri agenti AI. Pubblicando un agente sulla piattaforma, il Vendor concede a ShopYourAgent una licenza non esclusiva, revocabile, mondiale e gratuita per distribuire, promuovere e commercializzare l'agente tramite la piattaforma per tutta la durata del rapporto contrattuale.</p>
+    <p>Gli Acquirenti ottengono una licenza d'uso personale, non trasferibile e non sub-licenziabile sull'agente AI per la durata del proprio abbonamento attivo. È vietata qualsiasi forma di reverse engineering, decompilazione, copia o ridistribuzione degli agenti AI senza esplicita autorizzazione scritta del Vendor titolare.</p>
+    <p>ShopYourAgent si riserva il diritto di utilizzare il nome e il logo del Vendor a scopo promozionale sulla piattaforma, salvo espressa rinuncia scritta da parte del Vendor medesimo.</p>
+  </div>
+
+  <!-- 9. Limitazione di responsabilità -->
+  <div class="section">
+    <h2>9. Limitazione di Responsabilità</h2>
+    <p>Nei limiti consentiti dalla legge applicabile, ShopYourAgent non sarà responsabile per danni indiretti, incidentali, speciali, consequenziali o punitivi derivanti dall'uso o dall'impossibilità di uso della piattaforma o degli agenti AI distribuiti tramite essa, inclusi — a titolo non esaustivo — perdita di profitti, perdita di dati, interruzione dell'attività aziendale o danni alla reputazione.</p>
+    <p>La responsabilità complessiva di ShopYourAgent nei confronti di ciascun utente, per qualsiasi causa, è in ogni caso limitata all'importo pagato dall'utente alla piattaforma nei 3 mesi precedenti l'evento che ha originato la richiesta di risarcimento.</p>
+    <p>ShopYourAgent non offre garanzie esplicite o implicite circa l'idoneità degli agenti AI a uno scopo specifico, l'accuratezza dei risultati prodotti dagli agenti, né circa la continuità o l'assenza di errori del servizio. Tali caratteristiche dipendono in larga misura dai Vendor che distribuiscono gli agenti AI.</p>
+  </div>
+
+  <!-- 10. Legge applicabile -->
+  <div class="section">
+    <h2>10. Legge Applicabile e Foro Competente</h2>
+    <p>I presenti Termini di Servizio sono regolati dalla legge italiana. Per qualsiasi controversia relativa all'interpretazione, validità o esecuzione del presente accordo, le parti concordano di sottomettersi alla giurisdizione esclusiva del Tribunale di Milano.</p>
+    <p>Per gli utenti che rivestono la qualità di consumatori ai sensi del Codice del Consumo (D.Lgs. 206/2005), resta ferma l'applicabilità delle norme inderogabili di protezione previste dalla legislazione italiana ed europea, inclusa la possibilità di ricorrere alla procedura di risoluzione alternativa delle controversie (ADR/ODR) disponibile all'indirizzo <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">ec.europa.eu/consumers/odr</a>.</p>
+    <p>Per qualsiasi domanda o comunicazione relativa ai presenti Termini, è possibile contattare il team legale di ShopYourAgent:</p>
+    <div class="contact-box">
+      <p>ShopYourAgent &nbsp;·&nbsp; Dipartimento Legale<br>
+      Email: <a href="mailto:legal@shopyouragent.com">legal@shopyouragent.com</a><br>
+      Risposta entro 5 giorni lavorativi.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <a href="termini.html">Termini</a>
+  <a href="privacy.html">Privacy</a>
+  <span>© 2025 ShopYourAgent</span>
+</footer>
+
+</body>
+</html>
