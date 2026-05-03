@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Your Agent — Il marketplace italiano degli agenti AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+    background: rgba(10,10,10,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 400; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-cta { background: var(--accent); color: #0a0a0a; font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--accent-dark); }
+  .nav-link-auth { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-link-auth:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 2rem 4rem; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(200,245,90,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(200,245,90,0.1); border: 1px solid rgba(200,245,90,0.25);
+    color: var(--accent); font-size: 12px; font-weight: 500;
+    padding: 6px 14px; border-radius: 99px; margin-bottom: 2rem;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .hero-badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  h1 {
+    font-family: var(--font-display); font-size: clamp(40px, 7vw, 80px);
+    font-weight: 800; line-height: 1.05; letter-spacing: -2px;
+    color: var(--text); max-width: 800px; margin-bottom: 1.5rem;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub { font-size: 18px; color: var(--muted); max-width: 480px; margin-bottom: 2.5rem; font-weight: 300; line-height: 1.7; }
+  .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn-main {
+    background: var(--accent); color: #0a0a0a; font-family: var(--font-body);
+    font-size: 15px; font-weight: 500; padding: 14px 28px; border: none;
+    border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-main:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent; color: var(--text); font-family: var(--font-body);
+    font-size: 15px; font-weight: 400; padding: 14px 28px;
+    border: 1px solid var(--border2); border-radius: 8px; cursor: pointer;
+    text-decoration: none; transition: all 0.2s; display: inline-block;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+  /* STATS */
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; max-width: 560px; margin: 3rem auto 0;
+  }
+  .stat { background: var(--surface); padding: 1.5rem; text-align: center; }
+  .stat-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* SECTION */
+  section { max-width: 1100px; margin: 0 auto; padding: 5rem 2rem; }
+  .section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 1rem; }
+  h2 { font-family: var(--font-display); font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -1px; line-height: 1.1; margin-bottom: 1rem; }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 480px; margin-bottom: 2rem; font-weight: 300; }
+
+  /* SEARCH + FILTER */
+  .catalog-controls { display: flex; flex-direction: column; gap: 16px; margin-bottom: 2rem; }
+  .search-wrap { position: relative; max-width: 440px; }
+  .search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  #search-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px 11px 42px;
+    color: var(--text); font-family: var(--font-body); font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  #search-input:focus { border-color: rgba(200,245,90,0.4); }
+  #search-input::placeholder { color: #555; }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 12px; font-weight: 500; padding: 6px 14px;
+    border-radius: 99px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    cursor: pointer; transition: all 0.2s; font-family: var(--font-body);
+  }
+  .chip:hover { border-color: var(--border2); color: var(--text); }
+  .chip.active { background: rgba(200,245,90,0.1); border-color: rgba(200,245,90,0.3); color: var(--accent); }
+
+  /* AGENTS GRID */
+  .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .agent-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.5rem; transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .agent-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .agent-card.featured { border-color: rgba(200,245,90,0.3); }
+  .agent-card.featured::after {
+    content: 'Top'; position: absolute; top: 16px; right: 16px;
+    background: rgba(200,245,90,0.15); color: var(--accent);
+    font-size: 10px; font-weight: 600; padding: 3px 9px;
+    border-radius: 99px; border: 1px solid rgba(200,245,90,0.3);
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .agent-icon { font-size: 28px; margin-bottom: 12px; }
+  .agent-category-tag {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted); margin-bottom: 6px; font-weight: 500;
+  }
+  .agent-name { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .agent-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .agent-footer { display: flex; align-items: center; justify-content: space-between; }
+  .agent-price { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); }
+  .agent-price span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .agent-arrow { font-size: 13px; color: var(--accent); }
+  .no-results { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 3rem 2rem; font-size: 14px; }
+
+  /* HOW IT WORKS */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .step { padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  .step-num { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: rgba(200,245,90,0.15); line-height: 1; margin-bottom: 12px; }
+  .step-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* VENDOR CTA */
+  .vendor-cta {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 3rem; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center;
+  }
+  .vendor-cta h3 { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .vendor-cta p { font-size: 15px; color: var(--muted); font-weight: 300; margin-bottom: 1.5rem; }
+  .revenue-badge {
+    background: rgba(200,245,90,0.1); border: 1px solid rgba(200,245,90,0.25);
+    border-radius: 12px; padding: 1.5rem 2rem; text-align: center; min-width: 140px;
+  }
+  .revenue-num { font-family: var(--font-display); font-size: 44px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .revenue-label { font-size: 12px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; }
+  footer p { font-size: 13px; color: var(--muted); }
+
+  /* ANIMATIONS */
+  .fade-in { opacity: 0; transform: translateY(20px); animation: fadeIn 0.7s forwards; }
+  @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+  .fade-in:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in:nth-child(2) { animation-delay: 0.2s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { display: none; }
+    .vendor-cta { grid-template-columns: 1fr; }
+    .revenue-badge { display: none; }
+    .catalog-controls { flex-direction: column; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
+</head>
+<body>
+
+<nav>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+  <ul class="nav-links">
+    <li><a href="#agenti">Agenti</a></li>
+    <li><a href="#come-funziona">Come funziona</a></li>
+    <li><a href="#vendor">Vendi</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="nav-auth"></span>
+    <a href="#agenti" class="nav-cta">Esplora il catalogo</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">Nuovo in Italia</div>
+  <h1 class="fade-in">Automatizza la tua azienda con un <em>agente AI</em></h1>
+  <p class="hero-sub fade-in">Scegli tra agenti creati da sviluppatori italiani. Pronti all'uso, nessuna riga di codice.</p>
+  <div class="hero-buttons fade-in">
+    <a href="#agenti" class="btn-main">Esplora il catalogo</a>
+    <a href="#vendor" class="btn-ghost">Vendi il tuo agente →</a>
+  </div>
+  <div class="stats fade-in">
+    <div class="stat"><div class="stat-num" id="hero-stat-agenti">120+</div><div class="stat-label">Agenti</div></div>
+    <div class="stat"><div class="stat-num">40+</div><div class="stat-label">Sviluppatori</div></div>
+    <div class="stat"><div class="stat-num">€0</div><div class="stat-label">Per iniziare</div></div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<section id="agenti">
+  <div class="section-label">Catalogo</div>
+  <h2>Agenti in evidenza</h2>
+  <p class="section-sub">Soluzioni pronte all'uso per le PMI italiane. Attivazione immediata.</p>
+
+  <div class="catalog-controls">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Cerca un agente...">
+    </div>
+    <div class="filter-chips" id="filter-chips">
+      <button class="chip active" data-cat="tutti">Tutti</button>
+      <button class="chip" data-cat="Marketing">Marketing</button>
+      <button class="chip" data-cat="Vendite">Vendite</button>
+      <button class="chip" data-cat="Ospitalità">Ospitalità</button>
+      <button class="chip" data-cat="E-commerce">E-commerce</button>
+      <button class="chip" data-cat="Professioni">Professioni</button>
+      <button class="chip" data-cat="Real Estate">Real Estate</button>
+      <button class="chip" data-cat="Crescita">Crescita</button>
+    </div>
+  </div>
+
+  <div class="agents-grid" id="agents-grid">
+    <!-- skeleton -->
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="come-funziona">
+  <div class="section-label">Processo</div>
+  <h2>Come funziona</h2>
+  <p class="section-sub">Tre passi e il tuo agente è operativo.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Scegli l'agente</div>
+      <div class="step-desc">Sfoglia il catalogo e trova l'agente adatto alla tua attività.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Attiva e configura</div>
+      <div class="step-desc">Inserisci i tuoi dati aziendali. Nessun codice, nessun tecnico.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">L'agente lavora</div>
+      <div class="step-desc">Il tuo agente inizia a lavorare 24/7. Tu fai altro.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="vendor">
+  <div class="section-label">Per sviluppatori</div>
+  <h2>Vendi il tuo agente</h2>
+  <p class="section-sub">Hai costruito un agente N8N? Caricalo e inizia a guadagnare.</p>
+  <div class="vendor-cta">
+    <div>
+      <h3>Tieni il 70% di ogni vendita</h3>
+      <p>Noi gestiamo pagamenti, distribuzione e supporto. Tu ti concentri a costruire agenti straordinari.</p>
+      <a href="login.html" class="btn-main">Registrati come sviluppatore</a>
+    </div>
+    <div class="revenue-badge">
+      <div class="revenue-num">70%</div>
+      <div class="revenue-label">A te</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+<footer>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+  <p>© 2025 ShopYourAgent — Il marketplace italiano degli agenti AI</p>
+</footer>
+
+<script>
+  const STATIC_AGENTS = [
+    { id: null, icona: '🍽️', nome: 'Agente Ristorante', descrizione_breve: 'Gestisce prenotazioni, risponde ai clienti su WhatsApp e aggiorna il menu automaticamente.', prezzo_mensile: 29, categoria: 'Ospitalità', featured: false },
+    { id: null, icona: '📧', nome: 'Agente Email Marketing', descrizione_breve: 'Crea e invia campagne email personalizzate basate sul comportamento dei tuoi clienti.', prezzo_mensile: 39, categoria: 'Marketing', featured: true },
+    { id: null, icona: '🛒', nome: 'Agente E-commerce', descrizione_breve: 'Risponde ai clienti, gestisce resi e invia follow-up automatici post acquisto.', prezzo_mensile: 49, categoria: 'E-commerce', featured: false },
+    { id: null, icona: '⚖️', nome: 'Agente Studio Legale', descrizione_breve: 'Risponde alle FAQ dei clienti, qualifica le richieste e fissa appuntamenti in automatico.', prezzo_mensile: 59, categoria: 'Professioni', featured: false },
+    { id: null, icona: '🏠', nome: 'Agente Immobiliare', descrizione_breve: 'Qualifica i lead, invia schede immobili e prenota visite senza intervento umano.', prezzo_mensile: 49, categoria: 'Real Estate', featured: false },
+    { id: null, icona: '📊', nome: 'Agente Lead Generation', descrizione_breve: 'Trova, qualifica e contatta potenziali clienti in automatico ogni giorno.', prezzo_mensile: 69, categoria: 'Crescita', featured: false },
+  ];
+
+  let allAgents = [];
+  let activeCategory = 'tutti';
+
+  function renderAgentCard(a) {
+    const featuredClass = a.featured ? 'featured' : '';
+    const onclick = a.id
+      ? `window.location.href='dettaglio-agente.html?id=${a.id}'`
+      : `showToast('Questo agente sarà disponibile a breve!', 'info')`;
+    return `
+      <div class="agent-card ${featuredClass}" onclick="${onclick}">
+        <div class="agent-icon">${escHtml(a.icona || '🤖')}</div>
+        <div class="agent-category-tag">${escHtml(a.categoria || '')}</div>
+        <div class="agent-name">${escHtml(a.nome)}</div>
+        <div class="agent-desc">${escHtml(a.descrizione_breve || a.descrizione || '')}</div>
+        <div class="agent-footer">
+          <div class="agent-price">€${a.prezzo_mensile} <span>/mese</span></div>
+          <span class="agent-arrow">→</span>
+        </div>
+      </div>`;
+  }
+
+  function applyFilters() {
+    const query = document.getElementById('search-input').value.toLowerCase().trim();
+    let filtered = allAgents;
+    if (activeCategory !== 'tutti') {
+      filtered = filtered.filter(a => a.categoria === activeCategory);
+    }
+    if (query) {
+      filtered = filtered.filter(a =>
+        a.nome.toLowerCase().includes(query) ||
+        (a.descrizione_breve || a.descrizione || '').toLowerCase().includes(query) ||
+        (a.categoria || '').toLowerCase().includes(query)
+      );
+    }
+    const grid = document.getElementById('agents-grid');
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="no-results">Nessun agente trovato per "${query}"</div>`;
+    } else {
+      grid.innerHTML = filtered.map(renderAgentCard).join('');
+    }
+  }
+
+  async function loadAgents() {
+    const grid = document.getElementById('agents-grid');
+    grid.innerHTML = skeletonCards(6);
+
+    const { data: agents } = await db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false });
+
+    if (agents && agents.length > 0) {
+      allAgents = agents;
+      const count = document.getElementById('hero-stat-agenti');
+      if (count) count.textContent = agents.length + '+';
+    } else {
+      allAgents = STATIC_AGENTS;
+    }
+    applyFilters();
+  }
+
+  // Category filter chips
+  document.getElementById('filter-chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeCategory = chip.dataset.cat;
+    applyFilters();
+  });
+
+  document.getElementById('search-input').addEventListener('input', applyFilters);
+
+  // Auth-aware nav
+  db.auth.getSession().then(({ data: { session } }) => {
+    const el = document.getElementById('nav-auth');
+    if (session) {
+      const role = session.user.user_metadata?.role;
+      const href = role === 'vendor' ? 'dashboard-vendor.html' : role === 'admin' ? 'admin.html' : 'dashboard-utente.html';
+      el.innerHTML = `<a href="${href}" class="nav-link-auth">Dashboard</a>`;
+    } else {
+      el.innerHTML = `<a href="login.html" class="nav-link-auth">Accedi</a>`;
+    }
+  });
+
+  loadAgents();
+</script>
+</body>
+</html>

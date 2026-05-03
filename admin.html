@@ -12,27 +12,29 @@
     --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
     --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
-    --error: #ff5f5f; --success: #5fff9a; --warning: orange;
+    --error: #ff5f5f; --success: #5fff9a; --warning: #ffaa00;
   }
   body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; }
 
   .sidebar {
     width: 240px; min-height: 100vh; background: var(--surface);
     border-right: 1px solid var(--border); padding: 1.5rem;
-    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
   }
   .logo { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); text-decoration: none; margin-bottom: 0.5rem; display: block; }
   .logo span { color: var(--accent); }
   .role-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #ff5f5f; background: rgba(255,95,95,0.1); border: 1px solid rgba(255,95,95,0.2); padding: 3px 8px; border-radius: 99px; display: inline-block; margin-bottom: 2rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; text-decoration: none; border: none; background: none; font-family: var(--font-body); width: 100%; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; text-decoration: none; border: none; background: none; font-family: var(--font-body); width: 100%; text-align: left; }
   .nav-item:hover { background: var(--surface2); color: var(--text); }
   .nav-item.active { background: rgba(200,245,90,0.1); color: var(--accent); }
   .nav-icon { font-size: 16px; width: 20px; text-align: center; }
   .sidebar-bottom { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
   .admin-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .admin-name { font-size: 14px; font-weight: 500; }
+  .admin-name { font-size: 14px; font-weight: 500; word-break: break-all; }
+  .logout-btn { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 8px; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; display: block; text-align: center; border: 1px solid var(--border); }
+  .logout-btn:hover { color: var(--text); border-color: var(--border2); }
 
-  .main { margin-left: 240px; flex: 1; padding: 2.5rem; }
+  .main { margin-left: 240px; flex: 1; padding: 2.5rem; min-width: 0; }
   .page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.5rem; }
   .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 2rem; }
 
@@ -56,10 +58,10 @@
 
   .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 99px; white-space: nowrap; }
   .status-badge.active { background: rgba(95,255,154,0.1); color: var(--success); border: 1px solid rgba(95,255,154,0.2); }
-  .status-badge.pending { background: rgba(255,165,0,0.1); color: var(--warning); border: 1px solid rgba(255,165,0,0.2); }
+  .status-badge.pending { background: rgba(255,170,0,0.1); color: var(--warning); border: 1px solid rgba(255,170,0,0.2); }
   .status-badge.rejected { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); }
 
-  .action-btns { display: flex; gap: 6px; }
+  .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .btn-approve { background: rgba(95,255,154,0.1); color: var(--success); border: 1px solid rgba(95,255,154,0.2); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
   .btn-approve:hover { background: rgba(95,255,154,0.2); }
   .btn-reject { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
@@ -72,24 +74,55 @@
   .tab.active { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 
   .empty-row td { text-align: center; color: var(--muted); padding: 2.5rem !important; }
-
   .page-section { display: none; }
   .page-section.active { display: block; }
+
+  /* Detail modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 460px; }
+  .modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 1.25rem; }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .detail-row:last-of-type { border-bottom: none; }
+  .detail-label { color: var(--muted); font-size: 13px; }
+  .detail-val { font-weight: 500; word-break: break-all; text-align: right; max-width: 60%; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 1.5rem; }
+  .btn-close { background: var(--surface2); color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 11px 20px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; flex: 1; transition: all 0.2s; }
+  .btn-close:hover { border-color: var(--border2); }
+
+  /* Confirm modal */
+  .confirm-modal { max-width: 380px; text-align: center; }
+  .confirm-icon { font-size: 40px; margin-bottom: 1rem; }
+  .confirm-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 0.5rem; }
+  .confirm-sub { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.6; }
+  .btn-danger { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 11px 20px; border-radius: 8px; cursor: pointer; flex: 1; transition: all 0.2s; }
+  .btn-danger:hover { background: rgba(255,95,95,0.2); }
+
+  @media (max-width: 768px) {
+    .main { margin-left: 0; padding: 1.5rem; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
 </head>
 <body>
 
 <div class="sidebar">
-  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
   <span class="role-badge">Admin</span>
   <button class="nav-item active" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
-  <button class="nav-item" onclick="showSection('agenti', this)"><span class="nav-icon">🤖</span> Agenti <span id="pending-agents-count" style="margin-left:auto; background: var(--warning); color:#0a0a0a; font-size:10px; font-weight:700; padding:2px 6px; border-radius:99px; display:none;">0</span></button>
+  <button class="nav-item" onclick="showSection('agenti', this)">
+    <span class="nav-icon">🤖</span> Agenti
+    <span id="pending-agents-count" style="margin-left:auto;background:var(--warning);color:#0a0a0a;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;display:none;">0</span>
+  </button>
   <button class="nav-item" onclick="showSection('vendor', this)"><span class="nav-icon">👨‍💻</span> Vendor</button>
   <button class="nav-item" onclick="showSection('utenti', this)"><span class="nav-icon">👥</span> Utenti</button>
   <button class="nav-item" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
   <div class="sidebar-bottom">
     <div class="admin-label">Connesso come</div>
-    <div class="admin-name">Admin</div>
+    <div class="admin-name" id="admin-name">Admin</div>
+    <a class="logout-btn" onclick="signOut()">Esci</a>
   </div>
 </div>
 
@@ -100,32 +133,17 @@
     <div class="page-title">Pannello Admin</div>
     <div class="page-sub">Panoramica generale di Shop Your Agent</div>
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Utenti totali</div>
-        <div class="stat-val" id="stat-utenti">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Agenti attivi</div>
-        <div class="stat-val" id="stat-agenti-attivi">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">In attesa approvazione</div>
-        <div class="stat-val orange" id="stat-pending">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Abbonamenti attivi</div>
-        <div class="stat-val green" id="stat-subs">—</div>
-      </div>
+      <div class="stat-card"><div class="stat-label">Utenti totali</div><div class="stat-val" id="stat-utenti">—</div></div>
+      <div class="stat-card"><div class="stat-label">Agenti attivi</div><div class="stat-val" id="stat-agenti-attivi">—</div></div>
+      <div class="stat-card"><div class="stat-label">In attesa</div><div class="stat-val orange" id="stat-pending">—</div></div>
+      <div class="stat-card"><div class="stat-label">Abbonamenti attivi</div><div class="stat-val green" id="stat-subs">—</div></div>
     </div>
-
     <div class="section">
       <div class="section-header">
         <div class="section-title">Agenti in attesa di approvazione</div>
       </div>
       <table>
-        <thead>
-          <tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Azioni</th></tr>
-        </thead>
+        <thead><tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Azioni</th></tr></thead>
         <tbody id="pending-agents-tbody">
           <tr class="empty-row"><td colspan="5">Nessun agente in attesa</td></tr>
         </tbody>
@@ -143,9 +161,7 @@
       <button class="tab" onclick="filterAgents('attivi', this)">Attivi</button>
     </div>
     <table>
-      <thead>
-        <tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr>
-      </thead>
+      <thead><tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead>
       <tbody id="all-agents-tbody">
         <tr class="empty-row"><td colspan="6">Caricamento...</td></tr>
       </tbody>
@@ -157,11 +173,9 @@
     <div class="page-title">Gestione Vendor</div>
     <div class="page-sub">Approva e gestisci gli sviluppatori sulla piattaforma</div>
     <table>
-      <thead>
-        <tr><th>Nome</th><th>Email</th><th>Stato</th><th>Agenti</th><th>Azioni</th></tr>
-      </thead>
+      <thead><tr><th>Nome</th><th>Email</th><th>Stato</th><th>Azioni</th></tr></thead>
       <tbody id="vendors-tbody">
-        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
@@ -171,11 +185,9 @@
     <div class="page-title">Gestione Utenti</div>
     <div class="page-sub">Tutti gli utenti registrati sulla piattaforma</div>
     <table>
-      <thead>
-        <tr><th>Nome</th><th>Email</th><th>Registrato il</th><th>Agenti attivi</th><th>Azioni</th></tr>
-      </thead>
+      <thead><tr><th>Nome</th><th>Email (User ID)</th><th>Registrato il</th><th>Azioni</th></tr></thead>
       <tbody id="users-tbody">
-        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
@@ -183,24 +195,88 @@
   <!-- ABBONAMENTI -->
   <div class="page-section" id="section-abbonamenti">
     <div class="page-title">Abbonamenti</div>
-    <div class="page-sub">Tutti gli abbonamenti attivi sulla piattaforma</div>
+    <div class="page-sub">Tutti gli abbonamenti sulla piattaforma</div>
     <table>
-      <thead>
-        <tr><th>Utente</th><th>Agente</th><th>Stato</th><th>Data inizio</th><th>Azioni</th></tr>
-      </thead>
+      <thead><tr><th>Agente</th><th>Stato</th><th>Data inizio</th><th>Azioni</th></tr></thead>
       <tbody id="subs-tbody">
-        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
 
 </div>
 
-<script>
-  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzYxNDE0OCwiZXhwIjoyMDkzMTkwMTQ4fQ.2N2Atp7s6M18vU56BMnKf7I99WD71Ov2NI5K-_f4SGo'; // Usa la service key per l'admin!
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-title" id="detail-title">Dettaglio</div>
+    <div id="detail-body"></div>
+    <div class="modal-btns">
+      <button class="btn-close" onclick="closeDetailModal()">Chiudi</button>
+    </div>
+  </div>
+</div>
 
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal confirm-modal">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Conferma azione</div>
+    <div class="confirm-sub" id="confirm-sub">Sei sicuro?</div>
+    <div class="modal-btns">
+      <button class="btn-close" onclick="closeConfirm()">Annulla</button>
+      <button class="btn-danger" id="confirm-action-btn">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<script>
   let allAgents = [];
+  const _details = {};
+
+  function openDetail(k) {
+    const d = _details[k];
+    if (d) showDetailModal(d.title, d.rows);
+  }
+
+  function showDetailModal(title, rows) {
+    document.getElementById('detail-title').textContent = title;
+    document.getElementById('detail-body').innerHTML = rows.map(([label, val]) =>
+      `<div class="detail-row"><span class="detail-label">${escHtml(label)}</span><span class="detail-val">${escHtml(String(val ?? '—'))}</span></div>`
+    ).join('');
+    document.getElementById('detail-modal').classList.add('open');
+  }
+  function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+
+  function showConfirm(message, onConfirm) {
+    document.getElementById('confirm-sub').textContent = message;
+    document.getElementById('confirm-modal').classList.add('open');
+    document.getElementById('confirm-action-btn').onclick = async () => {
+      closeConfirm();
+      await onConfirm();
+    };
+  }
+  function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
+
+  async function init() {
+    const session = await requireAuth();
+    if (!session) return;
+
+    const role = session.user.user_metadata?.role;
+    if (role !== 'admin') {
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;">
+          <div style="font-size:48px;">🔒</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#f0ede8;">Accesso non autorizzato</div>
+          <div style="font-size:14px;color:#888;">Questa pagina è riservata agli amministratori.</div>
+          <a href="login.html" style="margin-top:1rem;background:#c8f55a;color:#0a0a0a;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500;">Torna al login</a>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('admin-name').textContent = session.user.email || 'Admin';
+    loadDashboard();
+  }
 
   function showSection(name, el) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
@@ -223,196 +299,179 @@
   }
 
   async function loadDashboard() {
-    try {
-      const [agentsRes, subsRes, vendorsRes] = await Promise.all([
-        fetch(`${SUPABASE_URL}/rest/v1/agents?select=*,vendors(nome,cognome)`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
-        fetch(`${SUPABASE_URL}/rest/v1/subscriptions?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
-        fetch(`${SUPABASE_URL}/rest/v1/profiles?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
-      ]);
-      const agents = await agentsRes.json();
-      const subs = await subsRes.json();
-      const profiles = await vendorsRes.json();
+    const [{ data: agents }, { data: subs }, { data: profiles }] = await Promise.all([
+      db.from('agents').select('*, vendors(nome, cognome)'),
+      db.from('subscriptions').select('*'),
+      db.from('profiles').select('*'),
+    ]);
 
-      allAgents = agents;
-      const pending = agents.filter(a => !a.attivo);
-      const active = agents.filter(a => a.attivo);
-      const activeSubs = subs.filter(s => s.stato === 'attiva');
+    allAgents = agents || [];
+    const pending = allAgents.filter(a => !a.attivo);
+    const active = allAgents.filter(a => a.attivo);
+    const activeSubs = (subs || []).filter(s => s.stato === 'attiva');
 
-      document.getElementById('stat-utenti').textContent = profiles.length;
-      document.getElementById('stat-agenti-attivi').textContent = active.length;
-      document.getElementById('stat-pending').textContent = pending.length;
-      document.getElementById('stat-subs').textContent = activeSubs.length;
+    document.getElementById('stat-utenti').textContent = (profiles || []).length;
+    document.getElementById('stat-agenti-attivi').textContent = active.length;
+    document.getElementById('stat-pending').textContent = pending.length;
+    document.getElementById('stat-subs').textContent = activeSubs.length;
 
-      // Pending count badge
-      if (pending.length > 0) {
-        const badge = document.getElementById('pending-agents-count');
-        badge.textContent = pending.length;
-        badge.style.display = 'inline';
-      }
+    if (pending.length > 0) {
+      const badge = document.getElementById('pending-agents-count');
+      badge.textContent = pending.length;
+      badge.style.display = 'inline';
+    }
 
-      // Render pending agents
-      const tbody = document.getElementById('pending-agents-tbody');
-      if (pending.length === 0) return;
-      tbody.innerHTML = pending.map(a => `
+    const tbody = document.getElementById('pending-agents-tbody');
+    if (!pending.length) return;
+    tbody.innerHTML = pending.map(a => {
+      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', 'In attesa'], ['ID', a.id]] };
+      return `
         <tr>
-          <td><strong>${a.icona || '🤖'} ${a.nome}</strong></td>
-          <td>${a.vendors ? `${a.vendors.nome} ${a.vendors.cognome}` : '—'}</td>
-          <td>${a.categoria}</td>
+          <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(a.descrizione_breve || '')}</span></td>
+          <td>${a.vendors ? escHtml(`${a.vendors.nome} ${a.vendors.cognome}`) : '—'}</td>
+          <td>${escHtml(a.categoria)}</td>
           <td>€${a.prezzo_mensile}/mese</td>
           <td>
             <div class="action-btns">
               <button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>
-              <button class="btn-reject" onclick="rejectAgent('${a.id}', this)">✕ Rifiuta</button>
+              <button class="btn-reject" onclick="confirmRejectAgent('${a.id}', this)">✕ Rifiuta</button>
             </div>
           </td>
-        </tr>
-      `).join('');
-    } catch(e) { console.error(e); }
+        </tr>`;
+    }).join('');
   }
 
   async function loadAllAgents() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/agents?select=*,vendors(nome,cognome)`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
-      allAgents = await res.json();
-      renderAllAgents(allAgents);
-    } catch(e) {}
+    const { data } = await db.from('agents').select('*, vendors(nome, cognome)').order('created_at', { ascending: false });
+    allAgents = data || [];
+    renderAllAgents(allAgents);
   }
 
   function renderAllAgents(agents) {
     const tbody = document.getElementById('all-agents-tbody');
-    if (!agents || agents.length === 0) {
+    if (!agents.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun agente trovato</td></tr>';
       return;
     }
-    tbody.innerHTML = agents.map(a => `
-      <tr>
-        <td><strong>${a.icona || '🤖'} ${a.nome}</strong></td>
-        <td>${a.vendors ? `${a.vendors.nome} ${a.vendors.cognome}` : '—'}</td>
-        <td>${a.categoria}</td>
-        <td>€${a.prezzo_mensile}/mese</td>
-        <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In attesa'}</span></td>
-        <td>
-          <div class="action-btns">
-            ${!a.attivo ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>` : ''}
-            <button class="btn-reject" onclick="rejectAgent('${a.id}', this)">✕ Rimuovi</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = agents.map(a => {
+      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', a.attivo ? 'Attivo' : 'In attesa'], ['ID', a.id]] };
+      return `
+        <tr>
+          <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong></td>
+          <td>${a.vendors ? escHtml(`${a.vendors.nome} ${a.vendors.cognome}`) : '—'}</td>
+          <td>${escHtml(a.categoria)}</td>
+          <td>€${a.prezzo_mensile}/mese</td>
+          <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In attesa'}</span></td>
+          <td>
+            <div class="action-btns">
+              ${!a.attivo ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>` : ''}
+              <button class="btn-view" onclick="openDetail('${a.id}')">Vedi</button>
+              <button class="btn-reject" onclick="confirmRejectAgent('${a.id}', this)">✕ Rimuovi</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
   }
 
   async function loadVendors() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/vendors?select=*`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
-      const vendors = await res.json();
-      const tbody = document.getElementById('vendors-tbody');
-      if (!vendors || vendors.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun vendor ancora</td></tr>';
-        return;
-      }
-      tbody.innerHTML = vendors.map(v => `
+    const { data: vendors } = await db.from('vendors').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('vendors-tbody');
+    if (!vendors?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun vendor ancora</td></tr>';
+      return;
+    }
+    tbody.innerHTML = vendors.map(v => {
+      _details['v_' + v.id] = { title: `${v.nome} ${v.cognome}`, rows: [['Email', v.email || ''], ['Bio', v.bio || ''], ['Approvato', v.approvato ? 'Sì' : 'No'], ['ID', v.id]] };
+      return `
         <tr>
-          <td><strong>${v.nome} ${v.cognome}</strong></td>
-          <td>${v.email}</td>
+          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong></td>
+          <td style="font-size:13px;color:var(--muted);">${escHtml(v.email || '—')}</td>
           <td><span class="status-badge ${v.approvato ? 'active' : 'pending'}">${v.approvato ? 'Approvato' : 'In attesa'}</span></td>
-          <td>—</td>
           <td>
             <div class="action-btns">
               ${!v.approvato ? `<button class="btn-approve" onclick="approveVendor('${v.id}', this)">✓ Approva</button>` : ''}
-              <button class="btn-view">Vedi</button>
+              <button class="btn-view" onclick="openDetail('v_${v.id}')">Vedi</button>
             </div>
           </td>
-        </tr>
-      `).join('');
-    } catch(e) {}
+        </tr>`;
+    }).join('');
   }
 
   async function loadUsers() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?select=*`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
-      const users = await res.json();
-      const tbody = document.getElementById('users-tbody');
-      if (!users || users.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun utente ancora</td></tr>';
-        return;
-      }
-      tbody.innerHTML = users.map(u => `
+    const { data: users } = await db.from('profiles').select('*').order('created_at', { ascending: false });
+    const tbody = document.getElementById('users-tbody');
+    if (!users?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun utente ancora</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const regDate = u.created_at ? new Date(u.created_at).toLocaleDateString('it-IT') : '—';
+      _details['u_' + u.user_id] = { title: `${u.nome || ''} ${u.cognome || ''}`.trim() || '—', rows: [['Nome', `${u.nome || ''} ${u.cognome || ''}`.trim()], ['User ID', u.user_id], ['Registrato il', regDate]] };
+      return `
         <tr>
-          <td>${u.nome || '—'} ${u.cognome || ''}</td>
-          <td>—</td>
-          <td>${new Date(u.created_at).toLocaleDateString('it-IT')}</td>
-          <td>—</td>
-          <td><button class="btn-view">Vedi</button></td>
-        </tr>
-      `).join('');
-    } catch(e) {}
+          <td>${escHtml(u.nome || '—')} ${escHtml(u.cognome || '')}</td>
+          <td style="font-size:12px;color:var(--muted);">${u.user_id || '—'}</td>
+          <td>${regDate}</td>
+          <td>
+            <button class="btn-view" onclick="openDetail('u_${u.user_id}')">Vedi</button>
+          </td>
+        </tr>`;
+    }).join('');
   }
 
   async function loadSubs() {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?select=*,agents(nome)`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
-      const subs = await res.json();
-      const tbody = document.getElementById('subs-tbody');
-      if (!subs || subs.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun abbonamento ancora</td></tr>';
-        return;
-      }
-      tbody.innerHTML = subs.map(s => `
+    const { data: subs } = await db.from('subscriptions').select('*, agents(nome, prezzo_mensile)').order('data_inizio', { ascending: false });
+    const tbody = document.getElementById('subs-tbody');
+    if (!subs?.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun abbonamento ancora</td></tr>';
+      return;
+    }
+    tbody.innerHTML = subs.map(s => {
+      const startDate = s.data_inizio ? new Date(s.data_inizio).toLocaleDateString('it-IT') : '—';
+      _details['s_' + s.id] = { title: 'Abbonamento', rows: [['Agente', s.agents?.nome || '—'], ['Stato', s.stato], ['Data inizio', startDate], ['ID', s.id]] };
+      return `
         <tr>
-          <td>—</td>
-          <td>${s.agents?.nome || '—'}</td>
-          <td><span class="status-badge ${s.stato === 'attiva' ? 'active' : 'rejected'}">${s.stato}</span></td>
-          <td>${new Date(s.data_inizio).toLocaleDateString('it-IT')}</td>
-          <td><button class="btn-view">Vedi</button></td>
-        </tr>
-      `).join('');
-    } catch(e) {}
+          <td><strong>${escHtml(s.agents?.nome || '—')}</strong><span style="font-size:12px;color:var(--muted);margin-left:6px;">€${s.agents?.prezzo_mensile || 0}/mese</span></td>
+          <td><span class="status-badge ${s.stato === 'attiva' ? 'active' : 'rejected'}">${escHtml(s.stato)}</span></td>
+          <td>${startDate}</td>
+          <td>
+            <button class="btn-view" onclick="openDetail('s_${s.id}')">Vedi</button>
+          </td>
+        </tr>`;
+    }).join('');
   }
 
   async function approveAgent(id, btn) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ attivo: true })
-      });
-      btn.closest('tr').remove();
-      loadDashboard();
-    } catch(e) {}
+    btn.disabled = true;
+    const { error } = await db.from('agents').update({ attivo: true }).eq('id', id);
+    if (error) { showToast('Errore durante l\'approvazione', 'error'); btn.disabled = false; return; }
+    showToast('Agente approvato e pubblicato!', 'success');
+    btn.closest('tr').remove();
+    loadDashboard();
+    allAgents = allAgents.map(a => a.id === id ? { ...a, attivo: true } : a);
   }
 
-  async function rejectAgent(id, btn) {
-    if (!confirm('Sei sicuro di voler rimuovere questo agente?')) return;
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
+  function confirmRejectAgent(id, btn) {
+    showConfirm('Sei sicuro di voler eliminare questo agente? L\'operazione non è reversibile.', async () => {
+      const { error } = await db.from('agents').delete().eq('id', id);
+      if (error) { showToast('Errore durante l\'eliminazione', 'error'); return; }
+      showToast('Agente eliminato', 'success');
       btn.closest('tr').remove();
-    } catch(e) {}
+      allAgents = allAgents.filter(a => a.id !== id);
+      loadDashboard();
+    });
   }
 
   async function approveVendor(id, btn) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/vendors?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ approvato: true })
-      });
-      btn.closest('tr').cells[2].innerHTML = '<span class="status-badge active">Approvato</span>';
-      btn.remove();
-    } catch(e) {}
+    btn.disabled = true;
+    const { error } = await db.from('vendors').update({ approvato: true }).eq('id', id);
+    if (error) { showToast('Errore', 'error'); btn.disabled = false; return; }
+    showToast('Vendor approvato!', 'success');
+    btn.closest('tr').cells[2].innerHTML = '<span class="status-badge active">Approvato</span>';
+    btn.remove();
   }
 
-  loadDashboard();
+  init();
 </script>
 </body>
 </html>

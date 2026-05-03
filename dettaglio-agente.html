@@ -93,6 +93,8 @@
     h1 { font-size: 32px; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
 </head>
 <body>
 
@@ -128,7 +130,7 @@
         <div class="price-big" id="agent-price">€29 <span>/mese</span></div>
         <div class="price-sub">Abbonamento mensile • Disdici quando vuoi</div>
         <button class="btn-buy" onclick="handleBuy()">Attiva ora →</button>
-        <button class="btn-demo">Guarda la demo</button>
+        <button class="btn-demo" onclick="handleDemo()">Guarda la demo</button>
         <ul class="purchase-features">
           <li>Attivazione immediata</li>
           <li>Supporto via email incluso</li>
@@ -170,45 +172,78 @@
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://rayqkicmlgbjawnyxjml.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXFraWNtbGdiamF3bnl4am1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MTQxNDgsImV4cCI6MjA5MzE5MDE0OH0.Sa1KJGVGNL9m7m60FNup3SF66u8HudYFo9AR0CSSuik';
-
-  // Leggi l'ID agente dall'URL: dettaglio-agente.html?id=xxx
-  const params = new URLSearchParams(window.location.search);
-  const agentId = params.get('id');
+  const agentId = new URLSearchParams(window.location.search).get('id');
 
   async function loadAgent() {
-    if (!agentId) return;
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/agents?id=eq.${agentId}&select=*,vendors(nome,cognome)`, {
-        headers: { 'apikey': SUPABASE_KEY }
-      });
-      const data = await res.json();
-      if (!data[0]) return;
-      const a = data[0];
-      document.getElementById('agent-icon').textContent = a.icona || '🤖';
-      document.getElementById('agent-category').textContent = a.categoria;
-      document.getElementById('agent-name').textContent = a.nome;
-      document.getElementById('agent-desc').textContent = a.descrizione;
-      document.getElementById('agent-price').innerHTML = `€${a.prezzo_mensile} <span>/mese</span>`;
-      document.getElementById('breadcrumb-name').textContent = a.nome;
-      if (a.vendors) {
-        const vname = `${a.vendors.nome} ${a.vendors.cognome}`;
-        document.getElementById('vendor-name').textContent = vname;
-        document.getElementById('vendor-initial').textContent = a.vendors.nome?.charAt(0).toUpperCase();
-      }
-    } catch(e) {}
+    if (!agentId) {
+      window.location.href = 'shop_your_agent.html';
+      return;
+    }
+
+    const { data, error } = await db
+      .from('agents')
+      .select('*, vendors(nome, cognome)')
+      .eq('id', agentId)
+      .limit(1);
+
+    if (error || !data?.[0]) return;
+    const a = data[0];
+
+    document.getElementById('agent-icon').textContent = a.icona || '🤖';
+    document.getElementById('agent-category').textContent = a.categoria || '';
+    document.getElementById('agent-name').textContent = a.nome;
+    document.getElementById('agent-desc').textContent = a.descrizione || '';
+    document.getElementById('agent-price').innerHTML = `€${a.prezzo_mensile} <span>/mese</span>`;
+    document.getElementById('breadcrumb-name').textContent = a.nome;
+    document.title = `${a.nome} — Shop Your Agent`;
+
+    if (a.vendors) {
+      const vname = `${a.vendors.nome} ${a.vendors.cognome}`;
+      document.getElementById('vendor-name').textContent = vname;
+      document.getElementById('vendor-initial').textContent = a.vendors.nome?.charAt(0).toUpperCase() || 'V';
+    }
   }
 
-  function handleBuy() {
-    const token = localStorage.getItem('sya_token');
-    if (!token) return window.location.href = 'login.html';
-    // Qui aggiungeremo il link Stripe
-    alert('Reindirizzamento al pagamento Stripe...');
+  async function handleBuy() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const btn = document.querySelector('.btn-buy');
+    setBtnLoading(btn, true, 'Attiva ora →');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          agentId,
+          successUrl: `${window.location.origin}/success.html?agent_id=${agentId}`,
+          cancelUrl: window.location.href,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err) {
+      setBtnLoading(btn, false, 'Attiva ora →');
+      showToast(err.message || 'Errore durante il pagamento', 'error');
+    }
   }
 
   function toggleFaq(el) {
     el.classList.toggle('open');
+  }
+
+  function handleDemo() {
+    alert('La demo video sarà disponibile a breve. Contatta il vendor per una presentazione personalizzata.');
   }
 
   loadAgent();

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento completato — Shop Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+    --success: #5fff9a;
+  }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 2rem; position: relative; overflow: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(95,255,154,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .logo {
+    position: fixed; top: 1.5rem; left: 2rem;
+    font-family: var(--font-display); font-size: 18px; font-weight: 800;
+    color: var(--text); text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  .card {
+    background: var(--surface); border: 1px solid rgba(95,255,154,0.2);
+    border-radius: 20px; padding: 3rem 2.5rem; width: 100%; max-width: 480px;
+    text-align: center; animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .check-circle {
+    width: 72px; height: 72px; background: rgba(95,255,154,0.1);
+    border: 1px solid rgba(95,255,154,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 32px;
+  }
+  h1 {
+    font-family: var(--font-display); font-size: 28px; font-weight: 700;
+    letter-spacing: -0.5px; margin-bottom: 0.75rem; color: var(--text);
+  }
+  .subtitle { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; font-weight: 300; }
+  .agent-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .agent-icon-sm { font-size: 28px; }
+  .agent-info { text-align: left; }
+  .agent-name-sm { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+  .agent-status-sm { font-size: 12px; color: var(--success); margin-top: 3px; }
+  .btn {
+    display: block; width: 100%; background: var(--accent); color: #0a0a0a;
+    font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    padding: 14px; border: none; border-radius: 8px; cursor: pointer;
+    text-decoration: none; transition: background 0.2s; margin-bottom: 10px;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn-ghost {
+    display: block; width: 100%; background: transparent; color: var(--muted);
+    font-family: var(--font-body); font-size: 14px; font-weight: 400;
+    padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.14); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
+</head>
+<body>
+<a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+
+<div class="card">
+  <div class="check-circle">✓</div>
+  <h1>Abbonamento attivato!</h1>
+  <p class="subtitle">Il pagamento è andato a buon fine. Il tuo agente è ora attivo e pronto a lavorare per te 24/7.</p>
+
+  <div class="agent-box" id="agent-box" style="display:none;">
+    <div class="agent-icon-sm" id="success-icon">🤖</div>
+    <div class="agent-info">
+      <div class="agent-name-sm" id="success-name">Agente</div>
+      <div class="agent-status-sm">● Attivo</div>
+    </div>
+  </div>
+
+  <a href="dashboard-utente.html" class="btn">Vai alla dashboard →</a>
+  <a href="shop_your_agent.html" class="btn-ghost">Esplora altri agenti</a>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const agentId = params.get('agent_id');
+
+  async function loadAgentInfo() {
+    if (!agentId) return;
+    const { data } = await db.from('agents').select('nome, icona').eq('id', agentId).single();
+    if (!data) return;
+    document.getElementById('success-icon').textContent = data.icona || '🤖';
+    document.getElementById('success-name').textContent = data.nome;
+    document.getElementById('agent-box').style.display = 'flex';
+  }
+
+  loadAgentInfo();
+</script>
+</body>
+</html>
