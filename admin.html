@@ -324,7 +324,7 @@
     const tbody = document.getElementById('pending-agents-tbody');
     if (!pending.length) return;
     tbody.innerHTML = pending.map(a => {
-      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', 'In attesa'], ['ID', a.id]] };
+      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', 'In attesa'], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['ID', a.id]] };
       return `
         <tr>
           <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(a.descrizione_breve || '')}</span></td>
@@ -354,7 +354,7 @@
       return;
     }
     tbody.innerHTML = agents.map(a => {
-      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', a.attivo ? 'Attivo' : 'In attesa'], ['ID', a.id]] };
+      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', a.attivo ? 'Attivo' : 'In attesa'], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['ID', a.id]] };
       return `
         <tr>
           <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong></td>

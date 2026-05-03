@@ -71,6 +71,16 @@
   .purchase-features li::before { content: '✓'; color: var(--accent); font-size: 12px; }
   .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
 
+  /* VIDEO DEMO */
+  .video-section { margin-bottom: 3rem; }
+  .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+  .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; border-radius: 12px; }
+
+  /* ISTRUZIONI */
+  .instructions-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .instructions-list li { display: flex; gap: 14px; font-size: 15px; color: var(--muted); line-height: 1.6; font-weight: 300; }
+  .step-num { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: rgba(200,245,90,0.25); flex-shrink: 0; width: 28px; }
+
   /* VENDOR INFO */
   .vendor-box { display: flex; align-items: center; gap: 12px; padding: 1rem; background: var(--surface2); border-radius: 10px; margin-top: 1.5rem; }
   .vendor-avatar { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0a0a0a; font-size: 14px; flex-shrink: 0; }
@@ -149,6 +159,20 @@
     </div>
   </div>
 
+  <!-- VIDEO DEMO -->
+  <div class="section video-section" id="video-section" style="display:none;">
+    <div class="section-title">Demo</div>
+    <div class="video-wrap">
+      <iframe id="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- ISTRUZIONI SETUP -->
+  <div class="section" id="instructions-section" style="display:none;">
+    <div class="section-title">Come si attiva</div>
+    <ul class="instructions-list" id="instructions-list"></ul>
+  </div>
+
   <!-- FAQ -->
   <div class="section">
     <div class="section-title">Domande frequenti</div>
@@ -202,6 +226,33 @@
       document.getElementById('vendor-name').textContent = vname;
       document.getElementById('vendor-initial').textContent = a.vendors.nome?.charAt(0).toUpperCase() || 'V';
     }
+
+    // Video demo
+    const embedUrl = getEmbedUrl(a.video_demo_url);
+    if (embedUrl) {
+      document.getElementById('video-iframe').src = embedUrl;
+      document.getElementById('video-section').style.display = 'block';
+    }
+
+    // Istruzioni setup
+    if (a.istruzioni_setup) {
+      const lines = a.istruzioni_setup.split('\n').filter(l => l.trim());
+      const isNumbered = lines.every(l => /^\d+\./.test(l.trim()));
+      document.getElementById('instructions-list').innerHTML = lines.map((line, i) => {
+        const text = isNumbered ? line.replace(/^\d+\.\s*/, '') : line;
+        return `<li><span class="step-num">${isNumbered ? (i + 1) : '—'}</span><span>${escHtml(text)}</span></li>`;
+      }).join('');
+      document.getElementById('instructions-section').style.display = 'block';
+    }
+  }
+
+  function getEmbedUrl(url) {
+    if (!url) return null;
+    const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0`;
+    const vimeo = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+    return null;
   }
 
   async function handleBuy() {

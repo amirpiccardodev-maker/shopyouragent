@@ -248,6 +248,8 @@
     <div class="field"><label>Descrizione completa *</label><textarea id="new-desc" placeholder="Descrivi cosa fa l'agente, come funziona, per chi è pensato..."></textarea></div>
     <div class="field"><label>Prezzo mensile (€) *</label><input type="number" id="new-prezzo" placeholder="29" min="1"></div>
     <div class="field"><label>Icona (emoji)</label><input type="text" id="new-icona" placeholder="🤖" maxlength="4"></div>
+    <div class="field"><label>URL Video Demo (YouTube / Vimeo)</label><input type="url" id="new-video-url" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="field"><label>Istruzioni di setup</label><textarea id="new-istruzioni" placeholder="Spiega passo per passo come configurare e usare l'agente...&#10;1. Primo passo&#10;2. Secondo passo&#10;..." style="min-height:120px;"></textarea></div>
     <div class="modal-btns">
       <button class="btn-ghost" onclick="closeModal()">Annulla</button>
       <button class="btn-main btn-main-full" id="modal-submit-btn" onclick="submitAgent()">Invia per approvazione</button>
@@ -299,6 +301,8 @@
       document.getElementById('new-desc').value = agent.descrizione || '';
       document.getElementById('new-prezzo').value = agent.prezzo_mensile;
       document.getElementById('new-icona').value = agent.icona || '';
+      document.getElementById('new-video-url').value = agent.video_demo_url || '';
+      document.getElementById('new-istruzioni').value = agent.istruzioni_setup || '';
       title.textContent = 'Modifica agente';
       btn.textContent = 'Salva modifiche';
       btn.onclick = saveEdit;
@@ -309,6 +313,8 @@
       document.getElementById('new-desc').value = '';
       document.getElementById('new-prezzo').value = '';
       document.getElementById('new-icona').value = '';
+      document.getElementById('new-video-url').value = '';
+      document.getElementById('new-istruzioni').value = '';
       title.textContent = 'Aggiungi nuovo agente';
       btn.textContent = 'Invia per approvazione';
       btn.onclick = submitAgent;
@@ -556,10 +562,15 @@
     const btn = document.getElementById('modal-submit-btn');
     setBtnLoading(btn, true, 'Invia per approvazione');
 
+    const videoUrl = document.getElementById('new-video-url').value.trim();
+    const istruzioni = document.getElementById('new-istruzioni').value.trim();
+
     const { error } = await db.from('agents').insert({
       vendor_id: currentVendorId, nome, categoria,
       descrizione: desc, descrizione_breve: descBreve,
-      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖', attivo: false
+      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+      video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
+      attivo: false
     });
 
     setBtnLoading(btn, false, 'Invia per approvazione');
@@ -588,9 +599,13 @@
     const btn = document.getElementById('modal-submit-btn');
     setBtnLoading(btn, true, 'Salva modifiche');
 
+    const videoUrl = document.getElementById('new-video-url').value.trim();
+    const istruzioni = document.getElementById('new-istruzioni').value.trim();
+
     const { error } = await db.from('agents').update({
       nome, categoria, descrizione: desc, descrizione_breve: descBreve,
-      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖'
+      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+      video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null
     }).eq('id', editingAgentId);
 
     setBtnLoading(btn, false, 'Salva modifiche');
