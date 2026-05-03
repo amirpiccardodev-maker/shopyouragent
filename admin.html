@@ -262,8 +262,8 @@
     const session = await requireAuth();
     if (!session) return;
 
-    const role = session.user.user_metadata?.role;
-    if (role !== 'admin') {
+    const isAdmin = session.user.app_metadata?.role === 'admin';
+    if (!isAdmin) {
       document.body.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;">
           <div style="font-size:48px;">🔒</div>
@@ -446,6 +446,21 @@
     const { error } = await db.from('agents').update({ attivo: true }).eq('id', id);
     if (error) { showToast('Errore durante l\'approvazione', 'error'); btn.disabled = false; return; }
     showToast('Agente approvato e pubblicato!', 'success');
+
+    // Notify vendor via email (fire and forget)
+    const agent = allAgents.find(a => a.id === id);
+    if (agent) {
+      const { data: { session } } = await db.auth.getSession();
+      const { data: vendor } = await db.from('vendors').select('email').eq('id', agent.vendor_id).single();
+      if (session && vendor?.email) {
+        fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ type: 'agent_approved', agentName: agent.nome, vendorEmail: vendor.email }),
+        }).catch(() => {});
+      }
+    }
+
     btn.closest('tr').remove();
     loadDashboard();
     allAgents = allAgents.map(a => a.id === id ? { ...a, attivo: true } : a);

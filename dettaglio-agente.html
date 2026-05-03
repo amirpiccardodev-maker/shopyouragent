@@ -80,6 +80,12 @@
   .instructions-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
   .instructions-list li { display: flex; gap: 14px; font-size: 15px; color: var(--muted); line-height: 1.6; font-weight: 300; }
   .step-num { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: rgba(200,245,90,0.25); flex-shrink: 0; width: 28px; }
+  .locked-box { text-align: center; padding: 2.5rem; background: var(--surface2); border-radius: 12px; border: 1px dashed var(--border2); }
+  .locked-box .lock-icon { font-size: 32px; margin-bottom: 12px; }
+  .locked-box p { font-size: 14px; color: var(--muted); margin-bottom: 1rem; }
+  .btn-small { display: inline-block; background: var(--accent); color: #0a0a0a; font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: 7px; text-decoration: none; transition: background 0.2s; }
+  .btn-small:hover { background: var(--accent-dark); }
+  .btn-subscribed { width: 100%; background: rgba(95,255,154,0.1); color: #5fff9a; border: 1px solid rgba(95,255,154,0.2); font-family: var(--font-body); font-size: 16px; font-weight: 500; padding: 16px; border-radius: 10px; cursor: default; margin-bottom: 1rem; }
 
   /* VENDOR INFO */
   .vendor-box { display: flex; align-items: center; gap: 12px; padding: 1rem; background: var(--surface2); border-radius: 10px; margin-top: 1.5rem; }
@@ -109,14 +115,14 @@
 <body>
 
 <nav>
-  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
-  <a href="index.html#agenti" class="nav-back">← Torna al catalogo</a>
+  <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
+  <a href="shop_your_agent.html#agenti" class="nav-back">← Torna al catalogo</a>
 </nav>
 
 <div class="container">
   <div class="breadcrumb">
-    <a href="index.html">Home</a><span>›</span>
-    <a href="index.html#agenti">Catalogo</a><span>›</span>
+    <a href="shop_your_agent.html">Home</a><span>›</span>
+    <a href="shop_your_agent.html#agenti">Catalogo</a><span>›</span>
     <span id="breadcrumb-name">Agente</span>
   </div>
 
@@ -197,21 +203,20 @@
 
 <script>
   const agentId = new URLSearchParams(window.location.search).get('id');
+  let session = null;
 
   async function loadAgent() {
-    if (!agentId) {
-      window.location.href = 'shop_your_agent.html';
-      return;
-    }
+    if (!agentId) { window.location.href = 'shop_your_agent.html'; return; }
 
-    const { data, error } = await db
-      .from('agents')
-      .select('*, vendors(nome, cognome)')
-      .eq('id', agentId)
-      .limit(1);
+    const [{ data: sessionData }, { data: agentData, error }] = await Promise.all([
+      db.auth.getSession(),
+      db.from('agents').select('*, vendors(nome, cognome)').eq('id', agentId).limit(1),
+    ]);
 
-    if (error || !data?.[0]) return;
-    const a = data[0];
+    session = sessionData?.session ?? null;
+
+    if (error || !agentData?.[0]) return;
+    const a = agentData[0];
 
     document.getElementById('agent-icon').textContent = a.icona || '🤖';
     document.getElementById('agent-category').textContent = a.categoria || '';
@@ -222,8 +227,7 @@
     document.title = `${a.nome} — Shop Your Agent`;
 
     if (a.vendors) {
-      const vname = `${a.vendors.nome} ${a.vendors.cognome}`;
-      document.getElementById('vendor-name').textContent = vname;
+      document.getElementById('vendor-name').textContent = `${a.vendors.nome} ${a.vendors.cognome}`;
       document.getElementById('vendor-initial').textContent = a.vendors.nome?.charAt(0).toUpperCase() || 'V';
     }
 
@@ -234,15 +238,48 @@
       document.getElementById('video-section').style.display = 'block';
     }
 
-    // Istruzioni setup
+    // Check subscription to gate instructions and update buy button
+    let hasActiveSub = false;
+    if (session) {
+      const { data: sub } = await db.from('subscriptions')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('agent_id', agentId)
+        .eq('stato', 'attiva')
+        .maybeSingle();
+      hasActiveSub = !!sub;
+    }
+
+    // Update purchase card based on subscription state
+    if (hasActiveSub) {
+      const buyBtn = document.querySelector('.btn-buy');
+      buyBtn.outerHTML = `<div class="btn-subscribed">✓ Agente attivo</div>`;
+    }
+
+    // Instructions: show only if subscribed, otherwise lock
     if (a.istruzioni_setup) {
-      const lines = a.istruzioni_setup.split('\n').filter(l => l.trim());
-      const isNumbered = lines.every(l => /^\d+\./.test(l.trim()));
-      document.getElementById('instructions-list').innerHTML = lines.map((line, i) => {
-        const text = isNumbered ? line.replace(/^\d+\.\s*/, '') : line;
-        return `<li><span class="step-num">${isNumbered ? (i + 1) : '—'}</span><span>${escHtml(text)}</span></li>`;
-      }).join('');
       document.getElementById('instructions-section').style.display = 'block';
+      if (hasActiveSub) {
+        const lines = a.istruzioni_setup.split('\n').filter(l => l.trim());
+        const isNumbered = lines.every(l => /^\d+\./.test(l.trim()));
+        document.getElementById('instructions-list').innerHTML = lines.map((line, i) => {
+          const text = isNumbered ? line.replace(/^\d+\.\s*/, '') : line;
+          return `<li><span class="step-num">${i + 1}</span><span>${escHtml(text)}</span></li>`;
+        }).join('');
+      } else {
+        const msg = session
+          ? 'Attiva l\'agente per accedere alle istruzioni di configurazione.'
+          : 'Accedi e attiva l\'agente per vedere le istruzioni di setup.';
+        const link = session ? '' : `<a href="login.html" class="btn-small" style="margin-top:12px;">Accedi →</a>`;
+        document.getElementById('instructions-list').innerHTML = `
+          <li style="display:block;">
+            <div class="locked-box">
+              <div class="lock-icon">🔒</div>
+              <p>${msg}</p>
+              ${link}
+            </div>
+          </li>`;
+      }
     }
   }
 
@@ -256,13 +293,10 @@
   }
 
   async function handleBuy() {
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) {
-      window.location.href = 'login.html';
-      return;
-    }
+    if (!session) { window.location.href = 'login.html'; return; }
 
     const btn = document.querySelector('.btn-buy');
+    if (!btn) return;
     setBtnLoading(btn, true, 'Attiva ora →');
 
     try {
@@ -279,7 +313,6 @@
           cancelUrl: window.location.href,
         }),
       });
-
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       window.location.href = data.url;
@@ -289,12 +322,15 @@
     }
   }
 
-  function toggleFaq(el) {
-    el.classList.toggle('open');
-  }
+  function toggleFaq(el) { el.classList.toggle('open'); }
 
   function handleDemo() {
-    alert('La demo video sarà disponibile a breve. Contatta il vendor per una presentazione personalizzata.');
+    const videoSection = document.getElementById('video-section');
+    if (videoSection && videoSection.style.display !== 'none') {
+      videoSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      showToast('Nessun video demo disponibile per questo agente.', 'info');
+    }
   }
 
   loadAgent();

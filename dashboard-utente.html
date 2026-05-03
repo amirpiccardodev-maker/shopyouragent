@@ -143,8 +143,13 @@
 
   <!-- ABBONAMENTI -->
   <div class="page-section" id="section-abbonamenti">
-    <div class="page-title">Abbonamenti</div>
-    <div class="page-sub">Storico completo di tutti i tuoi abbonamenti</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
+      <div>
+        <div class="page-title">Abbonamenti</div>
+        <div class="page-sub" style="margin-bottom:0;">Storico completo di tutti i tuoi abbonamenti</div>
+      </div>
+      <button onclick="openBillingPortal()" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">💳 Gestisci pagamenti</button>
+    </div>
     <table>
       <thead>
         <tr>
@@ -298,6 +303,23 @@
         <td>${a?.id ? `<a href="dettaglio-agente.html?id=${a.id}" class="agent-btn">Vedi →</a>` : '—'}</td>
       </tr>`;
     }).join('');
+  }
+
+  async function openBillingPortal() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-billing-portal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ returnUrl: window.location.href }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err) {
+      showToast(err.message || 'Errore', 'error');
+    }
   }
 
   async function cancelSubscription(stripeSubId) {

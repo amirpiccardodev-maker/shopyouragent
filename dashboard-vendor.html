@@ -579,6 +579,17 @@
 
     closeModal();
     showToast('Agente inviato per approvazione!', 'success', 'Il team lo revisiona entro 24h');
+
+    // Notify admin (fire and forget)
+    const { data: { session: s } } = await db.auth.getSession();
+    if (s) {
+      fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ type: 'agent_submitted', agentName: nome }),
+      }).catch(() => {});
+    }
+
     await loadDashboard();
     showSection('dashboard', document.getElementById('nav-dashboard'));
   }

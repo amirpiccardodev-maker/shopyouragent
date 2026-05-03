@@ -281,12 +281,20 @@
     el.className = `msg ${type}`;
   }
 
+  function redirectToDashboard(user) {
+    if (user.app_metadata?.role === 'admin') window.location.href = 'admin.html';
+    else if (user.user_metadata?.role === 'vendor') window.location.href = 'dashboard-vendor.html';
+    else window.location.href = 'dashboard-utente.html';
+  }
+
+  // Handle OAuth redirect callback
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) redirectToDashboard(session.user);
+  });
+
   // Redirect to dashboard if already logged in
   db.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-      const role = session.user.user_metadata?.role;
-      window.location.href = role === 'vendor' ? 'dashboard-vendor.html' : 'dashboard-utente.html';
-    }
+    if (session) redirectToDashboard(session.user);
   });
 
   async function handleLogin() {
@@ -307,10 +315,7 @@
     }
 
     showMsg('login-msg', 'Accesso effettuato! Reindirizzamento...', 'success');
-    const role = data.user.user_metadata?.role;
-    setTimeout(() => {
-      window.location.href = role === 'vendor' ? 'dashboard-vendor.html' : 'dashboard-utente.html';
-    }, 800);
+    setTimeout(() => redirectToDashboard(data.user), 800);
   }
 
   async function handleRegister() {
@@ -347,15 +352,13 @@
     // Email confirmation disabled — insert profile and redirect
     await db.from('profiles').insert({ user_id: data.user.id, nome, cognome });
     showMsg('register-msg', 'Account creato! Benvenuto...', 'success');
-    setTimeout(() => {
-      window.location.href = role === 'vendor' ? 'dashboard-vendor.html' : 'dashboard-utente.html';
-    }, 800);
+    setTimeout(() => redirectToDashboard(data.user), 800);
   }
 
   async function handleGoogleLogin() {
     const { error } = await db.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/dashboard-utente.html' }
+      options: { redirectTo: window.location.origin + '/login.html' }
     });
     if (error) showMsg('login-msg', translateAuthError(error.message), 'error');
   }

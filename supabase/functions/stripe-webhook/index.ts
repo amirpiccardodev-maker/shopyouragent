@@ -1,6 +1,26 @@
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
 
+async function sendPurchaseConfirmation(toEmail: string, agentName: string) {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  if (!apiKey) return;
+  const from = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: [toEmail],
+      subject: `Abbonamento attivato: ${agentName} ✓`,
+      html: `<p>Ciao,</p>
+             <p>Il tuo abbonamento all'agente <strong>${agentName}</strong> è attivo. Puoi trovare le istruzioni di configurazione nella pagina dedicata.</p>
+             <p><a href="${siteUrl}/dashboard-utente.html">Vai alla tua dashboard →</a></p>
+             <p>Il team di Shop Your Agent</p>`,
+    }),
+  });
+}
+
 async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
   const t = sigHeader.match(/t=(\d+)/)?.[1];
   const v1s = [...sigHeader.matchAll(/v1=([a-f0-9]+)/g)].map(m => m[1]);
@@ -84,6 +104,20 @@ Deno.serve(async (req) => {
         stripe_subscription_id: session['subscription'],
         stripe_customer_id: session['customer'],
       });
+
+      // Send purchase confirmation email (fire and forget)
+      const customerEmail = (session['customer_details'] as Record<string, string> | null)?.email;
+      if (customerEmail) {
+        const agentUrl = new URL(`${supabaseUrl()}/rest/v1/agents`);
+        agentUrl.searchParams.set('id', `eq.${meta.agent_id}`);
+        agentUrl.searchParams.set('select', 'nome');
+        const agentRes = await fetch(agentUrl, {
+          headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+        });
+        const agents = await agentRes.json();
+        const agentName = agents?.[0]?.nome || 'Agente';
+        sendPurchaseConfirmation(customerEmail, agentName).catch(() => {});
+      }
       break;
     }
 
