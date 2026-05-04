@@ -181,8 +181,13 @@
 
   <!-- I MIEI AGENTI -->
   <div class="page-section active" id="section-agenti">
-    <div class="page-title">I miei agenti</div>
-    <div class="page-sub">Gestisci tutti gli agenti attivi nel tuo account</div>
+    <div class="welcome-banner" id="welcome-banner" style="display:none;">
+      <div class="welcome-emoji">👋</div>
+      <div class="welcome-text">
+        <h3 id="welcome-name">Bentornato!</h3>
+        <p>Ecco il riepilogo dei tuoi agenti attivi.</p>
+      </div>
+    </div>
 
     <div class="stats-row" id="stats-row">
       <div class="stat-card"><div class="stat-label">Agenti attivi</div><div class="skel skel-text" style="height:32px;width:60%;margin-top:4px;"></div></div>
@@ -257,6 +262,13 @@
         document.getElementById('user-name').textContent = displayName;
         document.getElementById('avatar-initials').textContent = meta.nome.charAt(0).toUpperCase();
       }
+    }
+
+    const wb = document.getElementById('welcome-banner');
+    if (wb) {
+      const firstName = displayName.split(' ')[0] || '';
+      document.getElementById('welcome-name').textContent = firstName ? `Ciao, ${firstName}!` : 'Bentornato!';
+      wb.style.display = 'flex';
     }
 
     // Load subscriptions

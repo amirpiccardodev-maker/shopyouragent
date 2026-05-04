@@ -219,11 +219,11 @@
     <div class="form-sub">Accedi al tuo account Shop Your Agent</div>
     <div class="field">
       <label>Email</label>
-      <input type="email" id="login-email" placeholder="tua@email.it">
+      <input type="email" id="login-email" placeholder="tua@email.it" autocomplete="email">
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="login-password" placeholder="••••••••">
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()">
       <div class="forgot" onclick="handleForgotPassword()">Password dimenticata?</div>
     </div>
     <button class="btn" onclick="handleLogin()">Accedi</button>
@@ -241,11 +241,11 @@
     <div class="form-sub">Inizia ad automatizzare la tua azienda</div>
     <div class="field">
       <label>Nome</label>
-      <input type="text" id="reg-nome" placeholder="Mario">
+      <input type="text" id="reg-nome" placeholder="Mario" autocomplete="given-name">
     </div>
     <div class="field">
       <label>Cognome</label>
-      <input type="text" id="reg-cognome" placeholder="Rossi">
+      <input type="text" id="reg-cognome" placeholder="Rossi" autocomplete="family-name">
     </div>
     <div class="field">
       <label>Tipo account</label>
@@ -256,11 +256,11 @@
     </div>
     <div class="field">
       <label>Email</label>
-      <input type="email" id="reg-email" placeholder="tua@email.it">
+      <input type="email" id="reg-email" placeholder="tua@email.it" autocomplete="email">
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="reg-password" placeholder="min. 8 caratteri">
+      <input type="password" id="reg-password" placeholder="min. 8 caratteri" autocomplete="new-password" onkeydown="if(event.key==='Enter')handleRegister()">
     </div>
     <button class="btn" onclick="handleRegister()">Crea account</button>
     <div class="msg" id="register-msg"></div>

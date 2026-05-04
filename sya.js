@@ -3,6 +3,67 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ─── FAVICON ─────────────────────────────────────────────────────────────────
+
+(function addFavicon() {
+  if (document.querySelector('link[rel~="icon"]')) return;
+  const link = document.createElement('link');
+  link.rel = 'icon'; link.type = 'image/svg+xml';
+  link.href = 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+    '<rect width="32" height="32" rx="8" fill="#141414"/>' +
+    '<text x="16" y="23" font-family="Arial Black,sans-serif" font-size="17" font-weight="900" fill="#c8f55a" text-anchor="middle">S</text>' +
+    '</svg>'
+  );
+  document.head.appendChild(link);
+})();
+
+// ─── COOKIE BANNER ───────────────────────────────────────────────────────────
+
+(function initCookieBanner() {
+  if (localStorage.getItem('sya-cookies')) return;
+  document.addEventListener('DOMContentLoaded', function() {
+    const banner = document.createElement('div');
+    banner.id = 'sya-cookie-banner';
+    banner.innerHTML = `
+      <span style="flex:1;min-width:200px;">
+        🍪 Usiamo cookie tecnici necessari al funzionamento del sito.
+        <a href="privacy.html" style="color:#c8f55a;text-decoration:none;white-space:nowrap;">Privacy Policy</a>
+      </span>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button id="sya-cookie-reject" style="background:transparent;border:1px solid rgba(255,255,255,0.12);color:#888;font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;">Solo necessari</button>
+        <button id="sya-cookie-accept" style="background:#c8f55a;border:none;color:#0a0a0a;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;">Accetta</button>
+      </div>
+    `;
+    Object.assign(banner.style, {
+      position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '9990',
+      background: 'rgba(14,14,14,0.97)', borderTop: '1px solid rgba(255,255,255,0.08)',
+      padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center',
+      gap: '1rem', flexWrap: 'wrap', fontFamily: "'DM Sans',sans-serif",
+      fontSize: '13px', color: '#888', backdropFilter: 'blur(8px)',
+      boxShadow: '0 -4px 24px rgba(0,0,0,0.4)'
+    });
+    document.body.appendChild(banner);
+    function dismiss(val) {
+      localStorage.setItem('sya-cookies', val);
+      banner.style.transform = 'translateY(100%)';
+      banner.style.transition = 'transform 0.3s ease';
+      setTimeout(() => banner.remove(), 300);
+    }
+    document.getElementById('sya-cookie-accept').onclick = () => dismiss('accepted');
+    document.getElementById('sya-cookie-reject').onclick = () => dismiss('rejected');
+  });
+})();
+
+// ─── MOBILE NAV (public pages) ───────────────────────────────────────────────
+
+function toggleMobileNav() {
+  document.getElementById('mobile-nav')?.classList.toggle('open');
+}
+function closeMobileNav() {
+  document.getElementById('mobile-nav')?.classList.remove('open');
+}
+
 // ─── AUTH ────────────────────────────────────────────────────────────────────
 
 async function requireAuth() {

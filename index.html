@@ -726,6 +726,7 @@
 
     // Featured agents from DB (up to 6)
     const grid = document.getElementById('featured-grid');
+    grid.innerHTML = skeletonCards(6);
     const { data: agents } = await db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false }).limit(6);
     const list = (agents && agents.length > 0) ? agents : STATIC_FEATURED;
     grid.innerHTML = list.map(renderCard).join('');
