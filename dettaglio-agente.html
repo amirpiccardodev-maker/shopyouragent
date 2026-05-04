@@ -106,10 +106,36 @@
   .faq-item.open .faq-icon { transform: rotate(45deg); }
   .faq-icon { transition: transform 0.2s; font-size: 18px; color: var(--muted); }
 
+  /* Sticky buy bar (mobile only) */
+  .sticky-buy-bar {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 0.875rem 1.25rem; align-items: center; gap: 12px;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.3);
+  }
+  .sticky-price { font-family: var(--font-display); font-size: 18px; font-weight: 700; white-space: nowrap; }
+  .sticky-price span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .btn-buy-sticky {
+    flex: 1; background: var(--accent); color: #0a0a0a;
+    font-family: var(--font-body); font-size: 14px; font-weight: 600;
+    padding: 13px 16px; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-buy-sticky:hover { background: var(--accent-dark); }
+  .btn-buy-sticky:disabled { opacity: 0.65; cursor: not-allowed; }
+
   @media (max-width: 768px) {
-    .hero-grid { grid-template-columns: 1fr; }
+    nav { padding: 1rem 1.25rem; }
+    .hero-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    /* Purchase card shows first on mobile */
+    .hero-grid > div:last-child { order: -1; }
     .purchase-card { position: static; }
-    h1 { font-size: 32px; }
+    h1 { font-size: 28px; letter-spacing: -0.5px; }
+    .container { padding: 5.5rem 1.25rem 6rem; }
+    /* Show sticky bar, hide card buttons */
+    .sticky-buy-bar { display: flex; }
+    .purchase-card .btn-buy { display: none; }
+    .purchase-card .btn-demo { display: none; }
+    .agent-icon-big { font-size: 40px; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,6 +230,11 @@
   </div>
 </div>
 
+<div class="sticky-buy-bar" id="sticky-buy-bar">
+  <div class="sticky-price" id="sticky-price">€— <span>/mese</span></div>
+  <button class="btn-buy-sticky" id="sticky-btn" onclick="handleBuy()">Attiva ora →</button>
+</div>
+
 <footer style="border-top:1px solid rgba(255,255,255,0.08);padding:1.5rem 2.5rem;display:flex;align-items:center;justify-content:space-between;max-width:1000px;margin:0 auto;flex-wrap:wrap;gap:1rem;">
   <a href="index.html" style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#f0ede8;text-decoration:none;">Shop<span style="color:#c8f55a">Your</span>Agent</a>
   <p style="font-size:13px;color:#888;">© 2025 ShopYourAgent</p>
@@ -236,6 +267,7 @@
     document.getElementById('agent-name').textContent = a.nome;
     document.getElementById('agent-desc').textContent = a.descrizione || '';
     document.getElementById('agent-price').innerHTML = `€${a.prezzo_mensile} <span>/mese</span>`;
+    document.getElementById('sticky-price').innerHTML = `€${a.prezzo_mensile} <span>/mese</span>`;
     document.getElementById('breadcrumb-name').textContent = a.nome;
     document.title = `${a.nome} — Shop Your Agent`;
     const descEl = document.getElementById('page-desc');
@@ -268,7 +300,9 @@
     // Update purchase card based on subscription state
     if (hasActiveSub) {
       const buyBtn = document.querySelector('.btn-buy');
-      buyBtn.outerHTML = `<div class="btn-subscribed">✓ Agente attivo</div>`;
+      if (buyBtn) buyBtn.outerHTML = `<div class="btn-subscribed">✓ Agente attivo</div>`;
+      const stickyBtn = document.getElementById('sticky-btn');
+      if (stickyBtn) { stickyBtn.textContent = '✓ Attivo'; stickyBtn.disabled = true; stickyBtn.style.background = 'rgba(95,255,154,0.15)'; stickyBtn.style.color = '#5fff9a'; }
     }
 
     // Instructions: show only if subscribed, otherwise lock

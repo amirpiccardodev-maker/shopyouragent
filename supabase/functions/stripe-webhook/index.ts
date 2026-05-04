@@ -137,6 +137,17 @@ Deno.serve(async (req) => {
       }
       break;
     }
+
+    case 'invoice.payment_succeeded': {
+      const invoice = event.data.object;
+      if (invoice['subscription'] && invoice['billing_reason'] === 'subscription_cycle') {
+        await dbPatch('/subscriptions',
+          { stripe_subscription_id: `eq.${invoice['subscription']}` },
+          { stato: 'attiva', data_rinnovo: new Date().toISOString() }
+        );
+      }
+      break;
+    }
   }
 
   return new Response(JSON.stringify({ received: true }), {

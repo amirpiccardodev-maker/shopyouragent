@@ -65,6 +65,10 @@ function translateAuthError(message) {
     .toast-icon { font-size: 16px; flex-shrink: 0; }
     .toast-msg { color: #f0ede8; }
     .toast-sub { font-size: 12px; color: #888; margin-top: 2px; }
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
   `;
   document.head.appendChild(s);
 })();
