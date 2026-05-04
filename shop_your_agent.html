@@ -256,7 +256,7 @@
   <a href="#agenti" onclick="closeMobileNav()">Agenti</a>
   <a href="#come-funziona" onclick="closeMobileNav()">Come funziona</a>
   <a href="#vendor" onclick="closeMobileNav()">Vendi</a>
-  <a href="login.html" class="mobile-nav-cta" onclick="closeMobileNav()">Accedi / Registrati</a>
+  <span id="mobile-nav-auth"></span>
 </div>
 
 <div class="hero">
@@ -449,12 +449,16 @@
   // Auth-aware nav
   db.auth.getSession().then(({ data: { session } }) => {
     const el = document.getElementById('nav-auth');
+    const mobileEl = document.getElementById('mobile-nav-auth');
     if (session) {
-      const role = session.user.user_metadata?.role;
+      const isAdmin = session.user.app_metadata?.role === 'admin';
+      const role = isAdmin ? 'admin' : session.user.user_metadata?.role;
       const href = role === 'vendor' ? 'dashboard-vendor.html' : role === 'admin' ? 'admin.html' : 'dashboard-utente.html';
       el.innerHTML = `<a href="${href}" class="nav-link-auth">Dashboard</a>`;
+      if (mobileEl) mobileEl.innerHTML = `<a href="${href}" class="mobile-nav-cta" onclick="closeMobileNav()">Dashboard →</a>`;
     } else {
       el.innerHTML = `<a href="login.html" class="nav-link-auth">Accedi</a>`;
+      if (mobileEl) mobileEl.innerHTML = `<a href="login.html" class="mobile-nav-cta" onclick="closeMobileNav()">Accedi / Registrati</a>`;
     }
   });
 

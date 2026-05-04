@@ -190,7 +190,7 @@
   <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
   <span class="role-badge">Vendor</span>
   <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
-  <button class="nav-item" onclick="openModal()"><span class="nav-icon">➕</span> Nuovo agente</button>
+  <button class="nav-item" onclick="closeSidebar();openModal()"><span class="nav-icon">➕</span> Nuovo agente</button>
   <button class="nav-item" id="nav-guadagni" onclick="showSection('guadagni', this)"><span class="nav-icon">💰</span> Guadagni</button>
   <button class="nav-item" id="nav-profilo" onclick="showSection('profilo', this)"><span class="nav-icon">👤</span> Profilo</button>
   <a class="nav-item" href="impostazioni.html"><span class="nav-icon">⚙️</span> Impostazioni</a>
@@ -390,6 +390,7 @@
     document.getElementById(`section-${name}`).classList.add('active');
     if (el) el.classList.add('active');
     if (name === 'guadagni') loadGuadagni();
+    if (typeof closeSidebar === 'function') closeSidebar();
   }
 
   function openModal(agentId) {

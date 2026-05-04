@@ -229,6 +229,7 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(`section-${name}`).classList.add('active');
     if (el) el.classList.add('active');
+    if (typeof closeSidebar === 'function') closeSidebar();
   }
 
   async function init() {

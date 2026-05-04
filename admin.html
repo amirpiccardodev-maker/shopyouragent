@@ -351,6 +351,8 @@
     if (name === 'vendor') loadVendors();
     if (name === 'utenti') loadUsers();
     if (name === 'abbonamenti') loadSubs();
+    if (name === 'pagamenti') loadPayouts();
+    if (typeof closeSidebar === 'function') closeSidebar();
   }
 
   function filterAgents(filter, el) {

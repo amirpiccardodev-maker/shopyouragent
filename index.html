@@ -568,7 +568,7 @@
   <a href="shop_your_agent.html" onclick="closeMobileNav()">Agenti</a>
   <a href="#come-funziona" onclick="closeMobileNav()">Come funziona</a>
   <a href="#vendor" onclick="closeMobileNav()">Vendi</a>
-  <a href="login.html" class="mobile-nav-cta" onclick="closeMobileNav()">Accedi / Registrati</a>
+  <span id="mobile-nav-auth"></span>
 </div>
 
 <!-- HERO -->
@@ -703,12 +703,15 @@
     // Auth-aware nav
     const { data: { session } } = await db.auth.getSession();
     const navEl = document.getElementById('nav-auth');
+    const mobileAuthEl = document.getElementById('mobile-nav-auth');
     if (session) {
       const role = session.user.app_metadata?.role === 'admin' ? 'admin' : session.user.user_metadata?.role;
       const href = role === 'vendor' ? 'dashboard-vendor.html' : role === 'admin' ? 'admin.html' : 'dashboard-utente.html';
       navEl.innerHTML = `<a href="${href}" class="nav-link-auth">Dashboard</a>`;
+      if (mobileAuthEl) mobileAuthEl.innerHTML = `<a href="${href}" class="mobile-nav-cta" onclick="closeMobileNav()">Dashboard →</a>`;
     } else {
       navEl.innerHTML = `<a href="login.html" class="nav-link-auth">Accedi</a>`;
+      if (mobileAuthEl) mobileAuthEl.innerHTML = `<a href="login.html" class="mobile-nav-cta" onclick="closeMobileNav()">Accedi / Registrati</a>`;
     }
 
     // Live stats
