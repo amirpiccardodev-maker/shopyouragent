@@ -361,6 +361,16 @@ function setBtnLoading(btn, loading, originalText) {
     html.light .toast-sub { color: #666666 !important; }
 
     /* ── Light mode: cookie banner ── */
+    /* ── Light mode: mobile nav ── */
+    html.light .mobile-nav { box-shadow: -8px 0 40px rgba(0,0,0,0.12) !important; }
+    html.light .mobile-nav-close { background: var(--surface2) !important; border-color: var(--border) !important; }
+    html.light .mobile-nav-backdrop { background: rgba(0,0,0,0.3) !important; }
+    /* ── Light mode: product preview ── */
+    html.light .preview-window { box-shadow: 0 24px 64px rgba(0,0,0,0.12) !important; }
+    html.light .preview-bot .preview-bubble { background: #f0f0ee !important; }
+    /* ── Light mode: testimonials ── */
+    html.light .testimonial-card { border-color: var(--border) !important; }
+
     html.light #sya-cookie-banner {
       background: rgba(255,255,255,0.97) !important;
       border-top-color: rgba(0,0,0,0.1) !important;

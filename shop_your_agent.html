@@ -198,13 +198,29 @@
     font-size: 18px; line-height: 1;
   }
   .mobile-nav {
-    display: none; position: fixed; top: 60px; left: 0; right: 0; z-index: 99;
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 1rem 1.25rem; flex-direction: column; gap: 4px;
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(300px, 85vw); z-index: 200;
+    background: var(--surface); border-left: 1px solid var(--border);
+    padding: 5rem 1.5rem 2rem; flex-direction: column; gap: 4px;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; box-shadow: -8px 0 40px rgba(0,0,0,0.4);
   }
-  .mobile-nav.open { display: flex; }
+  .mobile-nav.open { transform: translateX(0); }
+  .mobile-nav-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 199;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+  }
+  .mobile-nav-backdrop.open { display: block; }
+  .mobile-nav-close {
+    position: absolute; top: 1rem; right: 1rem;
+    width: 32px; height: 32px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer; color: var(--text);
+    font-size: 20px; display: flex; align-items: center; justify-content: center;
+  }
   .mobile-nav a, .mobile-nav button {
-    display: block; padding: 12px 14px; border-radius: 8px;
+    display: block; padding: 13px 16px; border-radius: 10px;
     color: var(--muted); text-decoration: none; font-size: 15px;
     background: none; border: none; cursor: pointer; font-family: var(--font-body);
     text-align: left; width: 100%; transition: all 0.2s;
@@ -212,9 +228,14 @@
   .mobile-nav a:hover, .mobile-nav button:hover { background: var(--surface2); color: var(--text); }
   .mobile-nav .mobile-nav-cta {
     background: rgba(200,245,90,0.1); color: var(--accent);
-    border: 1px solid rgba(200,245,90,0.2); border-radius: 8px;
-    margin-top: 8px;
+    border: 1px solid rgba(200,245,90,0.2); border-radius: 10px; margin-top: 12px;
   }
+  /* Trust badges */
+  .trust-badges {
+    display: flex; flex-wrap: wrap; gap: 8px 20px;
+    justify-content: center; margin-top: 1.5rem;
+  }
+  .trust-badges span { font-size: 13px; color: var(--muted); font-weight: 300; }
 
   @media (max-width: 640px) {
     .mobile-menu-btn { display: block; }
@@ -252,7 +273,9 @@
   </div>
 </nav>
 
+<div class="mobile-nav-backdrop" id="mobile-nav-backdrop" onclick="closeMobileNav()"></div>
 <div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="closeMobileNav()" aria-label="Chiudi menu">×</button>
   <a href="#agenti" onclick="closeMobileNav()">Agenti</a>
   <a href="#come-funziona" onclick="closeMobileNav()">Come funziona</a>
   <a href="#vendor" onclick="closeMobileNav()">Vendi</a>
@@ -266,6 +289,11 @@
   <div class="hero-buttons fade-in">
     <a href="#agenti" class="btn-main">Esplora il catalogo</a>
     <a href="#vendor" class="btn-ghost">Vendi il tuo agente →</a>
+  </div>
+  <div class="trust-badges">
+    <span>✓ Attivazione in 5 minuti</span>
+    <span>✓ Nessuna carta richiesta</span>
+    <span>✓ Supporto in italiano</span>
   </div>
   <div class="stats fade-in">
     <div class="stat"><div class="stat-num" id="hero-stat-agenti">—</div><div class="stat-label">Agenti</div></div>
@@ -463,10 +491,14 @@
   loadAgents();
 
   function toggleMobileNav() {
-    document.getElementById('mobile-nav').classList.toggle('open');
+    const isOpen = document.getElementById('mobile-nav').classList.toggle('open');
+    document.getElementById('mobile-nav-backdrop').classList.toggle('open', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
   }
   function closeMobileNav() {
     document.getElementById('mobile-nav').classList.remove('open');
+    document.getElementById('mobile-nav-backdrop').classList.remove('open');
+    document.body.style.overflow = '';
   }
 </script>
 </body>
