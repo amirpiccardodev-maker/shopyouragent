@@ -200,6 +200,17 @@
   select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color 0.2s; cursor: pointer; appearance: none; }
   select:focus { border-color: var(--accent); }
   select option { background: var(--surface2); }
+  .strength-bar { height: 3px; border-radius: 99px; background: var(--surface2); margin-top: 6px; overflow: hidden; }
+  .strength-fill { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; width: 0; }
+  .strength-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  input.field-error { border-color: var(--error) !important; }
+  input.field-ok { border-color: rgba(95,255,154,0.4) !important; }
+  .confirm-icon { font-size: 48px; margin-bottom: 1rem; text-align: center; }
+  .confirm-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 0.5rem; text-align: center; }
+  .confirm-sub { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem; text-align: center; }
+  .confirm-email-hl { color: var(--text); font-weight: 500; }
+  .btn-outline { width: 100%; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+  .btn-outline:hover { border-color: var(--border2); color: var(--text); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sya.js"></script>
@@ -260,10 +271,22 @@
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" id="reg-password" placeholder="min. 8 caratteri" autocomplete="new-password" onkeydown="if(event.key==='Enter')handleRegister()">
+      <input type="password" id="reg-password" placeholder="min. 8 caratteri" autocomplete="new-password" onkeydown="if(event.key==='Enter')handleRegister()" oninput="updateStrength(this.value)">
+      <div class="strength-bar"><div class="strength-fill" id="reg-strength-fill"></div></div>
+      <div class="strength-label" id="reg-strength-label"></div>
     </div>
     <button class="btn" onclick="handleRegister()">Crea account</button>
     <div class="msg" id="register-msg"></div>
+  </div>
+
+  <!-- EMAIL CONFIRMATION -->
+  <div class="form-section" id="confirm-section">
+    <div class="confirm-icon">📧</div>
+    <div class="confirm-title">Controlla la tua email</div>
+    <p class="confirm-sub">Abbiamo inviato un link di attivazione a <span class="confirm-email-hl" id="confirm-email-addr"></span>. Clicca sul link per attivare il tuo account.</p>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:1.5rem;">Non trovi l'email? Controlla la cartella spam.</p>
+    <a href="login.html" class="btn" style="text-decoration:none;display:block;text-align:center;">Torna al login</a>
+    <button class="btn-outline" onclick="resendConfirmation()">Reinvia email di conferma</button>
   </div>
 </div>
 
@@ -345,7 +368,9 @@
     }
 
     if (!data.session) {
-      showMsg('register-msg', 'Account creato! Controlla la tua email per confermare.', 'success');
+      document.getElementById('confirm-email-addr').textContent = email;
+      document.querySelectorAll('.form-section').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('confirm-section').classList.add('active');
       return;
     }
 
@@ -361,6 +386,37 @@
       options: { redirectTo: window.location.origin + '/login.html' }
     });
     if (error) showMsg('login-msg', translateAuthError(error.message), 'error');
+  }
+
+  function updateStrength(pwd) {
+    const fill = document.getElementById('reg-strength-fill');
+    const label = document.getElementById('reg-strength-label');
+    if (!fill) return;
+    if (!pwd) { fill.style.width = '0'; label.textContent = ''; return; }
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    const levels = [
+      { w: '20%', bg: '#ff5f5f', txt: 'Molto debole' },
+      { w: '40%', bg: '#ff8c42', txt: 'Debole' },
+      { w: '60%', bg: '#ffaa00', txt: 'Media' },
+      { w: '80%', bg: '#9ec43a', txt: 'Buona' },
+      { w: '100%', bg: '#5fff9a', txt: 'Ottima' },
+    ];
+    const lv = levels[Math.min(score - 1, 4)] || levels[0];
+    fill.style.width = lv.w; fill.style.background = lv.bg;
+    label.textContent = lv.txt; label.style.color = lv.bg;
+  }
+
+  async function resendConfirmation() {
+    const email = document.getElementById('confirm-email-addr').textContent;
+    if (!email) return;
+    const { error } = await db.auth.resend({ type: 'signup', email });
+    if (error) showToast(translateAuthError(error.message), 'error');
+    else showToast('Email di conferma reinviata!', 'success');
   }
 
   async function handleForgotPassword() {

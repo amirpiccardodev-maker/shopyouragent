@@ -82,6 +82,12 @@
   .status-badge.active { background: rgba(95,255,154,0.1); color: #5fff9a; border: 1px solid rgba(95,255,154,0.2); }
   .status-badge.cancelled { background: rgba(255,95,95,0.1); color: #ff5f5f; border: 1px solid rgba(255,95,95,0.2); }
   .empty-row td { text-align: center; color: var(--muted); padding: 2.5rem !important; }
+  .onboarding-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 1.5rem; text-align: left; max-width: 380px; margin-left: auto; margin-right: auto; }
+  .ob-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+  .ob-num { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
+  .ob-done .ob-num { background: rgba(95,255,154,0.1); border-color: rgba(95,255,154,0.2); color: #5fff9a; }
+  .ob-step-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .ob-step-sub { font-size: 12px; color: var(--muted); }
 
   /* Welcome banner */
   .welcome-banner {
@@ -324,10 +330,24 @@
     if (!subs.length) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">🤖</div>
-          <div class="empty-title">Nessun agente ancora</div>
-          <div class="empty-sub">Esplora il catalogo e attiva il tuo primo agente AI</div>
-          <a href="shop_your_agent.html#agenti" class="btn-main">Esplora il catalogo</a>
+          <div class="empty-icon">🚀</div>
+          <div class="empty-title">Inizia ad automatizzare</div>
+          <div class="empty-sub">Non hai ancora agenti attivi. Segui questi 3 passi:</div>
+          <div class="onboarding-steps">
+            <div class="ob-step ob-done">
+              <div class="ob-num">✓</div>
+              <div><div class="ob-step-title">Account creato</div><div class="ob-step-sub">Sei registrato e pronto a partire</div></div>
+            </div>
+            <div class="ob-step">
+              <div class="ob-num">2</div>
+              <div><div class="ob-step-title">Scegli un agente dal catalogo</div><div class="ob-step-sub">Filtra per categoria o prezzo, attiva in un click</div></div>
+            </div>
+            <div class="ob-step">
+              <div class="ob-num">3</div>
+              <div><div class="ob-step-title">L'agente lavora per te</div><div class="ob-step-sub">24/7, nessun codice, supporto in italiano</div></div>
+            </div>
+          </div>
+          <a href="shop_your_agent.html#agenti" class="btn-main" style="margin-top:2rem;display:inline-block;">Vai al catalogo →</a>
         </div>`;
       return;
     }

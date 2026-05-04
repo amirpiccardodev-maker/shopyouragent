@@ -130,6 +130,9 @@ function translateAuthError(message) {
       0%, 100% { opacity: 0.6; }
       50% { opacity: 1; }
     }
+    @media (max-width: 640px) {
+      #toast-container { right: auto; left: 1rem; bottom: 7rem; }
+    }
   `;
   document.head.appendChild(s);
 })();
@@ -523,3 +526,58 @@ function animateNumber(el, target, duration, fmt) {
     else el.textContent = fmt(target);
   })(performance.now());
 }
+
+// ─── SCROLL REVEAL ────────────────────────────────────────────────────────────
+
+(function initScrollReveal() {
+  if (!('IntersectionObserver' in window)) return;
+  const s = document.createElement('style');
+  s.textContent = `
+    .sya-reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .sya-reveal.sya-revealed { opacity: 1; transform: translateY(0); }
+    .sya-reveal-d1 { transition-delay: 0.08s; }
+    .sya-reveal-d2 { transition-delay: 0.16s; }
+    .sya-reveal-d3 { transition-delay: 0.24s; }
+  `;
+  document.head.appendChild(s);
+
+  const SELECTORS = ['.agent-card', '.step', '.testimonial-card', '.stat-card', '.settings-block'];
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('sya-revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.07, rootMargin: '0px 0px -32px 0px' });
+
+  function addReveal(el, delay) {
+    if (el.closest && el.closest('.hero')) return;
+    if (el.classList.contains('fade-in')) return;
+    if (el.classList.contains('sya-reveal')) return;
+    el.classList.add('sya-reveal');
+    if (delay === 1) el.classList.add('sya-reveal-d1');
+    else if (delay === 2) el.classList.add('sya-reveal-d2');
+    else if (delay === 3) el.classList.add('sya-reveal-d3');
+    observer.observe(el);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll(SELECTORS.join(',')).forEach(function(el, i) {
+      addReveal(el, (i % 3) + 1);
+    });
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType !== 1) return;
+          SELECTORS.forEach(function(sel) {
+            if (node.matches && node.matches(sel)) addReveal(node, 1);
+            (node.querySelectorAll ? node.querySelectorAll(sel) : []).forEach(function(child, i) {
+              addReveal(child, (i % 3) + 1);
+            });
+          });
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+})();
