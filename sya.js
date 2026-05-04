@@ -311,3 +311,205 @@ function setBtnLoading(btn, loading, originalText) {
   if (loading) { btn.dataset.originalText = btn.textContent; btn.textContent = 'Caricamento...'; }
   else { btn.textContent = originalText || btn.dataset.originalText || btn.textContent; }
 }
+
+// ─── THEME & FRONTEND ENHANCEMENTS ────────────────────────────────────────────
+
+(function initTheme() {
+  // Apply saved theme immediately — before DOMContentLoaded — to prevent flash
+  if (localStorage.getItem('sya-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+
+  const s = document.createElement('style');
+  s.id = 'sya-theme-styles';
+  s.textContent = `
+    /* ── Light theme variables ── */
+    html.light {
+      --bg: #f5f5f2; --surface: #ffffff; --surface2: #ececea;
+      --border: rgba(0,0,0,0.07); --border2: rgba(0,0,0,0.15);
+      --text: #111111; --muted: #666666;
+      --accent: #5a8a00; --accent-dark: #3d6000;
+    }
+    html.light body { background: var(--bg); color: var(--text); }
+
+    /* ── Transitions only during theme switch — avoids polluting hover/animation ── */
+    html.theme-switching, html.theme-switching * {
+      transition: background-color 0.3s ease, color 0.25s ease,
+                  border-color 0.25s ease, box-shadow 0.25s ease !important;
+    }
+
+    /* ── Light mode: structural components ── */
+    html.light .sidebar { background: var(--surface) !important; border-right-color: var(--border) !important; }
+    html.light .hamburger { background: var(--surface) !important; border-color: var(--border2) !important; }
+    html.light .hamburger span { background: var(--text) !important; }
+    html.light .sidebar-overlay { background: rgba(0,0,0,0.3) !important; }
+    html.light .mobile-topbar { background: var(--surface) !important; border-bottom-color: var(--border) !important; }
+
+    /* ── Light mode: skeleton ── */
+    html.light .skel {
+      background: linear-gradient(90deg, #e0e0de 25%, #ebebea 50%, #e0e0de 75%);
+      background-size: 200% 100%;
+      animation: skel-shimmer 1.6s infinite;
+    }
+    html.light .skel-card { background: var(--surface) !important; border-color: var(--border) !important; }
+
+    /* ── Light mode: toasts ── */
+    html.light .sya-toast-success { background: rgba(255,255,255,0.97) !important; border-color: rgba(90,138,0,0.3) !important; color: #3d6000 !important; }
+    html.light .sya-toast-error   { background: rgba(255,255,255,0.97) !important; border-color: rgba(200,50,50,0.3)  !important; color: #b01c1c !important; }
+    html.light .sya-toast-info    { background: rgba(255,255,255,0.97) !important; border-color: rgba(90,138,0,0.3)   !important; color: #5a8a00 !important; }
+    html.light .toast-msg { color: #111111 !important; }
+    html.light .toast-sub { color: #666666 !important; }
+
+    /* ── Light mode: cookie banner ── */
+    html.light #sya-cookie-banner {
+      background: rgba(255,255,255,0.97) !important;
+      border-top-color: rgba(0,0,0,0.1) !important;
+      color: #555 !important;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1) !important;
+    }
+
+    /* ── Page fade-in ── */
+    @keyframes sya-page-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body { animation: sya-page-in 0.25s ease forwards; }
+
+    /* ── Input focus glow ── */
+    input:focus, textarea:focus, select:focus {
+      box-shadow: 0 0 0 3px rgba(200,245,90,0.15) !important;
+      outline: none !important;
+    }
+    html.light input:focus, html.light textarea:focus, html.light select:focus {
+      box-shadow: 0 0 0 3px rgba(90,138,0,0.15) !important;
+    }
+
+    /* ── Button press micro-interaction ── */
+    button:active, a.btn-main:active, a.btn-ghost:active { transform: scale(0.97) !important; }
+
+    /* ── Agent card hover depth ── */
+    .agent-card { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+    .agent-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.28) !important; }
+    html.light .agent-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important; }
+
+    /* ── Theme toggle button ── */
+    #sya-theme-btn {
+      position: fixed; bottom: 5.25rem; right: 1.25rem; z-index: 998;
+      width: 40px; height: 40px;
+      background: var(--surface, #141414);
+      border: 1px solid var(--border2, rgba(255,255,255,0.14));
+      border-radius: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; line-height: 1;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      transition: box-shadow 0.2s, transform 0.15s;
+      user-select: none;
+    }
+    #sya-theme-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+    #sya-theme-btn:active { transform: scale(0.92) !important; }
+
+    /* ── Back-to-top button ── */
+    #sya-back-top {
+      position: fixed; bottom: 1.5rem; right: 1.25rem; z-index: 997;
+      width: 40px; height: 40px;
+      background: var(--surface, #141414);
+      border: 1px solid var(--border2, rgba(255,255,255,0.14));
+      border-radius: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; color: var(--text, #f0ede8);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.15s, box-shadow 0.2s;
+      user-select: none;
+    }
+    #sya-back-top.visible { opacity: 1; pointer-events: all; }
+    #sya-back-top:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+    #sya-back-top:active { transform: scale(0.92) !important; }
+
+    /* ── Search clear (×) button ── */
+    .sya-search-wrap { position: relative; display: inline-flex; align-items: center; width: 100%; }
+    .sya-search-wrap input { padding-right: 2.25rem !important; width: 100%; }
+    #sya-search-clear {
+      position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted, #888); font-size: 18px; line-height: 1;
+      padding: 2px 4px; display: none; transition: color 0.15s;
+    }
+    #sya-search-clear.visible { display: block; }
+    #sya-search-clear:hover { color: var(--text, #f0ede8); }
+  `;
+  document.head.appendChild(s);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // ── Theme toggle
+    const themeBtn = document.createElement('button');
+    themeBtn.id = 'sya-theme-btn';
+    themeBtn.setAttribute('aria-label', 'Cambia tema');
+    themeBtn.title = 'Cambia tema';
+    function syncThemeIcon() {
+      themeBtn.textContent = document.documentElement.classList.contains('light') ? '🌙' : '☀️';
+    }
+    syncThemeIcon();
+    themeBtn.onclick = function() {
+      const isLight = document.documentElement.classList.contains('light');
+      document.documentElement.classList.add('theme-switching');
+      document.documentElement.classList.toggle('light', !isLight);
+      localStorage.setItem('sya-theme', isLight ? 'dark' : 'light');
+      syncThemeIcon();
+      setTimeout(function() { document.documentElement.classList.remove('theme-switching'); }, 400);
+    };
+    document.body.appendChild(themeBtn);
+
+    // ── Back-to-top
+    const backTop = document.createElement('button');
+    backTop.id = 'sya-back-top';
+    backTop.setAttribute('aria-label', 'Torna su');
+    backTop.title = 'Torna su';
+    backTop.textContent = '↑';
+    backTop.onclick = function() { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    document.body.appendChild(backTop);
+    window.addEventListener('scroll', function() {
+      backTop.classList.toggle('visible', window.scrollY > 500);
+    }, { passive: true });
+
+    // ── Search clear (only when #search-input is present)
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && !searchInput.closest('.sya-search-wrap')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'sya-search-wrap';
+      searchInput.parentNode.insertBefore(wrap, searchInput);
+      wrap.appendChild(searchInput);
+      const clearBtn = document.createElement('button');
+      clearBtn.id = 'sya-search-clear';
+      clearBtn.type = 'button';
+      clearBtn.setAttribute('aria-label', 'Cancella ricerca');
+      clearBtn.textContent = '×';
+      wrap.appendChild(clearBtn);
+      searchInput.addEventListener('input', function() {
+        clearBtn.classList.toggle('visible', this.value.length > 0);
+      });
+      clearBtn.onclick = function() {
+        searchInput.value = '';
+        clearBtn.classList.remove('visible');
+        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        searchInput.focus();
+      };
+    }
+  });
+})();
+
+// ─── ANIMATE NUMBER ───────────────────────────────────────────────────────────
+
+function animateNumber(el, target, duration, fmt) {
+  if (!el) return;
+  const start = performance.now();
+  const from = parseFloat(String(el.textContent).replace(/[^\d.-]/g, '')) || 0;
+  if (!fmt) fmt = function(n) { return Math.round(n).toLocaleString('it-IT'); };
+  (function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = fmt(from + (target - from) * eased);
+    if (t < 1) requestAnimationFrame(step);
+    else el.textContent = fmt(target);
+  })(performance.now());
+}

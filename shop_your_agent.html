@@ -419,17 +419,15 @@
       db.from('vendors').select('id', { count: 'exact', head: true }).eq('approvato', true),
     ]);
 
+    const plusFmt = function(n) { return Math.round(n) + '+'; };
     if (agentsRes.data && agentsRes.data.length > 0) {
       allAgents = agentsRes.data;
-      const count = document.getElementById('hero-stat-agenti');
-      if (count) count.textContent = agentsRes.data.length + '+';
+      animateNumber(document.getElementById('hero-stat-agenti'), agentsRes.data.length, 900, plusFmt);
     } else {
       allAgents = STATIC_AGENTS;
-      const count = document.getElementById('hero-stat-agenti');
-      if (count) count.textContent = STATIC_AGENTS.length + '+';
+      animateNumber(document.getElementById('hero-stat-agenti'), STATIC_AGENTS.length, 900, plusFmt);
     }
-    const vCount = document.getElementById('hero-stat-vendor');
-    if (vCount) vCount.textContent = (vendorsRes.count > 0 ? vendorsRes.count : 5) + '+';
+    animateNumber(document.getElementById('hero-stat-vendor'), vendorsRes.count > 0 ? vendorsRes.count : 5, 900, plusFmt);
 
     applyFilters();
   }

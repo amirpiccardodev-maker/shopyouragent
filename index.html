@@ -721,8 +721,9 @@
     ]);
     const statA = document.getElementById('stat-agenti');
     const statV = document.getElementById('stat-vendor');
-    if (statA) statA.textContent = agentsRes.count > 0 ? agentsRes.count + '+' : '10+';
-    if (statV) statV.textContent = vendorsRes.count > 0 ? vendorsRes.count + '+' : '5+';
+    const plusFmt = function(n) { return Math.round(n) + '+'; };
+    animateNumber(statA, agentsRes.count > 0 ? agentsRes.count : 10, 900, plusFmt);
+    animateNumber(statV, vendorsRes.count > 0 ? vendorsRes.count : 5, 900, plusFmt);
 
     // Featured agents from DB (up to 6)
     const grid = document.getElementById('featured-grid');
