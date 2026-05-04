@@ -173,10 +173,17 @@ function skeletonStats(count = 3) {
       transition: all 0.25s ease;
     }
     @media (max-width: 768px) {
+      html, body { overflow-x: hidden; }
       .hamburger { display: flex; }
       .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; z-index: 100; }
       .sidebar.open { transform: translateX(0); }
       .main { margin-left: 0 !important; }
+      .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-radius: 12px; }
+      .tbl-scroll > table { min-width: 480px; border-radius: 0; }
+      img, video, iframe { max-width: 100% !important; }
+      .page-header { flex-direction: column !important; align-items: flex-start !important; }
+      .agents-grid { grid-template-columns: 1fr !important; }
+      .modal { width: 100% !important; }
     }
   `;
   document.head.appendChild(s);
@@ -184,6 +191,8 @@ function skeletonStats(count = 3) {
   document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     if (!sidebar) return;
+    // Skip injection on pages that already have their own mobile-topbar + hamburger
+    if (document.querySelector('.mobile-topbar')) return;
 
     const overlay = document.createElement('div');
     overlay.className = 'sidebar-overlay';
@@ -208,6 +217,29 @@ function closeMobileMenu() {
   document.querySelector('.sidebar')?.classList.remove('open');
   document.querySelector('.sidebar-overlay')?.classList.remove('open');
 }
+
+// ─── MOBILE TABLE SCROLL ─────────────────────────────────────────────────────
+
+(function initTableScroll() {
+  function wrapTables() {
+    // Upgrade any .table-wrap to also use .tbl-scroll so the CSS min-width kicks in
+    document.querySelectorAll('.table-wrap:not(.tbl-scroll)').forEach(function(w) {
+      w.classList.add('tbl-scroll');
+    });
+    // Wrap any table not already inside a .tbl-scroll container
+    document.querySelectorAll('table').forEach(function(table) {
+      if (table.closest('.tbl-scroll')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'tbl-scroll';
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    wrapTables();
+    new MutationObserver(wrapTables).observe(document.body, { childList: true, subtree: true });
+  });
+})();
 
 // ─── BUTTON LOADING ───────────────────────────────────────────────────────────
 
