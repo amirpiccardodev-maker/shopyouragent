@@ -10,14 +10,20 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://shopyouragent.onrender.com/shop_your_agent.html">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Sfoglia il catalogo completo di agenti AI italiani. Filtra per categoria, cerca per nome, attiva in un click.">
+<meta property="og:image" content="https://shopyouragent.onrender.com/og-image.svg">
+<meta name="twitter:image" content="https://shopyouragent.onrender.com/og-image.svg">
 <link rel="canonical" href="https://shopyouragent.onrender.com/shop_your_agent.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --bg: #0a0a0a; --surface: #141414; --surface2: #242424;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.22);
+    --text: #f0ede8; --muted: #999; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
   }
   html { scroll-behavior: smooth; }
@@ -125,15 +131,42 @@
   }
   .chip:hover { border-color: var(--border2); color: var(--text); }
   .chip.active { background: rgba(200,245,90,0.1); border-color: rgba(200,245,90,0.3); color: var(--accent); }
+  .chip.active { box-shadow: 0 0 0 1px rgba(200,245,90,0.15); }
+
+  /* ACTIVE FILTER STRIP */
+  .active-filters {
+    display: none; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 8px 0; font-size: 12px; color: var(--muted);
+  }
+  .active-filters.visible { display: flex; }
+  .active-filters span { opacity: 0.7; margin-right: 2px; }
+  .filter-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(200,245,90,0.08); border: 1px solid rgba(200,245,90,0.2);
+    color: var(--accent); font-size: 11px; font-weight: 500;
+    padding: 3px 10px 3px 11px; border-radius: 99px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .filter-tag:hover { background: rgba(200,245,90,0.14); }
+  .filter-tag-x { font-size: 14px; line-height: 1; opacity: 0.7; margin-left: 1px; }
+  .filter-clear-all {
+    background: none; border: none; color: var(--muted); font-size: 11px;
+    cursor: pointer; font-family: var(--font-body); padding: 3px 8px;
+    border-radius: 6px; transition: color 0.15s;
+  }
+  .filter-clear-all:hover { color: var(--text); }
 
   /* AGENTS GRID */
   .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  @keyframes card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .agents-grid.filtering { opacity: 0; transform: translateY(4px); transition: opacity 0.15s, transform 0.15s; }
+  .agents-grid.filtered { opacity: 1; transform: translateY(0); transition: opacity 0.2s, transform 0.2s; }
   .agent-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 1.5rem; transition: border-color 0.2s, transform 0.2s;
+    padding: 1.5rem; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
     cursor: pointer; position: relative; overflow: hidden;
   }
-  .agent-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .agent-card:hover { border-color: rgba(200,245,90,0.25); transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(200,245,90,0.07); }
   .agent-card.featured { border-color: rgba(200,245,90,0.3); }
   .agent-card.featured::after {
     content: 'Top'; position: absolute; top: 16px; right: 16px;
@@ -154,6 +187,9 @@
   .agent-price span { font-size: 12px; font-weight: 400; color: var(--muted); }
   .agent-arrow { font-size: 13px; color: var(--accent); }
   .no-results { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 3rem 2rem; font-size: 14px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .results-count { font-size: 13px; color: var(--muted); margin-bottom: 1rem; min-height: 1.4em; }
+  .sort-select.has-value { color: var(--text); border-color: var(--border2); }
 
   /* HOW IT WORKS */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
@@ -240,7 +276,9 @@
   @media (max-width: 640px) {
     .mobile-menu-btn { display: block; }
     .nav-links { display: none !important; }
-    .nav-cta { padding: 8px 14px; font-size: 13px; }
+    .nav-right { display: none !important; }
+    nav { padding: 0.75rem 1.25rem; }
+    .logo { font-size: 15px; letter-spacing: -0.3px; }
   }
 
   /* Catalog row 1: search + sort */
@@ -286,6 +324,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Catalogo Agenti AI — Shop Your Agent","description":"Sfoglia il catalogo completo di agenti AI italiani. Filtra per categoria, attiva in un click.","url":"https://shopyouragent.onrender.com/shop_your_agent.html"}</script>
 </head>
 <body>
+<noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
 
 <nav>
   <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
@@ -343,9 +382,11 @@
   <div class="catalog-controls">
     <div class="catalog-row-1">
       <div class="search-wrap">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <label for="search-input" class="sr-only">Cerca un agente</label>
         <input type="text" id="search-input" placeholder="Cerca un agente...">
       </div>
+      <label for="sort-select" class="sr-only">Ordina per</label>
       <select id="sort-select" class="sort-select">
         <option value="">Ordina per</option>
         <option value="price-asc">Prezzo ↑</option>
@@ -371,6 +412,11 @@
     </div>
   </div>
 
+  <div class="active-filters" id="active-filters" aria-live="polite">
+    <span>Filtri attivi:</span>
+  </div>
+
+  <div class="results-count" id="results-count" aria-live="polite" aria-atomic="true"></div>
   <div class="agents-grid" id="agents-grid">
     <!-- skeleton -->
   </div>
@@ -463,6 +509,36 @@
       </div>`;
   }
 
+  function updateChipCounts() {
+    document.querySelectorAll('#filter-chips .chip').forEach(chip => {
+      const cat = chip.dataset.cat;
+      if (cat === 'tutti') {
+        chip.textContent = `Tutti (${allAgents.length})`;
+      } else {
+        const n = allAgents.filter(a => a.categoria === cat).length;
+        chip.textContent = n ? `${cat} (${n})` : cat;
+      }
+    });
+  }
+
+  function updateActiveFilterStrip() {
+    const strip = document.getElementById('active-filters');
+    if (!strip) return;
+    const tags = [];
+    if (activeCategory !== 'tutti') tags.push({ label: activeCategory, clear: () => { activeCategory = 'tutti'; document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'tutti')); applyFilters(); } });
+    if (activePrice !== 'tutti') tags.push({ label: activePrice === '0-29' ? 'Fino a €29' : activePrice === '30-59' ? '€30–59' : '€60+', clear: () => { activePrice = 'tutti'; document.querySelectorAll('#price-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.price === 'tutti')); applyFilters(); } });
+    const query = document.getElementById('search-input')?.value?.trim();
+    if (query) tags.push({ label: `"${query}"`, clear: () => { const el = document.getElementById('search-input'); if (el) el.value = ''; applyFilters(); } });
+    if (!tags.length) { strip.classList.remove('visible'); return; }
+    strip.classList.add('visible');
+    strip.innerHTML = `<span>Filtri attivi:</span>` + tags.map((t, i) =>
+      `<button class="filter-tag" data-tag="${i}"><span>${escHtml(t.label)}</span><span class="filter-tag-x">×</span></button>`
+    ).join('') + (tags.length > 1 ? `<button class="filter-clear-all">Cancella tutti</button>` : '');
+    strip.querySelectorAll('.filter-tag').forEach((btn, i) => btn.onclick = tags[i].clear);
+    const clearAll = strip.querySelector('.filter-clear-all');
+    if (clearAll) clearAll.onclick = () => { activeCategory = 'tutti'; activePrice = 'tutti'; const si = document.getElementById('search-input'); if (si) si.value = ''; document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === 'tutti')); document.querySelectorAll('#price-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.price === 'tutti')); applyFilters(); };
+  }
+
   function applyFilters() {
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     const sortVal = document.getElementById('sort-select').value;
@@ -480,33 +556,64 @@
     }
     if (sortVal === 'price-asc') filtered = [...filtered].sort((a, b) => a.prezzo_mensile - b.prezzo_mensile);
     else if (sortVal === 'price-desc') filtered = [...filtered].sort((a, b) => b.prezzo_mensile - a.prezzo_mensile);
+
+    try {
+      sessionStorage.setItem('sya-filters', JSON.stringify({ cat: activeCategory, price: activePrice, sort: sortVal, q: document.getElementById('search-input').value }));
+    } catch(e) {}
+
+    updateActiveFilterStrip();
+
     const grid = document.getElementById('agents-grid');
-    if (!filtered.length) {
-      grid.innerHTML = `<div class="no-results">Nessun agente trovato${query ? ` per "${query}"` : ''}</div>`;
-    } else {
-      grid.innerHTML = filtered.map(renderAgentCard).join('');
-    }
+    const countEl = document.getElementById('results-count');
+    grid.classList.add('filtering');
+    setTimeout(() => {
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="no-results">Nessun agente trovato${query ? ` per "${escHtml(query)}"` : ''}</div>`;
+        if (countEl) countEl.textContent = '';
+      } else {
+        grid.innerHTML = filtered.map(renderAgentCard).join('');
+        if (countEl) countEl.textContent = filtered.length === allAgents.length ? `${filtered.length} agenti` : `${filtered.length} di ${allAgents.length} agenti`;
+      }
+      grid.classList.remove('filtering');
+      grid.classList.add('filtered');
+      setTimeout(() => grid.classList.remove('filtered'), 250);
+    }, 120);
   }
 
   async function loadAgents() {
     const grid = document.getElementById('agents-grid');
     grid.innerHTML = skeletonCards(6);
 
-    const [agentsRes, vendorsRes] = await Promise.all([
-      db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false }),
-      db.from('vendors').select('id', { count: 'exact', head: true }).eq('approvato', true),
-    ]);
+    // Restore persisted filters
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('sya-filters') || '{}');
+      if (saved.cat) { activeCategory = saved.cat; document.querySelectorAll('#filter-chips .chip').forEach(c => { c.classList.toggle('active', c.dataset.cat === saved.cat); }); }
+      if (saved.price) { activePrice = saved.price; document.querySelectorAll('#price-chips .chip').forEach(c => { c.classList.toggle('active', c.dataset.price === saved.price); }); }
+      if (saved.sort) { const sel = document.getElementById('sort-select'); sel.value = saved.sort; sel.classList.toggle('has-value', !!saved.sort); }
+      if (saved.q) { document.getElementById('search-input').value = saved.q; }
+    } catch(e) {}
 
-    const plusFmt = function(n) { return Math.round(n) + '+'; };
-    if (agentsRes.data && agentsRes.data.length > 0) {
-      allAgents = agentsRes.data;
-      animateNumber(document.getElementById('hero-stat-agenti'), agentsRes.data.length, 900, plusFmt);
-    } else {
+    try {
+      const [agentsRes, vendorsRes] = await Promise.all([
+        db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false }),
+        db.from('vendors').select('id', { count: 'exact', head: true }).eq('approvato', true),
+      ]);
+
+      const plusFmt = function(n) { return Math.round(n) + '+'; };
+      if (agentsRes.data && agentsRes.data.length > 0) {
+        allAgents = agentsRes.data;
+        animateNumber(document.getElementById('hero-stat-agenti'), agentsRes.data.length, 900, plusFmt);
+      } else {
+        allAgents = STATIC_AGENTS;
+        animateNumber(document.getElementById('hero-stat-agenti'), STATIC_AGENTS.length, 900, plusFmt);
+      }
+      animateNumber(document.getElementById('hero-stat-vendor'), vendorsRes.count > 0 ? vendorsRes.count : 5, 900, plusFmt);
+    } catch(err) {
       allAgents = STATIC_AGENTS;
-      animateNumber(document.getElementById('hero-stat-agenti'), STATIC_AGENTS.length, 900, plusFmt);
+      showToast('Errore di connessione. Visualizzando agenti predefiniti.', 'error');
     }
-    animateNumber(document.getElementById('hero-stat-vendor'), vendorsRes.count > 0 ? vendorsRes.count : 5, 900, plusFmt);
 
+    updateChipCounts();
     applyFilters();
   }
 
@@ -529,7 +636,10 @@
     applyFilters();
   });
 
-  document.getElementById('sort-select').addEventListener('change', applyFilters);
+  document.getElementById('sort-select').addEventListener('change', function() {
+    this.classList.toggle('has-value', !!this.value);
+    applyFilters();
+  });
   document.getElementById('search-input').addEventListener('input', applyFilters);
 
   // Auth-aware nav
@@ -554,11 +664,15 @@
     const isOpen = document.getElementById('mobile-nav').classList.toggle('open');
     document.getElementById('mobile-nav-backdrop').classList.toggle('open', isOpen);
     document.body.style.overflow = isOpen ? 'hidden' : '';
+    const btn = document.querySelector('.mobile-menu-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeMobileNav() {
     document.getElementById('mobile-nav').classList.remove('open');
     document.getElementById('mobile-nav-backdrop').classList.remove('open');
     document.body.style.overflow = '';
+    const btn = document.querySelector('.mobile-menu-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 </script>
 </body>

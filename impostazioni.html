@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Impostazioni — Shop Your Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --bg: #0a0a0a; --surface: #141414; --surface2: #242424;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.22);
+    --text: #f0ede8; --muted: #999; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
     --error: #ff5f5f; --success: #5fff9a;
   }
@@ -98,10 +102,11 @@
 <script src="sya.js"></script>
 </head>
 <body>
+<noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
 
 <div class="mobile-topbar">
   <a href="shop_your_agent.html" class="mobile-logo">Shop<span>Your</span>Agent</a>
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </div>
@@ -123,7 +128,7 @@
         <div class="user-email" id="user-email"></div>
       </div>
     </div>
-    <a class="logout-btn" onclick="signOut()">Esci</a>
+    <button class="logout-btn" onclick="signOut()">Esci</button>
     <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
       <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
       <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
@@ -156,8 +161,8 @@
   <div class="settings-block">
     <div class="block-title">Profilo</div>
     <div class="field-row">
-      <div class="field"><label>Nome</label><input type="text" id="s-nome" placeholder="Mario"></div>
-      <div class="field"><label>Cognome</label><input type="text" id="s-cognome" placeholder="Rossi"></div>
+      <div class="field"><label for="s-nome">Nome</label><input type="text" id="s-nome" placeholder="Mario"></div>
+      <div class="field"><label for="s-cognome">Cognome</label><input type="text" id="s-cognome" placeholder="Rossi"></div>
     </div>
     <button class="btn-save" id="btn-profile" onclick="saveProfile()">Salva profilo</button>
   </div>
@@ -165,8 +170,8 @@
   <!-- PASSWORD -->
   <div class="settings-block">
     <div class="block-title">Sicurezza</div>
-    <div class="field"><label>Nuova password</label><input type="password" id="s-pwd" placeholder="Minimo 8 caratteri"></div>
-    <div class="field"><label>Conferma password</label><input type="password" id="s-pwd2" placeholder="Ripeti la nuova password"></div>
+    <div class="field"><label for="s-pwd">Nuova password</label><input type="password" id="s-pwd" placeholder="Minimo 8 caratteri"></div>
+    <div class="field"><label for="s-pwd2">Conferma password</label><input type="password" id="s-pwd2" placeholder="Ripeti la nuova password"></div>
     <button class="btn-save" id="btn-pwd" onclick="savePassword()">Aggiorna password</button>
   </div>
 
@@ -262,14 +267,19 @@
   init();
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar.classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('open');
-    document.body.style.overflow = document.querySelector('.sidebar').classList.contains('open') ? 'hidden' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeSidebar() {
     document.querySelector('.sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 </script>
 </body>

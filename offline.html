@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Offline — Shop Your Agent</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --border: rgba(255,255,255,0.08);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body), sans-serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+  }
+  .wrap { max-width: 420px; }
+  .icon { font-size: 64px; margin-bottom: 1.5rem; }
+  h1 {
+    font-family: var(--font-display), sans-serif;
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 0.75rem; color: var(--text);
+  }
+  p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+  .btn {
+    display: inline-block; background: var(--accent); color: #0a0a0a;
+    font-family: var(--font-body), sans-serif; font-size: 14px; font-weight: 500;
+    padding: 12px 28px; border: none; border-radius: 8px; cursor: pointer;
+    text-decoration: none; transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem;
+  }
+  .tip { font-size: 13px; color: var(--muted); margin-top: 1.5rem; }
+  .tip strong { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="icon">📡</div>
+    <h1>Sei offline</h1>
+    <p>Non è stato possibile connettersi a Shop Your Agent. Controlla la tua connessione a internet e riprova.</p>
+    <button class="btn" onclick="window.location.reload()">Riprova →</button>
+  </div>
+  <p class="tip">
+    <strong>Suggerimento:</strong> alcune pagine visitate di recente potrebbero essere disponibili anche offline — torna indietro e controllale.
+  </p>
+</div>
+</body>
+</html>

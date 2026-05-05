@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Dashboard Vendor — Shop Your Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --bg: #0a0a0a; --surface: #141414; --surface2: #242424;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.22);
+    --text: #f0ede8; --muted: #999; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
     --error: #ff5f5f; --success: #5fff9a;
   }
@@ -148,38 +152,49 @@
   @media (max-width: 768px) {
     body { flex-direction: column; }
     .mobile-topbar { display: flex; }
-    .sidebar {
-      transform: translateX(-260px);
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      z-index: 160;
-      width: 260px;
-    }
+    .sidebar { transform: translateX(-260px); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 160; width: 260px; }
     .sidebar.open { transform: translateX(0); }
-    .main {
-      margin-left: 0 !important;
-      padding: 4.5rem 1rem 2rem;
-      width: 100%;
-    }
-    /* Responsive grids */
+    .main { margin-left: 0 !important; padding: 4.5rem 1rem 2rem; width: 100%; }
     .stats-row { grid-template-columns: 1fr 1fr !important; }
     .revenue-grid { grid-template-columns: 1fr 1fr !important; }
     .field-row { grid-template-columns: 1fr !important; }
-    /* Tables scroll via sya.js global styles */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    /* Modal full width on mobile */
     .modal { margin: 0; border-radius: 16px 16px 0 0; max-height: 92vh; }
     .modal-overlay { align-items: flex-end; padding: 0; }
   }
+
+  /* ── Extra UI ── */
+  .status-badge.rejected { background: rgba(255,95,95,0.1); color: var(--error); border: 1px solid rgba(255,95,95,0.2); }
+  .nav-badge { margin-left: auto; background: var(--warning, #ffaa00); color: #0a0a0a; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 99px; display: none; }
+  .nav-badge.visible { display: inline; }
+  .char-counter { font-size: 11px; color: var(--muted); text-align: right; margin-top: 3px; transition: color 0.2s; }
+  .char-counter.warn { color: var(--warning, #ffaa00); }
+  .char-counter.over { color: var(--error); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--border); margin-top: 4px; }
+  .toggle-label-wrap .toggle-label { font-size: 13px; color: var(--text); font-weight: 500; }
+  .toggle-label-wrap .toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--surface2); border-radius: 99px; cursor: pointer; transition: 0.2s; border: 1px solid var(--border2); }
+  .toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; background: var(--muted); border-radius: 50%; transition: 0.2s; }
+  input:checked + .toggle-slider { background: rgba(200,245,90,0.2); border-color: rgba(200,245,90,0.5); }
+  input:checked + .toggle-slider::before { transform: translateX(18px); background: var(--accent); }
+  .info-banner { background: rgba(200,245,90,0.05); border: 1px solid rgba(200,245,90,0.15); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
+  .table-search { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; width: 100%; max-width: 280px; margin-bottom: 1rem; transition: border-color 0.2s; }
+  .table-search:focus { border-color: rgba(200,245,90,0.4); }
+  .table-search::placeholder { color: #555; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="sya.js"></script>
 </head>
 <body>
+<noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
 
 <div class="mobile-topbar">
   <a href="shop_your_agent.html" class="mobile-logo">Shop<span>Your</span>Agent</a>
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span id="topbar-section-name" style="font-size:13px;color:var(--muted);font-weight:500;flex:1;text-align:center;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Dashboard</span>
+  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </div>
@@ -188,20 +203,20 @@
 <div class="sidebar">
   <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
   <span class="role-badge">Vendor</span>
-  <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
+  <button class="nav-item active" id="nav-dashboard" aria-pressed="true" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard <span class="nav-badge" id="nav-pending-badge">0</span></button>
   <button class="nav-item" onclick="closeSidebar();openModal()"><span class="nav-icon">➕</span> Nuovo agente</button>
-  <button class="nav-item" id="nav-guadagni" onclick="showSection('guadagni', this)"><span class="nav-icon">💰</span> Guadagni</button>
-  <button class="nav-item" id="nav-profilo" onclick="showSection('profilo', this)"><span class="nav-icon">👤</span> Profilo</button>
+  <button class="nav-item" id="nav-guadagni" aria-pressed="false" onclick="showSection('guadagni', this)"><span class="nav-icon">💰</span> Guadagni</button>
+  <button class="nav-item" id="nav-profilo" aria-pressed="false" onclick="showSection('profilo', this)"><span class="nav-icon">👤</span> Profilo</button>
   <a class="nav-item" href="impostazioni.html"><span class="nav-icon">⚙️</span> Impostazioni</a>
   <div class="sidebar-bottom">
-    <div class="user-info">
+    <a href="impostazioni.html" class="user-info" style="text-decoration:none;border-radius:10px;transition:background 0.2s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
       <div class="avatar" id="avatar-initials">V</div>
       <div>
         <div class="user-name" id="user-name">Vendor</div>
         <div class="user-email" id="user-email"></div>
       </div>
-    </div>
-    <a class="logout-btn" onclick="signOut()">Esci</a>
+    </a>
+    <button class="logout-btn" onclick="signOut()">Esci</button>
     <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
       <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
       <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
@@ -245,13 +260,16 @@
       </div>
       <button class="btn-main" onclick="openModal()">+ Nuovo agente</button>
     </div>
-    <div class="stats-row" id="stats-row">
+    <div class="stats-row" id="stats-row" style="grid-template-columns:repeat(4,1fr);">
       <div class="stat-card"><div class="stat-label">Agenti pubblicati</div><div class="stat-val" id="stat-agenti">—</div></div>
       <div class="stat-card"><div class="stat-label">In revisione</div><div class="stat-val" id="stat-pending">—</div></div>
       <div class="stat-card"><div class="stat-label">Abbonamenti attivi</div><div class="stat-val" id="stat-subs">—</div></div>
-      <div class="stat-card"><div class="stat-label">Guadagno mensile</div><div class="stat-val green" id="stat-guadagno">—</div></div>
+      <div class="stat-card"><div class="stat-label">Guadagno mensile</div><div class="stat-val green" id="stat-guadagno">—</div><div class="stat-sub">70% delle vendite</div></div>
     </div>
-    <div class="section-title mb-2">I tuoi agenti</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div class="section-title" style="margin-bottom:0;">I tuoi agenti</div>
+      <input type="text" class="table-search" id="agents-search" placeholder="Cerca agente..." oninput="filterAgentsTable(this.value)">
+    </div>
     <div class="table-wrap">
     <table>
       <thead>
@@ -268,6 +286,7 @@
   <div class="page-section" id="section-profilo">
     <div class="page-title">Profilo vendor</div>
     <div class="page-sub" style="margin-bottom:2rem;">Informazioni pubbliche e coordinate di pagamento</div>
+    <div class="info-banner">ℹ️ Ogni volta che modifichi un agente già attivo, verrà rimandato in revisione prima di essere ripubblicato. Le modifiche saranno visibili agli utenti solo dopo l'approvazione del team.</div>
     <div class="settings-block">
       <div class="block-title">Informazioni pubbliche</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;">
@@ -351,13 +370,24 @@
         <option>Crescita</option><option>Altro</option>
       </select>
     </div>
-    <div class="field"><label>Descrizione breve</label><input type="text" id="new-desc-breve" placeholder="Una riga che descrive l'agente"></div>
+    <div class="field">
+      <label>Descrizione breve</label>
+      <input type="text" id="new-desc-breve" placeholder="Una riga che descrive l'agente" maxlength="140">
+      <div class="char-counter" id="desc-breve-counter">0/120</div>
+    </div>
     <div class="field"><label>Descrizione completa *</label><textarea id="new-desc" placeholder="Descrivi cosa fa l'agente, come funziona, per chi è pensato..."></textarea></div>
     <div class="field"><label>Prezzo mensile (€) *</label><input type="number" id="new-prezzo" placeholder="29" min="1"></div>
     <div class="field"><label>Icona (emoji)</label><input type="text" id="new-icona" placeholder="🤖" maxlength="4"></div>
     <div class="field"><label>URL Video Demo (YouTube / Vimeo)</label><input type="url" id="new-video-url" placeholder="https://youtube.com/watch?v=..."></div>
     <div class="field"><label>Istruzioni di setup</label><textarea id="new-istruzioni" placeholder="Spiega passo per passo come configurare e usare l'agente...&#10;1. Primo passo&#10;2. Secondo passo&#10;..." style="min-height:120px;"></textarea></div>
-    <div class="modal-btns">
+    <div class="toggle-row">
+      <div class="toggle-label-wrap">
+        <div class="toggle-label">⭐ Agente in evidenza</div>
+        <div class="toggle-sub">Appare con badge "Top" nel catalogo (soggetto ad approvazione admin)</div>
+      </div>
+      <label class="toggle-switch"><input type="checkbox" id="new-featured"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="modal-btns" style="margin-top:1.25rem;">
       <button class="btn-ghost" onclick="closeModal()">Annulla</button>
       <button class="btn-main btn-main-full" id="modal-submit-btn" onclick="submitAgent()">Invia per approvazione</button>
     </div>
@@ -378,25 +408,60 @@
 </div>
 
 <script>
+  const DESC_BREVE_MAX = 120;
   let currentVendorId = null;
   let vendorAgents = [];
+  let vendorAgentsFiltered = [];
   let earningsChart = null;
   let editingAgentId = null;
 
+  // ── Navigation ─────────────────────────────────────────────────
   function showSection(name, el) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.remove('active');
+      if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'false');
+    });
     document.getElementById(`section-${name}`).classList.add('active');
-    if (el) el.classList.add('active');
+    if (el) {
+      el.classList.add('active');
+      if (el.hasAttribute('aria-pressed')) el.setAttribute('aria-pressed', 'true');
+      const topbarName = document.getElementById('topbar-section-name');
+      if (topbarName) topbarName.textContent = el.textContent.trim().replace(/^[^\s]+\s*/, '').trim() || el.textContent.trim();
+    }
     if (name === 'guadagni') loadGuadagni();
     if (typeof closeSidebar === 'function') closeSidebar();
   }
 
+  // ── Char counter ───────────────────────────────────────────────
+  function updateCharCounter() {
+    const input = document.getElementById('new-desc-breve');
+    const counter = document.getElementById('desc-breve-counter');
+    if (!input || !counter) return;
+    const len = input.value.length;
+    counter.textContent = `${len}/${DESC_BREVE_MAX}`;
+    counter.className = 'char-counter' + (len > DESC_BREVE_MAX - 20 ? ' warn' : '') + (len > DESC_BREVE_MAX ? ' over' : '');
+  }
+
+  // ── Video URL validation ────────────────────────────────────────
+  function isValidVideoUrl(url) {
+    if (!url) return true;
+    return /(?:youtube\.com\/watch\?v=|youtu\.be\/|vimeo\.com\/)/.test(url);
+  }
+
+  // ── Agents table search ─────────────────────────────────────────
+  function filterAgentsTable(query) {
+    const q = query.toLowerCase().trim();
+    const filtered = q ? vendorAgents.filter(a =>
+      a.nome.toLowerCase().includes(q) ||
+      (a.categoria || '').toLowerCase().includes(q)
+    ) : vendorAgents;
+    renderAgentsTable(filtered, window._subsMap || {});
+  }
+
+  // ── Modal ───────────────────────────────────────────────────────
   function openModal(agentId) {
-    if (!currentVendorId) {
-      showToast('Completa prima il tuo profilo vendor.', 'error');
-      return;
-    }
+    if (!currentVendorId) { showToast('Completa prima il tuo profilo vendor.', 'error'); return; }
     editingAgentId = agentId || null;
     const title = document.getElementById('modal-title');
     const btn = document.getElementById('modal-submit-btn');
@@ -411,43 +476,40 @@
       document.getElementById('new-icona').value = agent.icona || '';
       document.getElementById('new-video-url').value = agent.video_demo_url || '';
       document.getElementById('new-istruzioni').value = agent.istruzioni_setup || '';
+      document.getElementById('new-featured').checked = !!agent.featured;
       title.textContent = 'Modifica agente';
       btn.textContent = 'Salva modifiche';
       btn.onclick = saveEdit;
     } else {
-      document.getElementById('new-nome').value = '';
+      ['new-nome','new-desc-breve','new-desc','new-icona','new-video-url','new-istruzioni'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('new-categoria').value = '';
-      document.getElementById('new-desc-breve').value = '';
-      document.getElementById('new-desc').value = '';
       document.getElementById('new-prezzo').value = '';
-      document.getElementById('new-icona').value = '';
-      document.getElementById('new-video-url').value = '';
-      document.getElementById('new-istruzioni').value = '';
+      document.getElementById('new-featured').checked = false;
       title.textContent = 'Aggiungi nuovo agente';
       btn.textContent = 'Invia per approvazione';
       btn.onclick = submitAgent;
     }
+    updateCharCounter();
     document.getElementById('modal').classList.add('open');
   }
 
-  function closeModal() {
-    document.getElementById('modal').classList.remove('open');
-    editingAgentId = null;
-  }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); editingAgentId = null; }
+  function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
 
-  function closeConfirm() {
-    document.getElementById('confirm-modal').classList.remove('open');
-  }
-
-  function confirmDelete(id) {
+  async function confirmDelete(id) {
+    const { count } = await db.from('subscriptions').select('*', { count: 'exact', head: true }).eq('agent_id', id).eq('stato', 'attiva');
     const modal = document.getElementById('confirm-modal');
+    const sub = document.getElementById('confirm-sub');
+    sub.textContent = count > 0
+      ? `Questo agente ha ${count} abbonamento/i attivo/i. Eliminarlo interromperà i servizi attivi degli utenti. Sei sicuro di voler procedere?`
+      : 'Stai per eliminare questo agente. L\'operazione non è reversibile.';
     modal.classList.add('open');
     document.getElementById('confirm-delete-btn').onclick = async () => {
       const { error } = await db.from('agents').delete().eq('id', id);
       closeConfirm();
       if (error) { showToast('Errore durante l\'eliminazione', 'error'); return; }
       showToast('Agente eliminato', 'success');
-      loadDashboard();
+      await loadDashboard();
     };
   }
 
@@ -459,220 +521,232 @@
     document.getElementById('user-email').textContent = user.email || '';
     document.getElementById('avatar-initials').textContent = user.email?.charAt(0).toUpperCase() || 'V';
 
-    const { data: vendors } = await db.from('vendors').select('*').eq('user_id', user.id).limit(1);
+    // Char counter + payout method listeners
+    const descBreveInput = document.getElementById('new-desc-breve');
+    if (descBreveInput) descBreveInput.addEventListener('input', updateCharCounter);
+    const sel = document.getElementById('p-payout-method');
+    if (sel) sel.addEventListener('change', updatePayoutLabel);
 
-    if (!vendors?.length) {
+    try {
+      const { data: vendors } = await db.from('vendors').select('*').eq('user_id', user.id).limit(1);
+
+      if (!vendors?.length) {
+        const meta = user.user_metadata || {};
+        if (meta.nome) document.getElementById('ob-nome').value = meta.nome;
+        if (meta.cognome) document.getElementById('ob-cognome').value = meta.cognome;
+        showSection('onboarding', null);
+        document.getElementById('section-onboarding').classList.add('active');
+        return;
+      }
+
+      const vendor = vendors[0];
+      currentVendorId = vendor.id;
+      document.getElementById('user-name').textContent = `${vendor.nome} ${vendor.cognome}`;
+      document.getElementById('avatar-initials').textContent = vendor.nome?.charAt(0).toUpperCase() || 'V';
+
+      document.getElementById('p-nome').value = vendor.nome || '';
+      document.getElementById('p-cognome').value = vendor.cognome || '';
+      document.getElementById('p-bio').value = vendor.bio || '';
+
+      // Prefer vendor table payout data, fallback to user_metadata
       const meta = user.user_metadata || {};
-      if (meta.nome) document.getElementById('ob-nome').value = meta.nome;
-      if (meta.cognome) document.getElementById('ob-cognome').value = meta.cognome;
-      showSection('onboarding', null);
-      document.getElementById('section-onboarding').classList.add('active');
-      return;
+      const pm = vendor.payout_method || meta.payout_method;
+      const pv = vendor.payout_value || meta.payout_value;
+      const pn = vendor.payout_name || meta.payout_name;
+      if (pm) document.getElementById('p-payout-method').value = pm;
+      if (pv) document.getElementById('p-payout-value').value = pv;
+      if (pn) document.getElementById('p-payout-name').value = pn;
+      updatePayoutLabel();
+
+      if (!vendor.approvato) {
+        showSection('pending', null);
+        document.getElementById('section-pending').classList.add('active');
+        return;
+      }
+
+      await loadDashboard();
+      showSection('dashboard', document.getElementById('nav-dashboard'));
+    } catch (err) {
+      showToast('Errore di connessione', 'error');
     }
-
-    const vendor = vendors[0];
-    currentVendorId = vendor.id;
-    document.getElementById('user-name').textContent = `${vendor.nome} ${vendor.cognome}`;
-    document.getElementById('avatar-initials').textContent = vendor.nome?.charAt(0).toUpperCase() || 'V';
-
-    // Populate profile section
-    document.getElementById('p-nome').value = vendor.nome || '';
-    document.getElementById('p-cognome').value = vendor.cognome || '';
-    document.getElementById('p-bio').value = vendor.bio || '';
-    const meta = user.user_metadata || {};
-    if (meta.payout_method) document.getElementById('p-payout-method').value = meta.payout_method;
-    if (meta.payout_value) document.getElementById('p-payout-value').value = meta.payout_value;
-    if (meta.payout_name) document.getElementById('p-payout-name').value = meta.payout_name;
-    updatePayoutLabel();
-
-    if (!vendor.approvato) {
-      showSection('pending', null);
-      document.getElementById('section-pending').classList.add('active');
-      return;
-    }
-
-    await loadDashboard();
-    showSection('dashboard', document.getElementById('nav-dashboard'));
   }
 
   async function createVendorProfile() {
     const nome = document.getElementById('ob-nome').value.trim();
     const cognome = document.getElementById('ob-cognome').value.trim();
     const bio = document.getElementById('ob-bio').value.trim();
-
-    if (!nome || !cognome) {
-      showToast('Inserisci nome e cognome', 'error');
-      return;
-    }
+    if (!nome || !cognome) { showToast('Inserisci nome e cognome', 'error'); return; }
 
     const { data: { session } } = await db.auth.getSession();
     const btn = document.querySelector('.onboarding-form .btn-main');
     setBtnLoading(btn, true, 'Completa profilo →');
 
-    const { data, error } = await db.from('vendors').insert({
-      user_id: session.user.id,
-      nome, cognome, bio,
-      email: session.user.email,
-      approvato: false
-    }).select().single();
+    try {
+      const { data, error } = await db.from('vendors').insert({
+        user_id: session.user.id, nome, cognome, bio,
+        email: session.user.email, approvato: false
+      }).select().single();
+      if (error) throw error;
 
-    setBtnLoading(btn, false, 'Completa profilo →');
+      currentVendorId = data.id;
+      document.getElementById('user-name').textContent = `${nome} ${cognome}`;
+      document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
 
-    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
+      fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ type: 'vendor_registered', agentName: `${nome} ${cognome}` }),
+      }).catch(() => {});
 
-    currentVendorId = data.id;
-    document.getElementById('user-name').textContent = `${nome} ${cognome}`;
-    document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
-
-    // Notify admin of new vendor registration (fire and forget)
-    fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify({ type: 'vendor_registered', agentName: `${nome} ${cognome}` }),
-    }).catch(() => {});
-
-    showToast('Profilo creato! In attesa di approvazione (entro 24h).', 'info');
-    showSection('pending', null);
-    document.getElementById('section-pending').classList.add('active');
+      showToast('Profilo creato! In attesa di approvazione (entro 24h).', 'info');
+      showSection('pending', null);
+      document.getElementById('section-pending').classList.add('active');
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      setBtnLoading(btn, false, 'Completa profilo →');
+    }
   }
 
   async function loadDashboard() {
     if (!currentVendorId) return;
+    try {
+      const { data: agents, error: agErr } = await db.from('agents').select('*').eq('vendor_id', currentVendorId);
+      if (agErr) throw agErr;
+      vendorAgents = agents || [];
 
-    const { data: agents } = await db.from('agents').select('*').eq('vendor_id', currentVendorId);
-    vendorAgents = agents || [];
+      const active = vendorAgents.filter(a => a.attivo);
+      const pending = vendorAgents.filter(a => !a.attivo);
 
-    const active = vendorAgents.filter(a => a.attivo);
-    const pending = vendorAgents.filter(a => !a.attivo);
+      // Update sidebar pending badge
+      const badge = document.getElementById('nav-pending-badge');
+      if (badge) { badge.textContent = pending.length; badge.classList.toggle('visible', pending.length > 0); }
 
-    let totalSubs = 0;
-    let guadagnoMensile = 0;
-    if (active.length) {
-      const agentIds = active.map(a => a.id);
-      const { data: subs } = await db.from('subscriptions').select('*, agents(prezzo_mensile)').in('agent_id', agentIds).eq('stato', 'attiva');
-      totalSubs = (subs || []).length;
-      guadagnoMensile = (subs || []).reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
+      let totalSubs = 0, guadagnoMensile = 0;
+      window._subsMap = {};
+
+      if (vendorAgents.length) {
+        const agentIds = vendorAgents.map(a => a.id);
+        const { data: subs } = await db.from('subscriptions')
+          .select('agent_id, stato, agents(prezzo_mensile)')
+          .in('agent_id', agentIds)
+          .eq('stato', 'attiva');
+        const activeSubs = subs || [];
+        totalSubs = activeSubs.length;
+        guadagnoMensile = activeSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
+        activeSubs.forEach(s => { window._subsMap[s.agent_id] = (window._subsMap[s.agent_id] || 0) + 1; });
+      }
+
+      document.getElementById('stat-agenti').textContent = active.length;
+      document.getElementById('stat-pending').textContent = pending.length;
+      document.getElementById('stat-subs').textContent = totalSubs;
+      document.getElementById('stat-guadagno').textContent = `€${guadagnoMensile.toFixed(0)}`;
+
+      renderAgentsTable(vendorAgents, window._subsMap);
+    } catch (err) {
+      showToast('Errore nel caricamento della dashboard', 'error');
     }
-
-    document.getElementById('stat-agenti').textContent = active.length;
-    document.getElementById('stat-pending').textContent = pending.length;
-    document.getElementById('stat-subs').textContent = totalSubs;
-    document.getElementById('stat-guadagno').textContent = `€${guadagnoMensile.toFixed(0)}`;
-
-    renderAgentsTable(vendorAgents);
   }
 
-  function renderAgentsTable(agents) {
+  function renderAgentsTable(agents, subsMap) {
     const tbody = document.getElementById('agents-tbody');
     if (!agents.length) {
       tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun agente ancora — clicca "+ Nuovo agente"</td></tr>';
       return;
     }
-    tbody.innerHTML = agents.map(a => `
-      <tr>
-        <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong></td>
-        <td>${escHtml(a.categoria)}</td>
-        <td>€${a.prezzo_mensile}/mese</td>
-        <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In revisione'}</span></td>
-        <td id="subs-${a.id}">—</td>
-        <td style="display:flex;gap:10px;">
-          <button class="table-action" onclick="openModal('${a.id}')">Modifica</button>
-          <button class="table-action" style="color:var(--error);" onclick="confirmDelete('${a.id}')">Elimina</button>
-        </td>
-      </tr>`).join('');
-
-    agents.forEach(async a => {
-      const { count } = await db.from('subscriptions').select('*', { count: 'exact', head: true }).eq('agent_id', a.id).eq('stato', 'attiva');
-      const el = document.getElementById(`subs-${a.id}`);
-      if (el) el.textContent = count || 0;
-    });
+    tbody.innerHTML = agents.map(a => {
+      const statusClass = a.attivo ? 'active' : (a.rejected ? 'rejected' : 'pending');
+      const statusLabel = a.attivo ? 'Attivo' : (a.rejected ? 'Rifiutato' : 'In revisione');
+      const subCount = subsMap ? (subsMap[a.id] || 0) : '—';
+      const featuredBadge = a.featured ? ' <span style="font-size:10px;background:rgba(200,245,90,0.1);color:var(--accent);border:1px solid rgba(200,245,90,0.2);padding:2px 6px;border-radius:99px;margin-left:4px;">Top</span>' : '';
+      return `
+        <tr>
+          <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong>${featuredBadge}</td>
+          <td>${escHtml(a.categoria)}</td>
+          <td>€${a.prezzo_mensile}/mese</td>
+          <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+          <td>${subCount}</td>
+          <td style="display:flex;gap:8px;">
+            ${!a.rejected ? `<button class="table-action" onclick="openModal('${a.id}')">Modifica</button>` : ''}
+            <button class="table-action" style="color:var(--error);" onclick="confirmDelete('${a.id}')">Elimina</button>
+          </td>
+        </tr>`;
+    }).join('');
   }
 
   async function loadGuadagni() {
     if (!currentVendorId) return;
+    try {
+      if (!vendorAgents.length) {
+        const { data: agents } = await db.from('agents').select('*').eq('vendor_id', currentVendorId);
+        vendorAgents = agents || [];
+      }
+      if (!vendorAgents.length) {
+        document.getElementById('rev-mensile').textContent = '€0';
+        document.getElementById('rev-totale').textContent = '€0';
+        document.getElementById('rev-abbonati').textContent = '0';
+        return;
+      }
+      const agentIds = vendorAgents.map(a => a.id);
+      const { data: allSubs } = await db.from('subscriptions')
+        .select('agent_id, stato, agents(nome, prezzo_mensile)')
+        .in('agent_id', agentIds);
+      const subs = allSubs || [];
+      const activeSubs = subs.filter(s => s.stato === 'attiva');
 
-    if (!vendorAgents.length) {
-      const { data: agents } = await db.from('agents').select('*').eq('vendor_id', currentVendorId);
-      vendorAgents = agents || [];
+      const mensile = activeSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
+      document.getElementById('rev-mensile').textContent = `€${mensile.toFixed(0)}`;
+      document.getElementById('rev-totale').textContent = `€${mensile.toFixed(0)}`;
+      document.getElementById('rev-abbonati').textContent = activeSubs.length;
+
+      const byAgent = {};
+      vendorAgents.forEach(a => { byAgent[a.id] = { nome: a.nome, prezzo: a.prezzo_mensile, count: 0 }; });
+      activeSubs.forEach(s => { if (byAgent[s.agent_id]) byAgent[s.agent_id].count++; });
+
+      const rows = Object.values(byAgent);
+      const tbody = document.getElementById('earnings-tbody');
+      if (!rows.length || rows.every(r => r.count === 0)) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun abbonamento attivo ancora</td></tr>';
+      } else {
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><strong>${escHtml(r.nome)}</strong></td>
+            <td>€${r.prezzo}/mese</td>
+            <td>${r.count}</td>
+            <td style="color:var(--accent);font-weight:600;">€${(r.count * r.prezzo * 0.7).toFixed(0)}</td>
+          </tr>`).join('');
+      }
+      renderEarningsChart(rows);
+    } catch (err) {
+      showToast('Errore nel caricamento guadagni', 'error');
     }
-
-    if (!vendorAgents.length) return;
-
-    const agentIds = vendorAgents.map(a => a.id);
-    const { data: allSubs } = await db.from('subscriptions').select('*, agents(nome, prezzo_mensile)').in('agent_id', agentIds);
-    const subs = allSubs || [];
-    const activeSubs = subs.filter(s => s.stato === 'attiva');
-
-    const mensile = activeSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
-    const totale = subs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
-
-    document.getElementById('rev-mensile').textContent = `€${mensile.toFixed(0)}`;
-    document.getElementById('rev-totale').textContent = `€${totale.toFixed(0)}`;
-    document.getElementById('rev-abbonati').textContent = activeSubs.length;
-
-    const byAgent = {};
-    vendorAgents.forEach(a => { byAgent[a.id] = { nome: a.nome, prezzo: a.prezzo_mensile, count: 0 }; });
-    activeSubs.forEach(s => { if (byAgent[s.agent_id]) byAgent[s.agent_id].count++; });
-
-    const rows = Object.values(byAgent);
-    const tbody = document.getElementById('earnings-tbody');
-    if (!rows.length || rows.every(r => r.count === 0)) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun abbonamento attivo</td></tr>';
-    } else {
-      tbody.innerHTML = rows.map(r => `
-        <tr>
-          <td><strong>${r.nome}</strong></td>
-          <td>€${r.prezzo}/mese</td>
-          <td>${r.count}</td>
-          <td style="color:var(--accent);font-weight:600;">€${(r.count * r.prezzo * 0.7).toFixed(0)}</td>
-        </tr>`).join('');
-    }
-
-    renderEarningsChart(rows);
   }
 
   function renderEarningsChart(rows) {
     const ctx = document.getElementById('earnings-chart');
     if (!ctx) return;
-
     const labels = rows.map(r => r.nome.length > 20 ? r.nome.substring(0, 20) + '…' : r.nome);
     const data = rows.map(r => parseFloat((r.count * r.prezzo * 0.7).toFixed(2)));
-
     if (earningsChart) earningsChart.destroy();
-
     earningsChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
-        datasets: [{
-          label: 'Guadagno mensile (€)',
-          data,
-          backgroundColor: 'rgba(200,245,90,0.15)',
-          borderColor: 'rgba(200,245,90,0.5)',
-          borderWidth: 1,
-          borderRadius: 6,
-        }]
+        datasets: [{ label: 'Guadagno mensile (€)', data, backgroundColor: 'rgba(200,245,90,0.15)', borderColor: 'rgba(200,245,90,0.5)', borderWidth: 1, borderRadius: 6 }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(10,10,10,0.9)',
-            borderColor: 'rgba(200,245,90,0.3)',
-            borderWidth: 1,
-            titleColor: '#f0ede8',
-            bodyColor: '#c8f55a',
-            callbacks: { label: ctx => `€${ctx.parsed.y}` }
+            backgroundColor: 'rgba(20,20,20,0.95)', borderColor: 'rgba(200,245,90,0.3)', borderWidth: 1,
+            titleColor: '#f0ede8', bodyColor: '#f0ede8', padding: 10,
+            callbacks: { label: c => `  €${c.parsed.y} guadagnati` }
           }
         },
         scales: {
-          x: { ticks: { color: '#888', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-          y: {
-            ticks: { color: '#888', font: { family: 'DM Sans', size: 11 }, callback: v => `€${v}` },
-            grid: { color: 'rgba(255,255,255,0.04)' }
-          }
+          x: { ticks: { color: '#999', font: { family: 'DM Sans', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { beginAtZero: true, ticks: { color: '#999', font: { family: 'DM Sans', size: 11 }, callback: v => `€${v}` }, grid: { color: 'rgba(255,255,255,0.04)' } }
         }
       }
     });
@@ -685,45 +759,36 @@
     const descBreve = document.getElementById('new-desc-breve').value.trim();
     const prezzo = document.getElementById('new-prezzo').value;
     const icona = document.getElementById('new-icona').value.trim();
+    const videoUrl = document.getElementById('new-video-url').value.trim();
+    const istruzioni = document.getElementById('new-istruzioni').value.trim();
+    const featured = document.getElementById('new-featured').checked;
 
-    if (!nome || !categoria || !desc || !prezzo) {
-      showToast('Compila tutti i campi obbligatori (*)', 'error');
-      return;
-    }
+    if (!nome || !categoria || !desc || !prezzo) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
+    if (descBreve.length > DESC_BREVE_MAX) { showToast(`La descrizione breve supera i ${DESC_BREVE_MAX} caratteri`, 'error'); return; }
+    if (videoUrl && !isValidVideoUrl(videoUrl)) { showToast('L\'URL video deve essere un link YouTube o Vimeo valido', 'error'); return; }
 
     const btn = document.getElementById('modal-submit-btn');
     setBtnLoading(btn, true, 'Invia per approvazione');
-
-    const videoUrl = document.getElementById('new-video-url').value.trim();
-    const istruzioni = document.getElementById('new-istruzioni').value.trim();
-
-    const { error } = await db.from('agents').insert({
-      vendor_id: currentVendorId, nome, categoria,
-      descrizione: desc, descrizione_breve: descBreve,
-      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
-      video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
-      attivo: false
-    });
-
-    setBtnLoading(btn, false, 'Invia per approvazione');
-
-    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
-
-    closeModal();
-    showToast('Agente inviato per approvazione!', 'success', 'Il team lo revisiona entro 24h');
-
-    // Notify admin (fire and forget)
-    const { data: { session: s } } = await db.auth.getSession();
-    if (s) {
-      fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.access_token}`, 'apikey': SUPABASE_ANON_KEY },
-        body: JSON.stringify({ type: 'agent_submitted', agentName: nome }),
-      }).catch(() => {});
+    try {
+      const { error } = await db.from('agents').insert({
+        vendor_id: currentVendorId, nome, categoria,
+        descrizione: desc, descrizione_breve: descBreve,
+        prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+        video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
+        attivo: false, featured: featured
+      });
+      if (error) throw error;
+      closeModal();
+      showToast('Agente inviato per approvazione!', 'success', 'Il team lo revisiona entro 24h');
+      const { data: { session: s } } = await db.auth.getSession();
+      if (s) fetch(`${SUPABASE_URL}/functions/v1/send-notification`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.access_token}`, 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ type: 'agent_submitted', agentName: nome }) }).catch(() => {});
+      await loadDashboard();
+      showSection('dashboard', document.getElementById('nav-dashboard'));
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      setBtnLoading(btn, false, 'Invia per approvazione');
     }
-
-    await loadDashboard();
-    showSection('dashboard', document.getElementById('nav-dashboard'));
   }
 
   async function saveEdit() {
@@ -733,48 +798,51 @@
     const descBreve = document.getElementById('new-desc-breve').value.trim();
     const prezzo = document.getElementById('new-prezzo').value;
     const icona = document.getElementById('new-icona').value.trim();
-
-    if (!nome || !categoria || !desc || !prezzo) {
-      showToast('Compila tutti i campi obbligatori (*)', 'error');
-      return;
-    }
-
-    const btn = document.getElementById('modal-submit-btn');
-    setBtnLoading(btn, true, 'Salva modifiche');
-
     const videoUrl = document.getElementById('new-video-url').value.trim();
     const istruzioni = document.getElementById('new-istruzioni').value.trim();
+    const featured = document.getElementById('new-featured').checked;
 
-    const { error } = await db.from('agents').update({
-      nome, categoria, descrizione: desc, descrizione_breve: descBreve,
-      prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
-      video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null
-    }).eq('id', editingAgentId);
+    if (!nome || !categoria || !desc || !prezzo) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
+    if (descBreve.length > DESC_BREVE_MAX) { showToast(`La descrizione breve supera i ${DESC_BREVE_MAX} caratteri`, 'error'); return; }
+    if (videoUrl && !isValidVideoUrl(videoUrl)) { showToast('L\'URL video deve essere un link YouTube o Vimeo valido', 'error'); return; }
 
-    setBtnLoading(btn, false, 'Salva modifiche');
-
-    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
-
-    closeModal();
-    showToast('Agente aggiornato con successo!', 'success');
-    await loadDashboard();
+    const existingAgent = vendorAgents.find(a => a.id === editingAgentId);
+    const wasActive = existingAgent?.attivo;
+    const btn = document.getElementById('modal-submit-btn');
+    setBtnLoading(btn, true, 'Salva modifiche');
+    try {
+      const { error } = await db.from('agents').update({
+        nome, categoria, descrizione: desc, descrizione_breve: descBreve,
+        prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+        video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
+        featured: featured, attivo: false
+      }).eq('id', editingAgentId);
+      if (error) throw error;
+      closeModal();
+      if (wasActive) {
+        showToast('Agente aggiornato e reinviato in revisione', 'info', 'Sarà ripubblicato dopo approvazione');
+        const { data: { session: s } } = await db.auth.getSession();
+        if (s) fetch(`${SUPABASE_URL}/functions/v1/send-notification`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.access_token}`, 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ type: 'agent_submitted', agentName: nome }) }).catch(() => {});
+      } else {
+        showToast('Agente aggiornato!', 'success');
+      }
+      await loadDashboard();
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      setBtnLoading(btn, false, 'Salva modifiche');
+    }
   }
 
   function updatePayoutLabel() {
     const method = document.getElementById('p-payout-method')?.value;
     const labelMap = { iban: 'IBAN', paypal: 'Email PayPal', wise: 'Email Wise' };
+    const placeholders = { iban: 'IT60 X054 2811 1010 0000 0123 456', paypal: 'mario@paypal.com', wise: 'mario@wise.com' };
     const input = document.getElementById('p-payout-value');
     const label = document.getElementById('p-payout-label');
     if (label) label.textContent = labelMap[method] || 'Dettaglio';
-    if (input) {
-      const placeholders = { iban: 'IT60 X054 2811 1010 0000 0123 456', paypal: 'mario@paypal.com', wise: 'mario@wise.com' };
-      input.placeholder = placeholders[method] || '';
-    }
+    if (input) input.placeholder = placeholders[method] || '';
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('p-payout-method');
-    if (sel) sel.addEventListener('change', updatePayoutLabel);
-  });
 
   async function saveVendorProfile() {
     const nome = document.getElementById('p-nome').value.trim();
@@ -783,12 +851,17 @@
     if (!nome || !cognome) { showToast('Nome e cognome sono obbligatori', 'error'); return; }
     const btn = document.getElementById('btn-save-profile');
     setBtnLoading(btn, true, 'Salva profilo');
-    const { error } = await db.from('vendors').update({ nome, cognome, bio }).eq('id', currentVendorId);
-    setBtnLoading(btn, false, 'Salva profilo');
-    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
-    document.getElementById('user-name').textContent = `${nome} ${cognome}`;
-    document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
-    showToast('Profilo aggiornato!', 'success');
+    try {
+      const { error } = await db.from('vendors').update({ nome, cognome, bio }).eq('id', currentVendorId);
+      if (error) throw error;
+      document.getElementById('user-name').textContent = `${nome} ${cognome}`;
+      document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
+      showToast('Profilo aggiornato!', 'success');
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      setBtnLoading(btn, false, 'Salva profilo');
+    }
   }
 
   async function savePayoutInfo() {
@@ -798,23 +871,36 @@
     if (!value || !name) { showToast('Compila tutti i campi per le coordinate di pagamento', 'error'); return; }
     const btn = document.getElementById('btn-save-payout');
     setBtnLoading(btn, true, 'Salva coordinate');
-    const { error } = await db.auth.updateUser({ data: { payout_method: method, payout_value: value, payout_name: name } });
-    setBtnLoading(btn, false, 'Salva coordinate');
-    if (error) { showToast('Errore: ' + error.message, 'error'); return; }
-    showToast('Coordinate salvate!', 'success');
+    try {
+      const [authRes, vendorRes] = await Promise.all([
+        db.auth.updateUser({ data: { payout_method: method, payout_value: value, payout_name: name } }),
+        db.from('vendors').update({ payout_method: method, payout_value: value, payout_name: name }).eq('id', currentVendorId)
+      ]);
+      if (authRes.error) throw authRes.error;
+      showToast('Coordinate salvate!', 'success');
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      setBtnLoading(btn, false, 'Salva coordinate');
+    }
   }
 
   init();
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar.classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('open');
-    document.body.style.overflow = document.querySelector('.sidebar').classList.contains('open') ? 'hidden' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeSidebar() {
     document.querySelector('.sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 </script>
 </body>

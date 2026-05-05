@@ -18,6 +18,32 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   document.head.appendChild(link);
 })();
 
+// ─── PWA META + SERVICE WORKER ───────────────────────────────────────────────
+
+(function initPWA() {
+  if (!document.querySelector('meta[name="theme-color"]')) {
+    const m = document.createElement('meta');
+    m.name = 'theme-color'; m.content = '#0a0a0a'; m.id = 'sya-theme-color';
+    document.head.appendChild(m);
+  }
+  if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+    const l = document.createElement('link');
+    l.rel = 'apple-touch-icon'; l.sizes = '180x180';
+    l.href = 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">' +
+      '<rect width="180" height="180" rx="40" fill="#141414"/>' +
+      '<text x="90" y="128" font-family="Arial Black,sans-serif" font-size="96" font-weight="900" fill="#c8f55a" text-anchor="middle">S</text>' +
+      '</svg>'
+    );
+    document.head.appendChild(l);
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').catch(function() {});
+    });
+  }
+})();
+
 // ─── COOKIE BANNER ───────────────────────────────────────────────────────────
 
 (function initCookieBanner() {
@@ -58,10 +84,16 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ─── MOBILE NAV (public pages) ───────────────────────────────────────────────
 
 function toggleMobileNav() {
-  document.getElementById('mobile-nav')?.classList.toggle('open');
+  const nav = document.getElementById('mobile-nav');
+  if (!nav) return;
+  const isOpen = nav.classList.toggle('open');
+  const btn = document.querySelector('.mobile-menu-btn');
+  if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 function closeMobileNav() {
   document.getElementById('mobile-nav')?.classList.remove('open');
+  const btn = document.querySelector('.mobile-menu-btn');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
 }
 
 // ─── AUTH ────────────────────────────────────────────────────────────────────
@@ -142,6 +174,9 @@ function showToast(message, type = 'success', subtitle = '', duration = 3500) {
   if (!container) {
     container = document.createElement('div');
     container.id = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-relevant', 'additions');
+    container.setAttribute('aria-atomic', 'false');
     document.body.appendChild(container);
   }
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
@@ -211,6 +246,27 @@ function skeletonStats(count = 3) {
   return Array(count).fill(0).map(() => `<div class="skel skel-stat"></div>`).join('');
 }
 
+// ─── GRAIN TEXTURE ────────────────────────────────────────────────────────────
+
+(function injectGrain() {
+  if (document.getElementById('sya-grain-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'sya-grain-styles';
+  s.textContent = `
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9997;
+      opacity: 0.038;
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='250' height='250' filter='url(%23g)'/></svg>");
+      background-repeat: repeat;
+      background-size: 250px 250px;
+    }
+    html.light body::after { opacity: 0.022; }
+  `;
+  document.head.appendChild(s);
+})();
+
 // ─── MOBILE SIDEBAR ───────────────────────────────────────────────────────────
 
 (function initMobileMenu() {
@@ -234,8 +290,10 @@ function skeletonStats(count = 3) {
     .hamburger span {
       display: block; width: 100%; height: 2px;
       background: #f0ede8; border-radius: 2px;
-      transition: all 0.25s ease;
+      transition: transform 0.25s ease, opacity 0.2s ease;
     }
+    tr:hover td { background: rgba(255,255,255,0.05) !important; }
+    html.light tr:hover td { background: rgba(0,0,0,0.04) !important; }
     @media (max-width: 768px) {
       html, body { overflow-x: hidden; }
       .hamburger { display: flex; }
@@ -274,12 +332,15 @@ function skeletonStats(count = 3) {
 function toggleMobileMenu() {
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.querySelector('.sidebar-overlay');
+  const hamburger = document.querySelector('.hamburger');
   sidebar?.classList.toggle('open');
   overlay?.classList.toggle('open');
+  hamburger?.classList.toggle('open');
 }
 function closeMobileMenu() {
   document.querySelector('.sidebar')?.classList.remove('open');
   document.querySelector('.sidebar-overlay')?.classList.remove('open');
+  document.querySelector('.hamburger')?.classList.remove('open');
 }
 
 // ─── MOBILE TABLE SCROLL ─────────────────────────────────────────────────────
@@ -310,9 +371,19 @@ function closeMobileMenu() {
 function setBtnLoading(btn, loading, originalText) {
   if (!btn) return;
   btn.disabled = loading;
-  btn.style.opacity = loading ? '0.65' : '1';
-  if (loading) { btn.dataset.originalText = btn.textContent; btn.textContent = 'Caricamento...'; }
-  else { btn.textContent = originalText || btn.dataset.originalText || btn.textContent; }
+  btn.style.opacity = loading ? '0.7' : '1';
+  if (loading) {
+    btn.dataset.originalHtml = btn.innerHTML;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display:inline-block;vertical-align:middle;animation:sya-spin 0.7s linear infinite;margin-right:7px;"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="2" opacity="0.25"/><path d="M7 1.5A5.5 5.5 0 0 1 12.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span style="vertical-align:middle;">Caricamento…</span>`;
+    if (!document.getElementById('sya-spin-kf')) {
+      const kf = document.createElement('style');
+      kf.id = 'sya-spin-kf';
+      kf.textContent = '@keyframes sya-spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(kf);
+    }
+  } else {
+    btn.innerHTML = originalText || btn.dataset.originalHtml || btn.innerHTML;
+  }
 }
 
 // ─── THEME & FRONTEND ENHANCEMENTS ────────────────────────────────────────────
@@ -405,12 +476,40 @@ function setBtnLoading(btn, loading, originalText) {
     .agent-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.28) !important; }
     html.light .agent-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1) !important; }
 
+    /* ── Light mode: public page nav ── */
+    html.light nav { background: rgba(245,245,242,0.9) !important; border-bottom-color: rgba(0,0,0,0.1) !important; }
+
+    /* ── Skip navigation link ── */
+    .sya-skip-link {
+      position: fixed; top: -100%; left: 1rem; z-index: 10000;
+      background: var(--accent, #c8f55a); color: #0a0a0a;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      padding: 10px 18px; border-radius: 8px; text-decoration: none;
+      transition: top 0.2s; outline: none;
+    }
+    .sya-skip-link:focus { top: 1rem; }
+
+    /* ── Logout button reset (converts <a> to <button> safely) ── */
+    button.logout-btn { background: transparent; font-family: var(--font-body, 'DM Sans', sans-serif); width: 100%; }
+
+    /* ── Password show/hide toggle ── */
+    .sya-pwd-wrap { position: relative; display: flex; align-items: center; }
+    .sya-pwd-wrap input { padding-right: 2.75rem !important; width: 100%; }
+    .sya-pwd-eye {
+      position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted, #999); font-size: 16px; line-height: 1;
+      padding: 4px; transition: color 0.15s; user-select: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sya-pwd-eye:hover { color: var(--text, #f0ede8); }
+
     /* ── Theme toggle button ── */
     #sya-theme-btn {
       position: fixed; bottom: 5.25rem; right: 1.25rem; z-index: 998;
       width: 40px; height: 40px;
       background: var(--surface, #141414);
-      border: 1px solid var(--border2, rgba(255,255,255,0.14));
+      border: 1px solid var(--border2, rgba(255,255,255,0.22));
       border-radius: 10px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-size: 18px; line-height: 1;
@@ -426,7 +525,7 @@ function setBtnLoading(btn, loading, originalText) {
       position: fixed; bottom: 1.5rem; right: 1.25rem; z-index: 997;
       width: 40px; height: 40px;
       background: var(--surface, #141414);
-      border: 1px solid var(--border2, rgba(255,255,255,0.14));
+      border: 1px solid var(--border2, rgba(255,255,255,0.22));
       border-radius: 10px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-size: 20px; font-weight: 700; color: var(--text, #f0ede8);
@@ -439,13 +538,26 @@ function setBtnLoading(btn, loading, originalText) {
     #sya-back-top:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
     #sya-back-top:active { transform: scale(0.92) !important; }
 
+    /* ── Hamburger → X animation ── */
+    .hamburger span { transition: transform 0.25s ease, opacity 0.2s ease; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── Dashboard section fade-in ── */
+    @keyframes sya-section-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section-content.active { animation: sya-section-in 0.22s ease forwards; }
+
     /* ── Search clear (×) button ── */
     .sya-search-wrap { position: relative; display: inline-flex; align-items: center; width: 100%; }
     .sya-search-wrap input { padding-right: 2.25rem !important; width: 100%; }
     #sya-search-clear {
       position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
-      color: var(--muted, #888); font-size: 18px; line-height: 1;
+      color: var(--muted, #999); font-size: 18px; line-height: 1;
       padding: 2px 4px; display: none; transition: color 0.15s;
     }
     #sya-search-clear.visible { display: block; }
@@ -469,6 +581,8 @@ function setBtnLoading(btn, loading, originalText) {
       document.documentElement.classList.toggle('light', !isLight);
       localStorage.setItem('sya-theme', isLight ? 'dark' : 'light');
       syncThemeIcon();
+      const tcMeta = document.querySelector('meta[name="theme-color"]');
+      if (tcMeta) tcMeta.content = isLight ? '#f5f5f2' : '#0a0a0a';
       setTimeout(function() { document.documentElement.classList.remove('theme-switching'); }, 400);
     };
     document.body.appendChild(themeBtn);
@@ -484,6 +598,23 @@ function setBtnLoading(btn, loading, originalText) {
     window.addEventListener('scroll', function() {
       backTop.classList.toggle('visible', window.scrollY > 500);
     }, { passive: true });
+
+    // ── Skip navigation link
+    const mainEl = document.querySelector('main, .main, [role="main"]');
+    if (mainEl) {
+      if (!mainEl.id) mainEl.id = 'sya-main-content';
+      const skip = document.createElement('a');
+      skip.className = 'sya-skip-link';
+      skip.href = '#' + mainEl.id;
+      skip.textContent = 'Vai al contenuto principale';
+      document.body.insertBefore(skip, document.body.firstChild);
+    }
+
+    // ── Fix target="_blank" links missing rel
+    document.querySelectorAll('a[target="_blank"]').forEach(function(a) {
+      const rel = a.getAttribute('rel') || '';
+      if (!rel.includes('noopener')) a.setAttribute('rel', (rel + ' noopener noreferrer').trim());
+    });
 
     // ── Search clear (only when #search-input is present)
     const searchInput = document.getElementById('search-input');
@@ -526,6 +657,35 @@ function animateNumber(el, target, duration, fmt) {
     else el.textContent = fmt(target);
   })(performance.now());
 }
+
+// ─── PASSWORD SHOW/HIDE ───────────────────────────────────────────────────────
+
+(function initPasswordToggles() {
+  function wrapInput(input) {
+    if (!input || input.closest('.sya-pwd-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'sya-pwd-wrap';
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sya-pwd-eye';
+    btn.setAttribute('aria-label', 'Mostra/nascondi password');
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    btn.onclick = function() {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.innerHTML = show
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    };
+    wrap.appendChild(btn);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[type="password"]').forEach(wrapInput);
+  });
+})();
 
 // ─── SCROLL REVEAL ────────────────────────────────────────────────────────────
 
@@ -579,5 +739,21 @@ function animateNumber(el, target, duration, fmt) {
         });
       });
     }).observe(document.body, { childList: true, subtree: true });
+  });
+})();
+
+// ─── CHIP ARIA-PRESSED ────────────────────────────────────────────────────────
+
+(function initChipAria() {
+  function syncChips() {
+    document.querySelectorAll('.chip').forEach(function(c) {
+      c.setAttribute('aria-pressed', c.classList.contains('active') ? 'true' : 'false');
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    syncChips();
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.chip')) setTimeout(syncChips, 0);
+    });
   });
 })();

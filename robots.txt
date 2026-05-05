@@ -1,12 +1,11 @@
 User-agent: *
+Allow: /
+
+Disallow: /admin.html
 Disallow: /dashboard-utente.html
 Disallow: /dashboard-vendor.html
-Disallow: /admin.html
 Disallow: /impostazioni.html
 Disallow: /success.html
 Disallow: /reset-password.html
-Disallow: /supabase/
-
-Allow: /
 
 Sitemap: https://shopyouragent.onrender.com/sitemap.xml

@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Admin — Shop Your Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --bg: #0a0a0a; --surface: #141414; --surface2: #242424;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.22);
+    --text: #f0ede8; --muted: #999; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
     --error: #ff5f5f; --success: #5fff9a; --warning: #ffaa00;
   }
@@ -132,15 +136,33 @@
     .modal { border-radius: 16px 16px 0 0; }
     .modal-overlay { align-items: flex-end; padding: 0; }
   }
+
+  /* ── Extra admin UI ── */
+  .table-search { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; width: 100%; max-width: 280px; transition: border-color 0.2s; }
+  .table-search:focus { border-color: rgba(200,245,90,0.4); }
+  .table-search::placeholder { color: #555; }
+  .section-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
+  .payout-coords { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .payout-coords strong { color: var(--text); }
+  .gmv-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .stat-val.accent { color: var(--accent); }
+  .rejection-field { margin-top: 1.25rem; }
+  .rejection-field label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .rejection-field textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; resize: vertical; min-height: 70px; transition: border-color 0.2s; }
+  .rejection-field textarea:focus { border-color: rgba(255,95,95,0.4); }
+  .btn-revoke { background: rgba(255,170,0,0.1); color: var(--warning); border: 1px solid rgba(255,170,0,0.2); font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .btn-revoke:hover { background: rgba(255,170,0,0.2); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sya.js"></script>
 </head>
 <body>
+<noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
 
 <div class="mobile-topbar">
   <a href="shop_your_agent.html" class="mobile-logo">Shop<span>Your</span>Agent</a>
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span id="topbar-section-name" style="font-size:13px;color:var(--muted);font-weight:500;flex:1;text-align:center;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Dashboard</span>
+  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </div>
@@ -149,19 +171,19 @@
 <div class="sidebar">
   <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
   <span class="role-badge">Admin</span>
-  <button class="nav-item active" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
-  <button class="nav-item" onclick="showSection('agenti', this)">
+  <button class="nav-item active" id="nav-dashboard" aria-pressed="true" onclick="showSection('dashboard', this)"><span class="nav-icon">📊</span> Dashboard</button>
+  <button class="nav-item" id="nav-agenti" aria-pressed="false" onclick="showSection('agenti', this)">
     <span class="nav-icon">🤖</span> Agenti
     <span id="pending-agents-count" style="margin-left:auto;background:var(--warning);color:#0a0a0a;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;display:none;">0</span>
   </button>
-  <button class="nav-item" onclick="showSection('vendor', this)"><span class="nav-icon">👨‍💻</span> Vendor</button>
-  <button class="nav-item" onclick="showSection('utenti', this)"><span class="nav-icon">👥</span> Utenti</button>
-  <button class="nav-item" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
-  <button class="nav-item" onclick="showSection('pagamenti', this)"><span class="nav-icon">💸</span> Pagamenti</button>
+  <button class="nav-item" id="nav-vendor" aria-pressed="false" onclick="showSection('vendor', this)"><span class="nav-icon">👨‍💻</span> Vendor</button>
+  <button class="nav-item" id="nav-utenti" aria-pressed="false" onclick="showSection('utenti', this)"><span class="nav-icon">👥</span> Utenti</button>
+  <button class="nav-item" id="nav-abbonamenti" aria-pressed="false" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
+  <button class="nav-item" id="nav-pagamenti" aria-pressed="false" onclick="showSection('pagamenti', this)"><span class="nav-icon">💸</span> Pagamenti</button>
   <div class="sidebar-bottom">
     <div class="admin-label">Connesso come</div>
     <div class="admin-name" id="admin-name">Admin</div>
-    <a class="logout-btn" onclick="signOut()">Esci</a>
+    <button class="logout-btn" onclick="signOut()">Esci</button>
     <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
       <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
       <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
@@ -175,11 +197,15 @@
   <div class="page-section active" id="section-dashboard">
     <div class="page-title">Pannello Admin</div>
     <div class="page-sub">Panoramica generale di Shop Your Agent</div>
-    <div class="stats-row">
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem;">
       <div class="stat-card"><div class="stat-label">Utenti totali</div><div class="stat-val" id="stat-utenti">—</div></div>
       <div class="stat-card"><div class="stat-label">Agenti attivi</div><div class="stat-val" id="stat-agenti-attivi">—</div></div>
-      <div class="stat-card"><div class="stat-label">In attesa</div><div class="stat-val orange" id="stat-pending">—</div></div>
+      <div class="stat-card"><div class="stat-label">In attesa approvazione</div><div class="stat-val orange" id="stat-pending">—</div></div>
+    </div>
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
       <div class="stat-card"><div class="stat-label">Abbonamenti attivi</div><div class="stat-val green" id="stat-subs">—</div></div>
+      <div class="stat-card"><div class="stat-label">GMV mensile</div><div class="stat-val accent" id="stat-gmv">—</div><div class="gmv-note">Fatturato lordo abbonamenti attivi</div></div>
+      <div class="stat-card"><div class="stat-label">Vendor approvati</div><div class="stat-val" id="stat-vendors">—</div></div>
     </div>
     <div class="section">
       <div class="section-header">
@@ -198,10 +224,14 @@
   <div class="page-section" id="section-agenti">
     <div class="page-title">Gestione Agenti</div>
     <div class="page-sub">Approva, rifiuta e gestisci tutti gli agenti</div>
-    <div class="tabs">
-      <button class="tab active" onclick="filterAgents('tutti', this)">Tutti</button>
-      <button class="tab" onclick="filterAgents('pending', this)">In attesa</button>
-      <button class="tab" onclick="filterAgents('attivi', this)">Attivi</button>
+    <div class="section-toolbar">
+      <div class="tabs" style="margin-bottom:0;">
+        <button class="tab active" onclick="filterAgents('tutti', this)">Tutti</button>
+        <button class="tab" onclick="filterAgents('pending', this)">In attesa</button>
+        <button class="tab" onclick="filterAgents('attivi', this)">Attivi</button>
+        <button class="tab" onclick="filterAgents('rifiutati', this)">Rifiutati</button>
+      </div>
+      <input type="text" class="table-search" placeholder="Cerca agente..." oninput="searchAgents(this.value)">
     </div>
     <table>
       <thead><tr><th>Agente</th><th>Vendor</th><th>Categoria</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead>
@@ -215,10 +245,14 @@
   <div class="page-section" id="section-vendor">
     <div class="page-title">Gestione Vendor</div>
     <div class="page-sub">Approva e gestisci gli sviluppatori sulla piattaforma</div>
+    <div class="section-toolbar">
+      <div></div>
+      <input type="text" class="table-search" placeholder="Cerca vendor..." oninput="searchVendors(this.value)">
+    </div>
     <table>
-      <thead><tr><th>Nome</th><th>Email</th><th>Stato</th><th>Azioni</th></tr></thead>
+      <thead><tr><th>Nome</th><th>Email</th><th>Agenti</th><th>Abbonati</th><th>Stato</th><th>Azioni</th></tr></thead>
       <tbody id="vendors-tbody">
-        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="6">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
@@ -227,10 +261,14 @@
   <div class="page-section" id="section-utenti">
     <div class="page-title">Gestione Utenti</div>
     <div class="page-sub">Tutti gli utenti registrati sulla piattaforma</div>
+    <div class="section-toolbar">
+      <div></div>
+      <input type="text" class="table-search" placeholder="Cerca utente..." oninput="searchUsers(this.value)">
+    </div>
     <table>
-      <thead><tr><th>Nome</th><th>Email (User ID)</th><th>Registrato il</th><th>Azioni</th></tr></thead>
+      <thead><tr><th>Nome</th><th>Email / User ID</th><th>Registrato il</th><th>Abbonamenti</th><th>Azioni</th></tr></thead>
       <tbody id="users-tbody">
-        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="5">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
@@ -239,10 +277,14 @@
   <div class="page-section" id="section-abbonamenti">
     <div class="page-title">Abbonamenti</div>
     <div class="page-sub">Tutti gli abbonamenti sulla piattaforma</div>
+    <div class="section-toolbar">
+      <div></div>
+      <input type="text" class="table-search" placeholder="Cerca agente..." oninput="searchSubs(this.value)">
+    </div>
     <table>
-      <thead><tr><th>Agente</th><th>Stato</th><th>Data inizio</th><th>Azioni</th></tr></thead>
+      <thead><tr><th>Agente</th><th>Utente</th><th>Prezzo</th><th>Stato</th><th>Data inizio</th><th>Azioni</th></tr></thead>
       <tbody id="subs-tbody">
-        <tr class="empty-row"><td colspan="4">Caricamento...</td></tr>
+        <tr class="empty-row"><td colspan="6">Caricamento...</td></tr>
       </tbody>
     </table>
   </div>
@@ -250,15 +292,15 @@
   <!-- PAGAMENTI VENDOR -->
   <div class="page-section" id="section-pagamenti">
     <div class="page-title">Pagamenti vendor</div>
-    <div class="page-sub">Coordinate di pagamento dei vendor approvati</div>
+    <div class="page-sub">Coordinate di pagamento e guadagni dei vendor approvati — pagamenti il 1° del mese</div>
     <div id="payouts-container">
       <table>
         <thead>
           <tr>
             <th>Vendor</th>
-            <th>User ID</th>
+            <th>Coordinate di pagamento</th>
             <th>Abbonati attivi</th>
-            <th>Guadagno mensile (70%)</th>
+            <th>Da pagare (70%)</th>
           </tr>
         </thead>
         <tbody id="payouts-tbody">
@@ -281,6 +323,23 @@
   </div>
 </div>
 
+<!-- REJECTION MODAL -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal confirm-modal" style="max-width:420px;text-align:left;">
+    <div class="confirm-icon" style="text-align:center;">✕</div>
+    <div class="confirm-title" style="text-align:center;">Rifiuta agente</div>
+    <div class="confirm-sub" style="text-align:center;" id="reject-agent-name">Nome agente</div>
+    <div class="rejection-field">
+      <label>Motivo del rifiuto (verrà comunicato al vendor)</label>
+      <textarea id="reject-motivo" placeholder="es. Il titolo è generico, manca una descrizione dettagliata delle funzionalità..."></textarea>
+    </div>
+    <div class="modal-btns" style="margin-top:1.25rem;">
+      <button class="btn-close" onclick="closeRejectModal()">Annulla</button>
+      <button class="btn-danger" id="reject-confirm-btn">Rifiuta agente</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal confirm-modal">
@@ -295,14 +354,13 @@
 </div>
 
 <script>
-  let allAgents = [];
+  let allAgents = [], allVendors = [], allUsers = [], allSubs = [];
+  let currentAgentFilter = 'tutti';
+  let currentAgentSearch = '';
   const _details = {};
 
-  function openDetail(k) {
-    const d = _details[k];
-    if (d) showDetailModal(d.title, d.rows);
-  }
-
+  // ── Detail modal ───────────────────────────────────────────────
+  function openDetail(k) { const d = _details[k]; if (d) showDetailModal(d.title, d.rows); }
   function showDetailModal(title, rows) {
     document.getElementById('detail-title').textContent = title;
     document.getElementById('detail-body').innerHTML = rows.map(([label, val]) =>
@@ -312,41 +370,78 @@
   }
   function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
 
+  // ── Confirm modal ──────────────────────────────────────────────
   function showConfirm(message, onConfirm) {
     document.getElementById('confirm-sub').textContent = message;
     document.getElementById('confirm-modal').classList.add('open');
-    document.getElementById('confirm-action-btn').onclick = async () => {
-      closeConfirm();
-      await onConfirm();
-    };
+    document.getElementById('confirm-action-btn').onclick = async () => { closeConfirm(); await onConfirm(); };
   }
   function closeConfirm() { document.getElementById('confirm-modal').classList.remove('open'); }
 
+  // ── Rejection modal ────────────────────────────────────────────
+  function openRejectModal(agentId, agentName) {
+    document.getElementById('reject-agent-name').textContent = agentName;
+    document.getElementById('reject-motivo').value = '';
+    document.getElementById('reject-modal').classList.add('open');
+    document.getElementById('reject-confirm-btn').onclick = () => executeReject(agentId, agentName);
+  }
+  function closeRejectModal() { document.getElementById('reject-modal').classList.remove('open'); }
+
+  async function executeReject(id, agentName) {
+    const motivo = document.getElementById('reject-motivo').value.trim();
+    const btn = document.getElementById('reject-confirm-btn');
+    btn.disabled = true;
+    try {
+      const { error } = await db.from('agents').update({ attivo: false, rejected: true, motivo_rifiuto: motivo || null }).eq('id', id);
+      if (error) throw error;
+      closeRejectModal();
+      showToast('Agente rifiutato', 'success');
+
+      const agent = allAgents.find(a => a.id === id);
+      if (agent) {
+        const { data: { session } } = await db.auth.getSession();
+        const { data: vendor } = await db.from('vendors').select('email').eq('id', agent.vendor_id).single();
+        if (session && vendor?.email) {
+          fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+            body: JSON.stringify({ type: 'agent_rejected', agentName, vendorEmail: vendor.email, motivo }),
+          }).catch(() => {});
+        }
+      }
+      await loadDashboard();
+      if (document.getElementById('section-agenti').classList.contains('active')) loadAllAgents();
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── Init ───────────────────────────────────────────────────────
   async function init() {
     const session = await requireAuth();
     if (!session) return;
-
     const isAdmin = session.user.app_metadata?.role === 'admin';
     if (!isAdmin) {
-      document.body.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;">
-          <div style="font-size:48px;">🔒</div>
-          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#f0ede8;">Accesso non autorizzato</div>
-          <div style="font-size:14px;color:#888;">Questa pagina è riservata agli amministratori.</div>
-          <a href="login.html" style="margin-top:1rem;background:#c8f55a;color:#0a0a0a;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500;">Torna al login</a>
-        </div>`;
+      document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1rem;"><div style="font-size:48px;">🔒</div><div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#f0ede8;">Accesso non autorizzato</div><div style="font-size:14px;color:#888;">Questa pagina è riservata agli amministratori.</div><a href="login.html" style="margin-top:1rem;background:#c8f55a;color:#0a0a0a;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:500;">Torna al login</a></div>`;
       return;
     }
-
     document.getElementById('admin-name').textContent = session.user.email || 'Admin';
-    loadDashboard();
+    await loadDashboard();
   }
 
+  // ── Navigation ─────────────────────────────────────────────────
   function showSection(name, el) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('active'); if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'false'); });
     document.getElementById(`section-${name}`).classList.add('active');
-    el.classList.add('active');
+    if (el) {
+      el.classList.add('active');
+      if (el.hasAttribute('aria-pressed')) el.setAttribute('aria-pressed', 'true');
+      const topbarName = document.getElementById('topbar-section-name');
+      if (topbarName) topbarName.textContent = el.textContent.trim().replace(/^[^\s]+\s*/, '').trim() || el.textContent.trim();
+    }
     if (name === 'agenti') loadAllAgents();
     if (name === 'vendor') loadVendors();
     if (name === 'utenti') loadUsers();
@@ -355,226 +450,334 @@
     if (typeof closeSidebar === 'function') closeSidebar();
   }
 
+  // ── Filter + search agents ─────────────────────────────────────
   function filterAgents(filter, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
+    currentAgentFilter = filter;
+    applyAgentView();
+  }
+  function searchAgents(q) { currentAgentSearch = q.toLowerCase().trim(); applyAgentView(); }
+  function applyAgentView() {
     let filtered = allAgents;
-    if (filter === 'pending') filtered = allAgents.filter(a => !a.attivo);
-    if (filter === 'attivi') filtered = allAgents.filter(a => a.attivo);
+    if (currentAgentFilter === 'pending') filtered = filtered.filter(a => !a.attivo && !a.rejected);
+    else if (currentAgentFilter === 'attivi') filtered = filtered.filter(a => a.attivo);
+    else if (currentAgentFilter === 'rifiutati') filtered = filtered.filter(a => a.rejected);
+    if (currentAgentSearch) filtered = filtered.filter(a => a.nome.toLowerCase().includes(currentAgentSearch) || (a.categoria || '').toLowerCase().includes(currentAgentSearch));
     renderAllAgents(filtered);
   }
 
-  async function loadDashboard() {
-    const [{ data: agents }, { data: subs }, { data: profiles }] = await Promise.all([
-      db.from('agents').select('*, vendors(nome, cognome)'),
-      db.from('subscriptions').select('*'),
-      db.from('profiles').select('*'),
-    ]);
-
-    allAgents = agents || [];
-    const pending = allAgents.filter(a => !a.attivo);
-    const active = allAgents.filter(a => a.attivo);
-    const activeSubs = (subs || []).filter(s => s.stato === 'attiva');
-
-    document.getElementById('stat-utenti').textContent = (profiles || []).length;
-    document.getElementById('stat-agenti-attivi').textContent = active.length;
-    document.getElementById('stat-pending').textContent = pending.length;
-    document.getElementById('stat-subs').textContent = activeSubs.length;
-
-    if (pending.length > 0) {
-      const badge = document.getElementById('pending-agents-count');
-      badge.textContent = pending.length;
-      badge.style.display = 'inline';
-    }
-
-    const tbody = document.getElementById('pending-agents-tbody');
-    if (!pending.length) return;
-    tbody.innerHTML = pending.map(a => {
-      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', 'In attesa'], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['ID', a.id]] };
-      return `
-        <tr>
-          <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(a.descrizione_breve || '')}</span></td>
-          <td>${a.vendors ? escHtml(`${a.vendors.nome} ${a.vendors.cognome}`) : '—'}</td>
-          <td>${escHtml(a.categoria)}</td>
-          <td>€${a.prezzo_mensile}/mese</td>
-          <td>
-            <div class="action-btns">
-              <button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>
-              <button class="btn-reject" onclick="confirmRejectAgent('${a.id}', this)">✕ Rifiuta</button>
-            </div>
-          </td>
-        </tr>`;
-    }).join('');
+  // ── Search helpers ─────────────────────────────────────────────
+  function searchVendors(q) {
+    const ql = q.toLowerCase();
+    const filtered = ql ? allVendors.filter(v => `${v.nome} ${v.cognome}`.toLowerCase().includes(ql) || (v.email || '').toLowerCase().includes(ql)) : allVendors;
+    renderVendors(filtered);
+  }
+  function searchUsers(q) {
+    const ql = q.toLowerCase();
+    const filtered = ql ? allUsers.filter(u => `${u.nome || ''} ${u.cognome || ''}`.toLowerCase().includes(ql) || (u.user_id || '').toLowerCase().includes(ql)) : allUsers;
+    renderUsers(filtered);
+  }
+  function searchSubs(q) {
+    const ql = q.toLowerCase();
+    const filtered = ql ? allSubs.filter(s => (s.agents?.nome || '').toLowerCase().includes(ql)) : allSubs;
+    renderSubs(filtered);
   }
 
+  // ── Load dashboard ─────────────────────────────────────────────
+  async function loadDashboard() {
+    try {
+      const [{ data: agents }, { data: subs }, { data: profiles }, { data: vendors }] = await Promise.all([
+        db.from('agents').select('*, vendors(nome, cognome)'),
+        db.from('subscriptions').select('*, agents(prezzo_mensile)'),
+        db.from('profiles').select('user_id'),
+        db.from('vendors').select('id').eq('approvato', true),
+      ]);
+
+      allAgents = agents || [];
+      const pending = allAgents.filter(a => !a.attivo && !a.rejected);
+      const active = allAgents.filter(a => a.attivo);
+      const activeSubs = (subs || []).filter(s => s.stato === 'attiva');
+      const gmv = activeSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0), 0);
+
+      document.getElementById('stat-utenti').textContent = (profiles || []).length;
+      document.getElementById('stat-agenti-attivi').textContent = active.length;
+      document.getElementById('stat-pending').textContent = pending.length;
+      document.getElementById('stat-subs').textContent = activeSubs.length;
+      document.getElementById('stat-gmv').textContent = `€${gmv.toFixed(0)}`;
+      document.getElementById('stat-vendors').textContent = (vendors || []).length;
+
+      const badge = document.getElementById('pending-agents-count');
+      if (pending.length > 0) { badge.textContent = pending.length; badge.style.display = 'inline'; }
+      else { badge.style.display = 'none'; }
+
+      const tbody = document.getElementById('pending-agents-tbody');
+      if (!pending.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun agente in attesa</td></tr>'; return; }
+      tbody.innerHTML = pending.map(a => {
+        _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['ID', a.id]] };
+        return `
+          <tr>
+            <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(a.descrizione_breve || '')}</span></td>
+            <td>${a.vendors ? escHtml(`${a.vendors.nome} ${a.vendors.cognome}`) : '—'}</td>
+            <td>${escHtml(a.categoria)}</td>
+            <td>€${a.prezzo_mensile}/mese</td>
+            <td><div class="action-btns">
+              <button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>
+              <button class="btn-view" onclick="openDetail('${a.id}')">Vedi</button>
+              <button class="btn-reject" onclick="openRejectModal('${a.id}', '${escHtml(a.nome).replace(/'/g,'')}')">✕ Rifiuta</button>
+            </div></td>
+          </tr>`;
+      }).join('');
+    } catch (err) {
+      showToast('Errore nel caricamento della dashboard', 'error');
+    }
+  }
+
+  // ── Agents section ─────────────────────────────────────────────
   async function loadAllAgents() {
     const { data } = await db.from('agents').select('*, vendors(nome, cognome)').order('created_at', { ascending: false });
     allAgents = data || [];
-    renderAllAgents(allAgents);
+    currentAgentFilter = 'tutti';
+    currentAgentSearch = '';
+    applyAgentView();
   }
 
   function renderAllAgents(agents) {
     const tbody = document.getElementById('all-agents-tbody');
-    if (!agents.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun agente trovato</td></tr>';
-      return;
-    }
+    if (!agents.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun agente trovato</td></tr>'; return; }
     tbody.innerHTML = agents.map(a => {
-      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', a.attivo ? 'Attivo' : 'In attesa'], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['ID', a.id]] };
+      _details[a.id] = { title: a.nome, rows: [['Categoria', a.categoria], ['Prezzo', `€${a.prezzo_mensile}/mese`], ['Stato', a.attivo ? 'Attivo' : (a.rejected ? 'Rifiutato' : 'In attesa')], ['Video Demo', a.video_demo_url || '—'], ['Istruzioni', a.istruzioni_setup ? '✓ Presenti' : '—'], ['Motivo rifiuto', a.motivo_rifiuto || '—'], ['ID', a.id]] };
+      const statusClass = a.attivo ? 'active' : (a.rejected ? 'rejected' : 'pending');
+      const statusLabel = a.attivo ? 'Attivo' : (a.rejected ? 'Rifiutato' : 'In attesa');
       return `
         <tr>
           <td><strong>${escHtml(a.icona || '🤖')} ${escHtml(a.nome)}</strong></td>
           <td>${a.vendors ? escHtml(`${a.vendors.nome} ${a.vendors.cognome}`) : '—'}</td>
           <td>${escHtml(a.categoria)}</td>
           <td>€${a.prezzo_mensile}/mese</td>
-          <td><span class="status-badge ${a.attivo ? 'active' : 'pending'}">${a.attivo ? 'Attivo' : 'In attesa'}</span></td>
-          <td>
-            <div class="action-btns">
-              ${!a.attivo ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>` : ''}
-              <button class="btn-view" onclick="openDetail('${a.id}')">Vedi</button>
-              <button class="btn-reject" onclick="confirmRejectAgent('${a.id}', this)">✕ Rimuovi</button>
-            </div>
-          </td>
+          <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+          <td><div class="action-btns">
+            ${!a.attivo && !a.rejected ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">✓ Approva</button>` : ''}
+            ${a.attivo ? `<button class="btn-reject" onclick="confirmRemoveAgent('${a.id}')">✕ Rimuovi</button>` : ''}
+            ${!a.attivo && a.rejected ? `<button class="btn-approve" onclick="approveAgent('${a.id}', this)">↩ Riapprova</button>` : ''}
+            <button class="btn-view" onclick="openDetail('${a.id}')">Vedi</button>
+            ${!a.attivo && !a.rejected ? `<button class="btn-reject" onclick="openRejectModal('${a.id}', '${escHtml(a.nome).replace(/'/g,'')}')">✕ Rifiuta</button>` : ''}
+          </div></td>
         </tr>`;
     }).join('');
   }
 
+  // ── Vendors section ────────────────────────────────────────────
   async function loadVendors() {
-    const { data: vendors } = await db.from('vendors').select('*').order('created_at', { ascending: false });
-    const tbody = document.getElementById('vendors-tbody');
-    if (!vendors?.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun vendor ancora</td></tr>';
-      return;
+    try {
+      const { data: vendors } = await db.from('vendors').select('*, agents(id, attivo)').order('created_at', { ascending: false });
+      allVendors = vendors || [];
+      renderVendors(allVendors);
+    } catch (err) {
+      showToast('Errore nel caricamento vendor', 'error');
     }
+  }
+
+  function renderVendors(vendors) {
+    const tbody = document.getElementById('vendors-tbody');
+    if (!vendors.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun vendor ancora</td></tr>'; return; }
     tbody.innerHTML = vendors.map(v => {
-      _details['v_' + v.id] = { title: `${v.nome} ${v.cognome}`, rows: [['Email', v.email || ''], ['Bio', v.bio || ''], ['Approvato', v.approvato ? 'Sì' : 'No'], ['ID', v.id]] };
+      const agentsCount = (v.agents || []).length;
+      const activeCount = (v.agents || []).filter(a => a.attivo).length;
+      _details['v_' + v.id] = { title: `${v.nome} ${v.cognome}`, rows: [['Email', v.email || ''], ['Bio', v.bio || '—'], ['Agenti totali', agentsCount], ['Agenti attivi', activeCount], ['Approvato', v.approvato ? 'Sì' : 'No'], ['Metodo payout', v.payout_method || '—'], ['Coordinate', v.payout_value || '—'], ['Intestatario', v.payout_name || '—'], ['ID', v.id]] };
       return `
         <tr>
           <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong></td>
           <td style="font-size:13px;color:var(--muted);">${escHtml(v.email || '—')}</td>
+          <td>${activeCount}/${agentsCount}</td>
+          <td>—</td>
           <td><span class="status-badge ${v.approvato ? 'active' : 'pending'}">${v.approvato ? 'Approvato' : 'In attesa'}</span></td>
-          <td>
-            <div class="action-btns">
-              ${!v.approvato ? `<button class="btn-approve" onclick="approveVendor('${v.id}', this)">✓ Approva</button>` : ''}
-              <button class="btn-view" onclick="openDetail('v_${v.id}')">Vedi</button>
-            </div>
-          </td>
+          <td><div class="action-btns">
+            ${!v.approvato ? `<button class="btn-approve" onclick="approveVendor('${v.id}', this)">✓ Approva</button>` : `<button class="btn-revoke" onclick="revokeVendor('${v.id}', this)">⊘ Revoca</button>`}
+            <button class="btn-view" onclick="openDetail('v_${v.id}')">Vedi</button>
+          </div></td>
         </tr>`;
     }).join('');
   }
 
+  // ── Users section ──────────────────────────────────────────────
   async function loadUsers() {
-    const { data: users } = await db.from('profiles').select('*').order('created_at', { ascending: false });
-    const tbody = document.getElementById('users-tbody');
-    if (!users?.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun utente ancora</td></tr>';
-      return;
+    try {
+      const [{ data: users }, { data: subs }] = await Promise.all([
+        db.from('profiles').select('*').order('created_at', { ascending: false }),
+        db.from('subscriptions').select('user_id, stato'),
+      ]);
+      allUsers = users || [];
+      const subsMap = {};
+      (subs || []).filter(s => s.stato === 'attiva').forEach(s => { subsMap[s.user_id] = (subsMap[s.user_id] || 0) + 1; });
+      allUsers._subsMap = subsMap;
+      renderUsers(allUsers);
+    } catch (err) {
+      showToast('Errore nel caricamento utenti', 'error');
     }
+  }
+
+  function renderUsers(users) {
+    const subsMap = users._subsMap || allUsers._subsMap || {};
+    const tbody = document.getElementById('users-tbody');
+    if (!users.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun utente ancora</td></tr>'; return; }
     tbody.innerHTML = users.map(u => {
       const regDate = u.created_at ? new Date(u.created_at).toLocaleDateString('it-IT') : '—';
-      _details['u_' + u.user_id] = { title: `${u.nome || ''} ${u.cognome || ''}`.trim() || '—', rows: [['Nome', `${u.nome || ''} ${u.cognome || ''}`.trim()], ['User ID', u.user_id], ['Registrato il', regDate]] };
+      const subCount = subsMap[u.user_id] || 0;
+      _details['u_' + u.user_id] = { title: `${u.nome || ''} ${u.cognome || ''}`.trim() || '—', rows: [['Nome', `${u.nome || ''} ${u.cognome || ''}`.trim()], ['User ID', u.user_id], ['Registrato il', regDate], ['Abbonamenti attivi', subCount]] };
       return `
         <tr>
           <td>${escHtml(u.nome || '—')} ${escHtml(u.cognome || '')}</td>
           <td style="font-size:12px;color:var(--muted);">${u.user_id || '—'}</td>
           <td>${regDate}</td>
-          <td>
-            <button class="btn-view" onclick="openDetail('u_${u.user_id}')">Vedi</button>
-          </td>
+          <td>${subCount > 0 ? `<span style="color:var(--accent);font-weight:600;">${subCount}</span>` : '0'}</td>
+          <td><button class="btn-view" onclick="openDetail('u_${u.user_id}')">Vedi</button></td>
         </tr>`;
     }).join('');
   }
 
+  // ── Subscriptions section ──────────────────────────────────────
   async function loadSubs() {
-    const { data: subs } = await db.from('subscriptions').select('*, agents(nome, prezzo_mensile)').order('data_inizio', { ascending: false });
-    const tbody = document.getElementById('subs-tbody');
-    if (!subs?.length) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun abbonamento ancora</td></tr>';
-      return;
+    try {
+      const { data: subs } = await db.from('subscriptions')
+        .select('*, agents(nome, prezzo_mensile, vendor_id), profiles(nome, cognome)')
+        .order('data_inizio', { ascending: false });
+      allSubs = subs || [];
+      renderSubs(allSubs);
+    } catch (err) {
+      showToast('Errore nel caricamento abbonamenti', 'error');
     }
+  }
+
+  function renderSubs(subs) {
+    const tbody = document.getElementById('subs-tbody');
+    if (!subs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun abbonamento ancora</td></tr>'; return; }
     tbody.innerHTML = subs.map(s => {
       const startDate = s.data_inizio ? new Date(s.data_inizio).toLocaleDateString('it-IT') : '—';
-      _details['s_' + s.id] = { title: 'Abbonamento', rows: [['Agente', s.agents?.nome || '—'], ['Stato', s.stato], ['Data inizio', startDate], ['ID', s.id]] };
+      const userName = s.profiles ? `${s.profiles.nome || ''} ${s.profiles.cognome || ''}`.trim() || s.user_id?.slice(0,8) + '…' : (s.user_id?.slice(0,8) + '…');
+      _details['s_' + s.id] = { title: 'Abbonamento', rows: [['Agente', s.agents?.nome || '—'], ['Utente', userName], ['Prezzo', `€${s.agents?.prezzo_mensile || 0}/mese`], ['Stato', s.stato], ['Data inizio', startDate], ['ID', s.id]] };
       return `
         <tr>
-          <td><strong>${escHtml(s.agents?.nome || '—')}</strong><span style="font-size:12px;color:var(--muted);margin-left:6px;">€${s.agents?.prezzo_mensile || 0}/mese</span></td>
+          <td><strong>${escHtml(s.agents?.nome || '—')}</strong></td>
+          <td style="font-size:13px;color:var(--muted);">${escHtml(userName)}</td>
+          <td>€${s.agents?.prezzo_mensile || 0}/mese</td>
           <td><span class="status-badge ${s.stato === 'attiva' ? 'active' : 'rejected'}">${escHtml(s.stato)}</span></td>
           <td>${startDate}</td>
-          <td>
-            <button class="btn-view" onclick="openDetail('s_${s.id}')">Vedi</button>
-          </td>
+          <td><button class="btn-view" onclick="openDetail('s_${s.id}')">Vedi</button></td>
         </tr>`;
     }).join('');
   }
 
-  async function approveAgent(id, btn) {
-    btn.disabled = true;
-    const { error } = await db.from('agents').update({ attivo: true }).eq('id', id);
-    if (error) { showToast('Errore durante l\'approvazione', 'error'); btn.disabled = false; return; }
-    showToast('Agente approvato e pubblicato!', 'success');
-
-    // Notify vendor via email (fire and forget)
-    const agent = allAgents.find(a => a.id === id);
-    if (agent) {
-      const { data: { session } } = await db.auth.getSession();
-      const { data: vendor } = await db.from('vendors').select('email').eq('id', agent.vendor_id).single();
-      if (session && vendor?.email) {
-        fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
-          body: JSON.stringify({ type: 'agent_approved', agentName: agent.nome, vendorEmail: vendor.email }),
-        }).catch(() => {});
-      }
+  // ── Payouts section ────────────────────────────────────────────
+  async function loadPayouts() {
+    const tbody = document.getElementById('payouts-tbody');
+    try {
+      const [{ data: vendors }, { data: subs }] = await Promise.all([
+        db.from('vendors').select('id, nome, cognome, email, payout_method, payout_value, payout_name').eq('approvato', true).order('nome'),
+        db.from('subscriptions').select('agent_id, stato, agents(vendor_id, prezzo_mensile)').eq('stato', 'attiva'),
+      ]);
+      if (!vendors?.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun vendor approvato</td></tr>'; return; }
+      const activeSubs = subs || [];
+      tbody.innerHTML = vendors.map(v => {
+        const vendorSubs = activeSubs.filter(s => s.agents?.vendor_id === v.id);
+        const guadagno = vendorSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
+        const payoutInfo = v.payout_method
+          ? `<div class="payout-coords"><strong>${escHtml(v.payout_method?.toUpperCase())}</strong> ${escHtml(v.payout_value || '—')}<br>${escHtml(v.payout_name || '—')}</div>`
+          : `<span style="color:var(--muted);font-size:12px;">Non configurato</span>`;
+        return `<tr>
+          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(v.email || '')}</span></td>
+          <td>${payoutInfo}</td>
+          <td>${vendorSubs.length}</td>
+          <td style="color:var(--accent);font-weight:600;">€${guadagno.toFixed(0)}</td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Errore nel caricamento</td></tr>';
     }
-
-    btn.closest('tr').remove();
-    loadDashboard();
-    allAgents = allAgents.map(a => a.id === id ? { ...a, attivo: true } : a);
   }
 
-  function confirmRejectAgent(id, btn) {
-    showConfirm('Sei sicuro di voler eliminare questo agente? L\'operazione non è reversibile.', async () => {
-      const { error } = await db.from('agents').delete().eq('id', id);
-      if (error) { showToast('Errore durante l\'eliminazione', 'error'); return; }
-      showToast('Agente eliminato', 'success');
+  // ── Approve / reject agents ────────────────────────────────────
+  async function approveAgent(id, btn) {
+    btn.disabled = true;
+    try {
+      const { error } = await db.from('agents').update({ attivo: true, rejected: false, motivo_rifiuto: null }).eq('id', id);
+      if (error) throw error;
+      showToast('Agente approvato e pubblicato!', 'success');
+      const agent = allAgents.find(a => a.id === id);
+      if (agent) {
+        const { data: { session } } = await db.auth.getSession();
+        const { data: vendor } = await db.from('vendors').select('email').eq('id', agent.vendor_id).single();
+        if (session && vendor?.email) {
+          fetch(`${SUPABASE_URL}/functions/v1/send-notification`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ type: 'agent_approved', agentName: agent.nome, vendorEmail: vendor.email }) }).catch(() => {});
+        }
+      }
       btn.closest('tr').remove();
-      allAgents = allAgents.filter(a => a.id !== id);
-      loadDashboard();
+      allAgents = allAgents.map(a => a.id === id ? { ...a, attivo: true, rejected: false } : a);
+      await loadDashboard();
+    } catch (err) {
+      showToast('Errore durante l\'approvazione', 'error'); btn.disabled = false;
+    }
+  }
+
+  function confirmRejectAgent(id) { openRejectModal(id, allAgents.find(a => a.id === id)?.nome || 'Agente'); }
+
+  function confirmRemoveAgent(id) {
+    showConfirm('Sei sicuro di voler rimuovere questo agente attivo? Gli utenti abbonati perderanno l\'accesso.', async () => {
+      const { error } = await db.from('agents').update({ attivo: false }).eq('id', id);
+      if (error) { showToast('Errore', 'error'); return; }
+      showToast('Agente rimosso dal catalogo', 'success');
+      allAgents = allAgents.map(a => a.id === id ? { ...a, attivo: false } : a);
+      await loadDashboard();
+      applyAgentView();
     });
   }
 
+  // ── Approve / revoke vendors ───────────────────────────────────
   async function approveVendor(id, btn) {
     btn.disabled = true;
-    const { data: vendor, error } = await db.from('vendors').update({ approvato: true }).eq('id', id).select('nome, cognome, email').single();
-    if (error) { showToast('Errore', 'error'); btn.disabled = false; return; }
-    showToast('Vendor approvato!', 'success');
-    btn.closest('tr').cells[2].innerHTML = '<span class="status-badge active">Approvato</span>';
-    btn.remove();
-
-    // Notify vendor via email (fire and forget)
-    if (vendor?.email) {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) {
-        fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
-          body: JSON.stringify({ type: 'vendor_approved', agentName: `${vendor.nome} ${vendor.cognome}`, vendorEmail: vendor.email }),
-        }).catch(() => {});
+    try {
+      const { data: vendor, error } = await db.from('vendors').update({ approvato: true }).eq('id', id).select('nome, cognome, email').single();
+      if (error) throw error;
+      showToast('Vendor approvato!', 'success');
+      allVendors = allVendors.map(v => v.id === id ? { ...v, approvato: true } : v);
+      renderVendors(allVendors);
+      if (vendor?.email) {
+        const { data: { session } } = await db.auth.getSession();
+        if (session) fetch(`${SUPABASE_URL}/functions/v1/send-notification`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY }, body: JSON.stringify({ type: 'vendor_approved', agentName: `${vendor.nome} ${vendor.cognome}`, vendorEmail: vendor.email }) }).catch(() => {});
       }
+      await loadDashboard();
+    } catch (err) {
+      showToast('Errore', 'error'); btn.disabled = false;
     }
+  }
+
+  async function revokeVendor(id, btn) {
+    showConfirm('Sei sicuro di voler revocare l\'approvazione a questo vendor? Non potrà più accedere alla sua dashboard.', async () => {
+      const { error } = await db.from('vendors').update({ approvato: false }).eq('id', id);
+      if (error) { showToast('Errore', 'error'); return; }
+      showToast('Approvazione revocata', 'success');
+      allVendors = allVendors.map(v => v.id === id ? { ...v, approvato: false } : v);
+      renderVendors(allVendors);
+      await loadDashboard();
+    });
   }
 
   init();
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar.classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('open');
-    document.body.style.overflow = document.querySelector('.sidebar').classList.contains('open') ? 'hidden' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeSidebar() {
     document.querySelector('.sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 </script>
 </body>

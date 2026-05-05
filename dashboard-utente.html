@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Dashboard — Shop Your Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
-    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --bg: #0a0a0a; --surface: #141414; --surface2: #242424;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.22);
+    --text: #f0ede8; --muted: #999; --accent: #c8f55a; --accent-dark: #9ec43a;
     --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
     --error: #ff5f5f; --success: #5fff9a;
   }
@@ -82,6 +86,8 @@
   .status-badge.active { background: rgba(95,255,154,0.1); color: #5fff9a; border: 1px solid rgba(95,255,154,0.2); }
   .status-badge.cancelled { background: rgba(255,95,95,0.1); color: #ff5f5f; border: 1px solid rgba(255,95,95,0.2); }
   .empty-row td { text-align: center; color: var(--muted); padding: 2.5rem !important; }
+  .btn-billing { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: var(--font-body); font-size: 13px; padding: 9px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .btn-billing:hover { color: var(--text); border-color: var(--border2); }
   .onboarding-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 1.5rem; text-align: left; max-width: 380px; margin-left: auto; margin-right: auto; }
   .ob-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
   .ob-num { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
@@ -98,6 +104,19 @@
   .welcome-emoji { font-size: 36px; }
   .welcome-text h3 { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 4px; }
   .welcome-text p { font-size: 13px; color: var(--muted); }
+
+  /* Confirm modal */
+  .confirm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(4px); z-index:9000; align-items:center; justify-content:center; }
+  .confirm-overlay.open { display:flex; }
+  .confirm-modal { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:2rem; max-width:380px; width:90%; box-shadow:0 24px 64px rgba(0,0,0,0.5); animation:fadeUp 0.25s ease; }
+  .confirm-modal-title { font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:0.75rem; }
+  .confirm-modal-body { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:1.75rem; }
+  .confirm-modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+  .confirm-modal-cancel { background:transparent; border:1px solid var(--border2); color:var(--muted); font-family:var(--font-body); font-size:14px; padding:10px 20px; border-radius:8px; cursor:pointer; transition:all 0.2s; }
+  .confirm-modal-cancel:hover { color:var(--text); border-color:rgba(255,255,255,0.3); }
+  .confirm-modal-confirm { background:rgba(255,95,95,0.15); border:1px solid rgba(255,95,95,0.3); color:#ff5f5f; font-family:var(--font-body); font-size:14px; font-weight:500; padding:10px 20px; border-radius:8px; cursor:pointer; transition:all 0.2s; }
+  .confirm-modal-confirm:hover { background:rgba(255,95,95,0.25); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
   /* Mobile topbar */
   .mobile-topbar {
@@ -152,10 +171,12 @@
 <script src="sya.js"></script>
 </head>
 <body>
+<noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
 
 <div class="mobile-topbar">
   <a href="shop_your_agent.html" class="mobile-logo">Shop<span>Your</span>Agent</a>
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span id="topbar-section-name" style="font-size:13px;color:var(--muted);font-weight:500;flex:1;text-align:center;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">I miei agenti</span>
+  <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </div>
@@ -163,19 +184,19 @@
 
 <div class="sidebar">
   <a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
-  <button class="nav-item active" id="nav-agenti" onclick="showSection('agenti', this)"><span class="nav-icon">⚡</span> I miei agenti</button>
+  <button class="nav-item active" id="nav-agenti" aria-pressed="true" onclick="showSection('agenti', this)"><span class="nav-icon">⚡</span> I miei agenti</button>
   <a class="nav-item" href="shop_your_agent.html#agenti"><span class="nav-icon">🛒</span> Catalogo</a>
-  <button class="nav-item" id="nav-abbonamenti" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
+  <button class="nav-item" id="nav-abbonamenti" aria-pressed="false" onclick="showSection('abbonamenti', this)"><span class="nav-icon">💳</span> Abbonamenti</button>
   <a class="nav-item" href="impostazioni.html"><span class="nav-icon">⚙️</span> Impostazioni</a>
   <div class="sidebar-bottom">
-    <div class="user-info">
+    <a href="impostazioni.html" class="user-info" style="text-decoration:none;border-radius:10px;transition:background 0.2s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
       <div class="avatar" id="avatar-initials">?</div>
       <div>
         <div class="user-name" id="user-name">Caricamento...</div>
         <div class="user-email" id="user-email"></div>
       </div>
-    </div>
-    <a class="logout-btn" onclick="signOut()">Esci</a>
+    </a>
+    <button class="logout-btn" onclick="signOut()">Esci</button>
     <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
       <a href="termini.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Termini</a>
       <a href="privacy.html" style="font-size:11px;color:#555;text-decoration:none;" target="_blank">Privacy</a>
@@ -215,7 +236,7 @@
         <div class="page-title">Abbonamenti</div>
         <div class="page-sub" style="margin-bottom:0;">Storico completo di tutti i tuoi abbonamenti</div>
       </div>
-      <button onclick="openBillingPortal()" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">💳 Gestisci pagamenti</button>
+      <button onclick="openBillingPortal()" class="btn-billing">💳 Gestisci pagamenti</button>
     </div>
     <div class="table-wrap">
     <table>
@@ -233,12 +254,32 @@
 
 </div>
 
+<!-- Confirm modal -->
+<div class="confirm-overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="confirm-modal">
+    <div class="confirm-modal-title" id="confirm-title"></div>
+    <div class="confirm-modal-body" id="confirm-body"></div>
+    <div class="confirm-modal-actions">
+      <button class="confirm-modal-cancel" id="confirm-cancel">Annulla</button>
+      <button class="confirm-modal-confirm" id="confirm-ok">Conferma</button>
+    </div>
+  </div>
+</div>
+
 <script>
   function showSection(name, el) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.remove('active');
+      if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', 'false');
+    });
     document.getElementById(`section-${name}`).classList.add('active');
-    if (el) el.classList.add('active');
+    if (el) {
+      el.classList.add('active');
+      if (el.hasAttribute('aria-pressed')) el.setAttribute('aria-pressed', 'true');
+      const topbarName = document.getElementById('topbar-section-name');
+      if (topbarName) topbarName.textContent = el.textContent.trim().replace(/^[^\s]+\s*/, '').trim() || el.textContent.trim();
+    }
     if (typeof closeSidebar === 'function') closeSidebar();
   }
 
@@ -255,19 +296,23 @@
     document.getElementById('agents-skeleton').innerHTML = skeletonCards(3);
 
     // Load profile
-    const { data: profiles } = await db.from('profiles').select('nome, cognome').eq('user_id', user.id).limit(1);
     let displayName = '';
-    if (profiles?.[0]) {
-      displayName = `${profiles[0].nome} ${profiles[0].cognome}`;
-      document.getElementById('user-name').textContent = displayName;
-      document.getElementById('avatar-initials').textContent = profiles[0].nome?.charAt(0).toUpperCase() || email.charAt(0).toUpperCase();
-    } else {
-      const meta = user.user_metadata || {};
-      if (meta.nome) {
-        displayName = `${meta.nome} ${meta.cognome || ''}`.trim();
+    try {
+      const { data: profiles } = await db.from('profiles').select('nome, cognome').eq('user_id', user.id).limit(1);
+      if (profiles?.[0]) {
+        displayName = `${profiles[0].nome} ${profiles[0].cognome}`;
         document.getElementById('user-name').textContent = displayName;
-        document.getElementById('avatar-initials').textContent = meta.nome.charAt(0).toUpperCase();
+        document.getElementById('avatar-initials').textContent = profiles[0].nome?.charAt(0).toUpperCase() || email.charAt(0).toUpperCase();
+      } else {
+        const meta = user.user_metadata || {};
+        if (meta.nome) {
+          displayName = `${meta.nome} ${meta.cognome || ''}`.trim();
+          document.getElementById('user-name').textContent = displayName;
+          document.getElementById('avatar-initials').textContent = meta.nome.charAt(0).toUpperCase();
+        }
       }
+    } catch (err) {
+      showToast('Errore nel caricamento del profilo', 'error');
     }
 
     const wb = document.getElementById('welcome-banner');
@@ -278,14 +323,19 @@
     }
 
     // Load subscriptions
-    const { data: subs } = await db
-      .from('subscriptions')
-      .select('*, agents(*)')
-      .eq('user_id', user.id)
-      .order('data_inizio', { ascending: false });
+    let allSubs = [];
+    try {
+      const { data: subs, error } = await db
+        .from('subscriptions')
+        .select('*, agents(*)')
+        .eq('user_id', user.id)
+        .order('data_inizio', { ascending: false });
+      if (error) throw error;
+      allSubs = subs || [];
+    } catch (err) {
+      showToast('Errore nel caricamento degli abbonamenti', 'error');
+    }
 
-
-    const allSubs = subs || [];
     const activeSubs = allSubs.filter(s => s.stato === 'attiva');
     renderStats(activeSubs, displayName);
     renderAgentCards(activeSubs);
@@ -413,42 +463,87 @@
     }
   }
 
-  async function cancelSubscription(stripeSubId) {
-    if (!confirm('Sei sicuro di voler disdire questo abbonamento? Mantieni l\'accesso fino alla fine del periodo pagato.')) return;
+  function showConfirm(title, body, onConfirm) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-body').textContent = body;
+    const overlay = document.getElementById('confirm-overlay');
+    overlay.classList.add('open');
 
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) return;
+    const focusable = Array.from(overlay.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])'));
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    const prevFocus = document.activeElement;
+    if (first) first.focus();
 
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/cancel-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ stripeSubscriptionId: stripeSubId }),
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      showToast('Abbonamento disdetto. Accesso attivo fino a fine periodo.', 'info');
-      setTimeout(() => init(), 1500);
-    } catch (err) {
-      showToast(err.message || 'Errore durante la disdetta', 'error');
+    function trapFocus(e) {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      }
     }
+    function onEsc(e) { if (e.key === 'Escape') close(); }
+    function onOverlay(e) { if (e.target === overlay) close(); }
+
+    function close() {
+      overlay.classList.remove('open');
+      overlay.removeEventListener('click', onOverlay);
+      document.removeEventListener('keydown', trapFocus);
+      document.removeEventListener('keydown', onEsc);
+      if (prevFocus) prevFocus.focus();
+    }
+
+    overlay.addEventListener('click', onOverlay);
+    document.addEventListener('keydown', trapFocus);
+    document.addEventListener('keydown', onEsc);
+
+    document.getElementById('confirm-ok').onclick = function() { close(); onConfirm(); };
+    document.getElementById('confirm-cancel').onclick = close;
+  }
+
+  async function cancelSubscription(stripeSubId) {
+    showConfirm(
+      'Disdici abbonamento',
+      'Sei sicuro? Manterrai l\'accesso fino alla fine del periodo già pagato.',
+      async function() {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) return;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/functions/v1/cancel-subscription`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+              'apikey': SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({ stripeSubscriptionId: stripeSubId }),
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          showToast('Abbonamento disdetto. Accesso attivo fino a fine periodo.', 'info');
+          setTimeout(() => init(), 1500);
+        } catch (err) {
+          showToast(err.message || 'Errore durante la disdetta', 'error');
+        }
+      }
+    );
   }
 
   init();
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const isOpen = sidebar.classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('open');
-    document.body.style.overflow = document.querySelector('.sidebar').classList.contains('open') ? 'hidden' : '';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
   function closeSidebar() {
     document.querySelector('.sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 </script>
 </body>
