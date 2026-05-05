@@ -7,39 +7,46 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 (function addFavicon() {
   if (document.querySelector('link[rel~="icon"]')) return;
-  const link = document.createElement('link');
-  link.rel = 'icon'; link.type = 'image/svg+xml';
-  link.href = 'data:image/svg+xml,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
-    '<rect width="32" height="32" rx="8" fill="#141414"/>' +
-    '<text x="16" y="23" font-family="Arial Black,sans-serif" font-size="17" font-weight="900" fill="#c8f55a" text-anchor="middle">S</text>' +
-    '</svg>'
-  );
-  document.head.appendChild(link);
+  const link32 = document.createElement('link');
+  link32.rel = 'icon'; link32.type = 'image/png'; link32.sizes = '32x32';
+  link32.href = '/icons/icon-32.png';
+  document.head.appendChild(link32);
+  const link192 = document.createElement('link');
+  link192.rel = 'icon'; link192.type = 'image/png'; link192.sizes = '192x192';
+  link192.href = '/icons/icon-192.png';
+  document.head.appendChild(link192);
 })();
 
 // ─── PWA META + SERVICE WORKER ───────────────────────────────────────────────
 
 (function initPWA() {
-  if (!document.querySelector('meta[name="theme-color"]')) {
-    const m = document.createElement('meta');
-    m.name = 'theme-color'; m.content = '#0a0a0a'; m.id = 'sya-theme-color';
-    document.head.appendChild(m);
+  const head = document.head;
+  function meta(name, content) {
+    if (document.querySelector('meta[name="' + name + '"]')) return;
+    const m = document.createElement('meta'); m.name = name; m.content = content;
+    head.appendChild(m);
   }
-  if (!document.querySelector('link[rel="apple-touch-icon"]')) {
-    const l = document.createElement('link');
-    l.rel = 'apple-touch-icon'; l.sizes = '180x180';
-    l.href = 'data:image/svg+xml,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">' +
-      '<rect width="180" height="180" rx="40" fill="#141414"/>' +
-      '<text x="90" y="128" font-family="Arial Black,sans-serif" font-size="96" font-weight="900" fill="#c8f55a" text-anchor="middle">S</text>' +
-      '</svg>'
-    );
-    document.head.appendChild(l);
+  function link(rel, href, extra) {
+    if (document.querySelector('link[rel="' + rel + '"]')) return;
+    const l = document.createElement('link'); l.rel = rel; l.href = href;
+    if (extra) Object.assign(l, extra);
+    head.appendChild(l);
   }
+
+  meta('theme-color', '#0a0a0a');
+  meta('apple-mobile-web-app-capable', 'yes');
+  meta('apple-mobile-web-app-status-bar-style', 'black-translucent');
+  meta('apple-mobile-web-app-title', 'Shop Your Agent');
+  meta('mobile-web-app-capable', 'yes');
+  meta('msapplication-TileColor', '#0a0a0a');
+  meta('msapplication-TileImage', '/icons/icon-144.png');
+
+  link('apple-touch-icon', '/icons/icon-180.png', { sizes: '180x180' });
+  link('manifest', '/manifest.json');
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js').catch(function() {});
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
     });
   }
 })();

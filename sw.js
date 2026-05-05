@@ -1,4 +1,4 @@
-const CACHE = 'sya-v2';
+const CACHE = 'sya-v3';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -8,6 +8,8 @@ const PRECACHE = [
   '/sya.js',
   '/manifest.json',
   '/og-image.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
 ];
 
 self.addEventListener('install', function(e) {
@@ -31,7 +33,6 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
-  // Skip external APIs and CDNs — always network
   if (url.includes('supabase.co') || url.includes('googleapis.com') ||
       url.includes('gstatic.com') || url.includes('jsdelivr.net') ||
       url.includes('stripe.com')) return;
