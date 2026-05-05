@@ -10,6 +10,8 @@ const PRECACHE = [
   '/og-image.svg',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/store-assets/screenshot-1.png',
+  '/store-assets/screenshot-2.png',
 ];
 
 self.addEventListener('install', function(e) {

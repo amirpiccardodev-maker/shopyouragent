@@ -44,6 +44,27 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   link('apple-touch-icon', '/icons/icon-180.png', { sizes: '180x180' });
   link('manifest', '/manifest.json');
 
+  // Apple splash screens
+  var splashes = [
+    ['(device-width:390px)and(device-height:844px)and(-webkit-device-pixel-ratio:3)',   'iphone-12-13-14'],
+    ['(device-width:428px)and(device-height:926px)and(-webkit-device-pixel-ratio:3)',   'iphone-12-13-pro-max'],
+    ['(device-width:393px)and(device-height:852px)and(-webkit-device-pixel-ratio:3)',   'iphone-14-pro'],
+    ['(device-width:430px)and(device-height:932px)and(-webkit-device-pixel-ratio:3)',   'iphone-14-pro-max'],
+    ['(device-width:375px)and(device-height:667px)and(-webkit-device-pixel-ratio:2)',   'iphone-8'],
+    ['(device-width:375px)and(device-height:812px)and(-webkit-device-pixel-ratio:3)',   'iphone-x-xs'],
+    ['(device-width:414px)and(device-height:896px)and(-webkit-device-pixel-ratio:2)',   'iphone-xr-11'],
+    ['(device-width:1024px)and(device-height:1366px)and(-webkit-device-pixel-ratio:2)', 'ipad-pro-12'],
+    ['(device-width:834px)and(device-height:1194px)and(-webkit-device-pixel-ratio:2)',  'ipad-pro-11'],
+    ['(device-width:768px)and(device-height:1024px)and(-webkit-device-pixel-ratio:2)',  'ipad-air']
+  ];
+  splashes.forEach(function(s) {
+    var l = document.createElement('link');
+    l.rel = 'apple-touch-startup-image';
+    l.href = '/splash/apple-splash-' + s[1] + '.png';
+    l.media = s[0] + 'and(orientation:portrait)';
+    head.appendChild(l);
+  });
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js').catch(function() {});

@@ -1,0 +1,140 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║              SHOP YOUR AGENT — STORE LISTING                               ║
+║              Pronto per: Google Play · App Store · Microsoft Store          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ITALIANO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TITOLO (max 50 caratteri)
+Shop Your Agent — Agenti AI per PMI
+
+SOTTOTITOLO / BREVE (max 80 caratteri)
+Il marketplace italiano degli agenti AI. Zero codice, risultati veri.
+
+DESCRIZIONE BREVE (max 167 caratteri — Google Play)
+Automatizza la tua azienda con agenti AI pronti all'uso. Marketing, customer care, SEO e molto altro. Scegli, acquista e attiva in pochi minuti.
+
+DESCRIZIONE COMPLETA
+Shop Your Agent è il primo marketplace italiano dedicato agli agenti AI per
+piccole e medie imprese. Smetti di perdere tempo in attività ripetitive:
+i nostri agenti lavorano per te 24 ore su 24, 7 giorni su 7.
+
+🤖 COSA PUOI FARE
+• Automatizza il customer care con risposte intelligenti in tempo reale
+• Ottimizza i tuoi contenuti e il posizionamento SEO
+• Gestisci i social media con post automatici e schedulati
+• Genera lead qualificati senza sforzo
+• Invia campagne email personalizzate
+• Crea report e analisi automatiche ogni settimana
+
+✅ PERCHÉ SCEGLIERE SHOP YOUR AGENT
+• Nessuna riga di codice necessaria — tutto pronto all'uso
+• Agenti creati e verificati da sviluppatori italiani
+• Abbonamenti mensili flessibili, disdici quando vuoi
+• Assistenza in italiano
+• Pagamenti sicuri con Stripe
+
+🏆 CATEGORIE DISPONIBILI
+Marketing • Customer Care • SEO • Social Media • Finance • Analytics
+Content Creation • Lead Generation • Email Marketing • Automazione
+
+📦 COME FUNZIONA
+1. Sfoglia il catalogo e scegli l'agente che fa per te
+2. Acquista l'abbonamento mensile con Stripe
+3. Segui le istruzioni di attivazione guidata
+4. Il tuo agente è operativo — seduta stante
+
+PAROLE CHIAVE (Google Play)
+agenti AI, intelligenza artificiale, automazione aziendale, marketing AI,
+customer care automatico, SEO automatico, social media bot, PMI, no-code,
+marketplace AI, agenti italiani, business automation
+
+CATEGORIA GOOGLE PLAY
+Business
+
+CATEGORIA APP STORE
+Business / Productivity
+
+CLASSIFICAZIONE CONTENUTI
+Everyone (4+) — nessun contenuto inappropriato
+
+SITO WEB
+https://shopyouragent.onrender.com
+
+EMAIL SUPPORTO
+amirpiccardo@gmail.com
+
+PRIVACY POLICY URL
+https://shopyouragent.onrender.com/privacy.html
+
+TERMINI DI SERVIZIO URL
+https://shopyouragent.onrender.com/termini.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ENGLISH (for international store regions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TITLE
+Shop Your Agent — AI Agents Marketplace
+
+SHORT DESCRIPTION
+Italy's #1 AI agents marketplace for SMBs. No code, ready to use, instant results.
+
+FULL DESCRIPTION
+Shop Your Agent is the first Italian marketplace for AI agents built for
+small and medium-sized businesses. Stop wasting time on repetitive tasks —
+let our agents work for you 24/7.
+
+🤖 WHAT YOU CAN DO
+• Automate customer support with real-time intelligent responses
+• Optimize your content and SEO rankings automatically
+• Manage social media with auto-scheduling and posting
+• Generate qualified leads without manual effort
+• Send personalized email campaigns at scale
+• Get automated analytics reports every week
+
+✅ WHY SHOP YOUR AGENT
+• Zero code required — everything works out of the box
+• Agents built and verified by Italian developers
+• Flexible monthly subscriptions, cancel anytime
+• Secure payments via Stripe
+• Italian-language support
+
+HOW IT WORKS
+1. Browse the catalog and pick the right agent
+2. Subscribe with a monthly plan via Stripe
+3. Follow the guided setup instructions
+4. Your agent is live — immediately
+
+KEYWORDS
+AI agents, artificial intelligence, business automation, marketing AI,
+customer care automation, SEO automation, social media bot, SMB, no-code,
+AI marketplace, business productivity
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ASSET FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+store-assets/screenshot-1.png     → Screenshot 1 (1080×1920) — Homepage
+store-assets/screenshot-2.png     → Screenshot 2 (1080×1920) — Catalogo
+store-assets/feature-graphic.png  → Feature Graphic (1024×500) — Google Play
+icons/icon-512.png                → App Icon (512×512)
+icons/icon-192.png                → App Icon (192×192)
+splash/apple-splash-*.png         → iOS Splash Screens (10 dispositivi)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROSSIMI PASSI — GOOGLE PLAY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Vai su https://pwabuilder.com
+2. Inserisci: https://shopyouragent.onrender.com
+3. Clicca "Package for stores" → Android
+4. Scarica il pacchetto ZIP (contiene APK + AAB + istruzioni)
+5. Copia il SHA-256 fingerprint dal file generato
+6. Sostituiscilo in .well-known/assetlinks.json → push su GitHub
+7. Aspetta il redeploy su Render (~2 min)
+8. Carica l'AAB su https://play.google.com/console
+9. Compila il listing con i testi qui sopra
+10. Submit per review (3-7 giorni)
