@@ -1,4 +1,4 @@
-const CACHE = 'sya-v3';
+const CACHE = 'sya-v4';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -12,6 +12,7 @@ const PRECACHE = [
   '/icons/icon-512.png',
   '/store-assets/screenshot-1.png',
   '/store-assets/screenshot-2.png',
+  '/store-assets/screenshot-wide.png',
 ];
 
 self.addEventListener('install', function(e) {
