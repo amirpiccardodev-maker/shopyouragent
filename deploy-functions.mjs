@@ -56,11 +56,18 @@ async function deployFunction(slug, sourceFile, verifyJwt) {
 }
 
 const functions = [
-  { slug: 'create-checkout-session', file: 'supabase/functions/create-checkout-session/index.ts', jwt: true },
-  { slug: 'stripe-webhook',          file: 'supabase/functions/stripe-webhook/index.ts',          jwt: false },
-  { slug: 'cancel-subscription',     file: 'supabase/functions/cancel-subscription/index.ts',     jwt: true },
-  { slug: 'create-billing-portal',   file: 'supabase/functions/create-billing-portal/index.ts',   jwt: true },
-  { slug: 'send-notification',       file: 'supabase/functions/send-notification/index.ts',       jwt: true },
+  // Core payments
+  { slug: 'create-checkout-session',  file: 'supabase/functions/create-checkout-session/index.ts',  jwt: true  },
+  { slug: 'stripe-webhook',           file: 'supabase/functions/stripe-webhook/index.ts',           jwt: false },
+  { slug: 'cancel-subscription',      file: 'supabase/functions/cancel-subscription/index.ts',      jwt: true  },
+  { slug: 'create-billing-portal',    file: 'supabase/functions/create-billing-portal/index.ts',    jwt: true  },
+  // Notifications
+  { slug: 'send-notification',        file: 'supabase/functions/send-notification/index.ts',        jwt: true  },
+  // Vendor identity verification
+  { slug: 'send-vendor-verification', file: 'supabase/functions/send-vendor-verification/index.ts', jwt: true  },
+  { slug: 'confirm-vendor-email',     file: 'supabase/functions/confirm-vendor-email/index.ts',     jwt: false },
+  // Public contact form
+  { slug: 'contact-form',             file: 'supabase/functions/contact-form/index.ts',             jwt: false },
 ];
 
 for (const fn of functions) {
