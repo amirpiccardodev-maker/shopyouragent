@@ -1,6 +1,5 @@
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
 const cors = {
-  'Access-Control-Allow-Origin': SITE_URL,
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'content-type',
 };
 
