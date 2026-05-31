@@ -1055,7 +1055,10 @@
     const grid = document.getElementById('featured-grid');
     grid.innerHTML = skeletonCards(6);
     const { data: agents } = await db.from('agents').select('*').eq('attivo', true).order('created_at', { ascending: false }).limit(6);
-    const list = (agents && agents.length > 0) ? agents : STATIC_FEATURED;
+    const realAgents = agents || [];
+    const realNames = new Set(realAgents.map(a => a.nome.toLowerCase()));
+    const staticFill = STATIC_FEATURED.filter(a => !realNames.has(a.nome.toLowerCase())).slice(0, 6 - realAgents.length);
+    const list = [...realAgents, ...staticFill];
     grid.innerHTML = list.map(renderCard).join('');
   }
 

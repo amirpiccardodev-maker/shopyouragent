@@ -606,9 +606,13 @@
       ]);
 
       const plusFmt = function(n) { return Math.round(n) + '+'; };
-      if (agentsRes.data && agentsRes.data.length > 0) {
-        allAgents = agentsRes.data;
-        animateNumber(document.getElementById('hero-stat-agenti'), agentsRes.data.length, 900, plusFmt);
+      if (agentsRes.data) {
+        // Merge: real agents first, fill remaining slots with static placeholders
+        const realAgents = agentsRes.data;
+        const realNames = new Set(realAgents.map(a => a.nome.toLowerCase()));
+        const staticFill = STATIC_AGENTS.filter(a => !realNames.has(a.nome.toLowerCase()));
+        allAgents = [...realAgents, ...staticFill];
+        animateNumber(document.getElementById('hero-stat-agenti'), Math.max(realAgents.length, STATIC_AGENTS.length), 900, plusFmt);
       } else {
         allAgents = STATIC_AGENTS;
         animateNumber(document.getElementById('hero-stat-agenti'), STATIC_AGENTS.length, 900, plusFmt);
