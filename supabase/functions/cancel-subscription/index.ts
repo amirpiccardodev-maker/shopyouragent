@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -8,6 +6,16 @@ const cors = {
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
 function stripeSk() { return Deno.env.get('STRIPE_SECRET_KEY')!; }
+
+async function verifyUser(token: string): Promise<{ id: string; email: string }> {
+  const res = await fetch(`${supabaseUrl()}/auth/v1/user`, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Non autorizzato');
+  const user = await res.json();
+  if (!user.id) throw new Error('Non autorizzato');
+  return { id: user.id, email: user.email || '' };
+}
 
 async function dbGet(path: string, query: Record<string, string>) {
   const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
@@ -50,15 +58,11 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
-    // Verify JWT signature via Supabase auth
     const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
-    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !user) throw new Error('Non autorizzato');
+    const user = await verifyUser(token);
 
     const { stripeSubscriptionId } = await req.json();
 
-    // Verify the subscription belongs to this verified user
     const subs = await dbGet('/subscriptions', {
       stripe_subscription_id: `eq.${stripeSubscriptionId}`,
       user_id: `eq.${user.id}`,

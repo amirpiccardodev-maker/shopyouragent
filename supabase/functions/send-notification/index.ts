@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -7,6 +5,16 @@ const cors = {
 
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
+
+async function verifyUser(token: string): Promise<{ id: string }> {
+  const res = await fetch(`${supabaseUrl()}/auth/v1/user`, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Non autorizzato');
+  const user = await res.json();
+  if (!user.id) throw new Error('Non autorizzato');
+  return { id: user.id };
+}
 
 async function sendEmail(apiKey: string, to: string, subject: string, html: string) {
   const from = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
@@ -21,11 +29,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
-    // Verify JWT signature via Supabase auth
     const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
-    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !user) throw new Error('Non autorizzato');
+    await verifyUser(token);
 
     const { type, agentName, vendorEmail, vendorName, buyerEmail } = await req.json();
     const RESEND_KEY = Deno.env.get('RESEND_API_KEY');

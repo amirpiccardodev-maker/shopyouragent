@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -8,44 +6,70 @@ const cors = {
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
 
+async function verifyUser(token: string): Promise<{ id: string; email: string }> {
+  const res = await fetch(`${supabaseUrl()}/auth/v1/user`, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Non autorizzato');
+  const user = await res.json();
+  if (!user.id) throw new Error('Non autorizzato');
+  return { id: user.id, email: user.email || '' };
+}
+
+async function dbGet(path: string, query: Record<string, string>) {
+  const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
+  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+  const res = await fetch(url, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+  });
+  return res.json();
+}
+
+async function dbPatch(path: string, query: Record<string, string>, body: unknown) {
+  const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
+  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+  await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: supabaseSrk(),
+      Authorization: `Bearer ${supabaseSrk()}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(body),
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
-    // Verify JWT
     const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
-    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !user) throw new Error('Non autorizzato');
+    const authUser = await verifyUser(token);
 
-    // Find vendor record
-    const { data: vendors, error: vendorError } = await supabaseAdmin
-      .from('vendors')
-      .select('id, nome, email')
-      .eq('user_id', user.id)
-      .limit(1);
-
-    if (vendorError || !vendors?.length) throw new Error('Profilo vendor non trovato');
+    const vendors = await dbGet('/vendors', {
+      user_id: `eq.${authUser.id}`,
+      select: 'id,nome,email',
+      limit: '1',
+    });
+    if (!Array.isArray(vendors) || !vendors.length) throw new Error('Profilo vendor non trovato');
     const vendor = vendors[0];
 
     // Generate secure token (64-char hex)
     const rawBytes = crypto.getRandomValues(new Uint8Array(32));
     const verificationToken = Array.from(rawBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-
-    // Store token with 48h expiry
     const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-    const { error: updateError } = await supabaseAdmin
-      .from('vendors')
-      .update({ verification_token: verificationToken, token_expires_at: expiresAt })
-      .eq('id', vendor.id);
 
-    if (updateError) throw new Error('Errore nel salvataggio del token');
+    await dbPatch('/vendors', { id: `eq.${vendor.id}` }, {
+      verification_token: verificationToken,
+      token_expires_at: expiresAt,
+    });
 
-    // Send verification email
     const RESEND_KEY = Deno.env.get('RESEND_API_KEY');
     const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
+    const SITE_URL = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
     const verifyUrl = `${SITE_URL}/verify-vendor.html?token=${verificationToken}&vid=${vendor.id}`;
-    const vendorEmail = vendor.email || user.email;
+    const vendorEmail = vendor.email || authUser.email;
 
     if (RESEND_KEY && vendorEmail) {
       await fetch('https://api.resend.com/emails', {
@@ -67,13 +91,7 @@ Deno.serve(async (req) => {
                 ✓ Verifica email
               </a>
             </p>
-            <p style="font-family:sans-serif;font-size:13px;color:#888;line-height:1.6;">
-              Il link scade tra 48 ore. Se non hai creato un account vendor, ignora questa email.
-            </p>
-            <p style="font-family:sans-serif;font-size:12px;color:#aaa;margin-top:24px;border-top:1px solid #eee;padding-top:12px;">
-              Oppure copia questo URL nel browser:<br>
-              <a href="${verifyUrl}" style="color:#7a9a00;word-break:break-all;">${verifyUrl}</a>
-            </p>
+            <p style="font-family:sans-serif;font-size:13px;color:#888;">Il link scade tra 48 ore.</p>
           `,
         }),
       });

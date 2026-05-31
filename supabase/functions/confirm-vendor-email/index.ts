@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'content-type',
@@ -7,6 +5,31 @@ const cors = {
 
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
+
+async function dbGet(path: string, query: Record<string, string>) {
+  const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
+  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+  const res = await fetch(url, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+  });
+  return res.json();
+}
+
+async function dbPatch(path: string, query: Record<string, string>, body: unknown) {
+  const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
+  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: supabaseSrk(),
+      Authorization: `Bearer ${supabaseSrk()}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(body),
+  });
+  return res;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -19,18 +42,14 @@ Deno.serve(async (req) => {
     if (!token || !vid) throw new Error('Parametri mancanti');
     if (token.length !== 64 || !/^[0-9a-f]+$/.test(token)) throw new Error('Token non valido');
 
-    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
+    const vendors = await dbGet('/vendors', {
+      id: `eq.${vid}`,
+      verification_token: `eq.${token}`,
+      select: 'id,email_verificata,token_expires_at',
+      limit: '1',
+    });
 
-    // Find vendor with this token
-    const { data: vendors, error } = await supabaseAdmin
-      .from('vendors')
-      .select('id, email_verificata, token_expires_at')
-      .eq('id', vid)
-      .eq('verification_token', token)
-      .limit(1);
-
-    if (error || !vendors?.length) throw new Error('Token non valido o già utilizzato');
-
+    if (!Array.isArray(vendors) || !vendors.length) throw new Error('Token non valido o già utilizzato');
     const vendor = vendors[0];
 
     if (vendor.email_verificata) {
@@ -39,18 +58,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check expiry
     if (vendor.token_expires_at && new Date(vendor.token_expires_at) < new Date()) {
       throw new Error('Il link di verifica è scaduto. Richiedine uno nuovo dalla dashboard.');
     }
 
-    // Mark as verified and clear token
-    const { error: updateError } = await supabaseAdmin
-      .from('vendors')
-      .update({ email_verificata: true, verification_token: null, token_expires_at: null })
-      .eq('id', vid);
-
-    if (updateError) throw new Error('Errore durante la verifica');
+    const patchRes = await dbPatch('/vendors', { id: `eq.${vid}` }, {
+      email_verificata: true,
+      verification_token: null,
+      token_expires_at: null,
+    });
+    if (!patchRes.ok) throw new Error('Errore durante la verifica');
 
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...cors, 'Content-Type': 'application/json' },
