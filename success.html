@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Pagamento completato — Shop Your Agent</title>
+<title>Abbonamento attivato — Shop Your Agent</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
@@ -13,110 +13,347 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
-    --border: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.18);
     --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
-    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
-    --success: #5fff9a;
+    --success: #5fff9a; --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
   }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg); color: var(--text); font-family: var(--font-body);
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    padding: 2rem; position: relative; overflow: hidden;
+    min-height: 100vh; padding: 0 0 4rem;
   }
   body::before {
     content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(95,255,154,0.06) 0%, transparent 70%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(95,255,154,0.05) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 1rem; }
+  .nav-link { font-size: 13px; color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+
+  /* MAIN */
+  .container { max-width: 780px; margin: 0 auto; padding: 3rem 1.5rem; position: relative; z-index: 1; }
+
+  /* HERO */
+  .hero-card {
+    background: var(--surface); border: 1px solid rgba(95,255,154,0.2);
+    border-radius: 20px; padding: 2.5rem 2rem; text-align: center;
+    margin-bottom: 1.5rem; position: relative; overflow: hidden;
+  }
+  .hero-card::before {
+    content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(95,255,154,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
-  .logo {
-    position: fixed; top: 1.5rem; left: 2rem;
-    font-family: var(--font-display); font-size: 18px; font-weight: 800;
-    color: var(--text); text-decoration: none;
-  }
-  .logo span { color: var(--accent); }
-  .card {
-    background: var(--surface); border: 1px solid rgba(95,255,154,0.2);
-    border-radius: 20px; padding: 3rem 2.5rem; width: 100%; max-width: 480px;
-    text-align: center; animation: fadeUp 0.5s ease forwards;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .check-circle {
+  .check-anim {
     width: 72px; height: 72px; background: rgba(95,255,154,0.1);
     border: 1px solid rgba(95,255,154,0.3); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1.5rem; font-size: 32px;
+    margin: 0 auto 1.25rem; font-size: 28px;
+    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
-  h1 {
-    font-family: var(--font-display); font-size: 28px; font-weight: 700;
-    letter-spacing: -0.5px; margin-bottom: 0.75rem; color: var(--text);
+  @keyframes pop { from { opacity:0; transform: scale(0.4); } to { opacity:1; transform: scale(1); } }
+  .hero-title {
+    font-family: var(--font-display); font-size: 30px; font-weight: 700;
+    letter-spacing: -0.5px; margin-bottom: 0.5rem;
   }
-  .subtitle { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; font-weight: 300; }
-  .agent-box {
+  .hero-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; font-weight: 300; }
+
+  .agent-pill {
+    display: inline-flex; align-items: center; gap: 10px;
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem;
-    display: flex; align-items: center; gap: 12px;
+    border-radius: 99px; padding: 8px 16px; font-size: 14px; font-weight: 500;
+    margin-bottom: 1.5rem;
   }
-  .agent-icon-sm { font-size: 28px; }
-  .agent-info { text-align: left; }
-  .agent-name-sm { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
-  .agent-status-sm { font-size: 12px; color: var(--success); margin-top: 3px; }
-  .btn {
-    display: block; width: 100%; background: var(--accent); color: #0a0a0a;
+  .agent-pill-icon { font-size: 20px; }
+  .agent-pill-status { font-size: 11px; color: var(--success); letter-spacing: 0.5px; }
+
+  .email-notice {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    font-size: 13px; color: var(--muted);
+  }
+  .email-notice span { color: var(--text); font-weight: 500; }
+
+  /* STEPS */
+  .steps-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.75rem 1.5rem; margin-bottom: 1.5rem;
+  }
+  .steps-title {
+    font-family: var(--font-display); font-size: 18px; font-weight: 700;
+    margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;
+  }
+  .steps-title-badge {
+    font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--accent); background: rgba(200,245,90,0.1);
+    border: 1px solid rgba(200,245,90,0.2); padding: 3px 8px; border-radius: 99px;
+  }
+
+  .step-item {
+    display: flex; gap: 14px; padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.4s ease both;
+  }
+  .step-item:last-child { border-bottom: none; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .step-num-circle {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 13px; font-weight: 700;
+    background: rgba(200,245,90,0.1); border: 1px solid rgba(200,245,90,0.25); color: var(--accent);
+  }
+  .step-content { flex: 1; padding-top: 4px; }
+  .step-content-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .step-content-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+  /* INSTRUCTIONS */
+  .instructions-card {
+    background: var(--surface); border: 1px solid rgba(200,245,90,0.15);
+    border-radius: 16px; padding: 1.75rem 1.5rem; margin-bottom: 1.5rem;
+  }
+  .instructions-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;
+  }
+  .instructions-title {
+    font-family: var(--font-display); font-size: 18px; font-weight: 700;
+  }
+  .btn-copy {
+    display: flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px;
+    font-family: var(--font-body); font-size: 12px;
+    padding: 6px 12px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-copy:hover { color: var(--text); border-color: var(--border2); }
+
+  .instr-step {
+    display: flex; gap: 14px; padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .instr-step:last-child { border-bottom: none; }
+  .instr-num { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: rgba(200,245,90,0.2); flex-shrink: 0; width: 28px; margin-top: 1px; }
+  .instr-text { font-size: 14px; line-height: 1.7; color: var(--muted); font-weight: 300; padding-top: 2px; }
+
+  .locked-notice {
+    text-align: center; padding: 2rem;
+    background: var(--surface2); border-radius: 12px;
+    border: 1px dashed var(--border2);
+  }
+  .locked-notice .lock-icon { font-size: 28px; margin-bottom: 10px; }
+  .locked-notice p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* CTAS */
+  .cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .btn-main {
+    display: block; text-align: center; background: var(--accent); color: #0a0a0a;
     font-family: var(--font-body); font-size: 15px; font-weight: 500;
     padding: 14px; border: none; border-radius: 8px; cursor: pointer;
-    text-decoration: none; transition: background 0.2s; margin-bottom: 10px;
+    text-decoration: none; transition: all 0.2s;
   }
-  .btn:hover { background: var(--accent-dark); }
+  .btn-main:hover { background: var(--accent-dark); transform: translateY(-1px); }
   .btn-ghost {
-    display: block; width: 100%; background: transparent; color: var(--muted);
+    display: block; text-align: center; background: transparent; color: var(--muted);
     font-family: var(--font-body); font-size: 14px; font-weight: 400;
-    padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px; border: 1px solid var(--border); border-radius: 8px;
     cursor: pointer; text-decoration: none; transition: all 0.2s;
   }
-  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.14); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+
+  .help-row {
+    text-align: center; font-size: 13px; color: var(--muted); padding-top: 0.5rem;
+  }
+  .help-row a { color: var(--accent); text-decoration: none; }
+  .help-row a:hover { text-decoration: underline; }
+
+  /* SKELETON */
+  .skel-line { height: 14px; border-radius: 4px; background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%); background-size: 200% 100%; animation: skel-shimmer 1.6s infinite; margin-bottom: 10px; border-radius: 6px; }
+  @keyframes skel-shimmer { 0%{ background-position:200% 0; } 100%{ background-position:-200% 0; } }
+
+  @media (max-width: 600px) {
+    .cta-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 24px; }
+    .container { padding: 1.5rem 1rem; }
+    nav { padding: 0.875rem 1.25rem; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sya.js"></script>
 </head>
 <body>
 <noscript><div style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff5f5f;color:#fff;text-align:center;padding:12px 1rem;font-family:sans-serif;font-size:14px;font-weight:500;">Questo sito richiede JavaScript. Attivalo nel browser per continuare.</div></noscript>
-<a href="shop_your_agent.html" class="logo">Shop<span>Your</span>Agent</a>
 
-<div class="card">
-  <div class="check-circle">✓</div>
-  <h1>Abbonamento attivato!</h1>
-  <p class="subtitle">Il pagamento è andato a buon fine. Il tuo agente è ora attivo e pronto a lavorare per te 24/7.</p>
+<nav>
+  <a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+  <div class="nav-links">
+    <a href="dashboard-utente.html" class="nav-link">Dashboard</a>
+    <a href="shop_your_agent.html" class="nav-link">Catalogo</a>
+  </div>
+</nav>
 
-  <div class="agent-box" id="agent-box" style="display:none;">
-    <div class="agent-icon-sm" id="success-icon">🤖</div>
-    <div class="agent-info">
-      <div class="agent-name-sm" id="success-name">Agente</div>
-      <div class="agent-status-sm">● Attivo</div>
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero-card" id="hero-card">
+    <div class="check-anim">✓</div>
+    <div class="hero-title">Abbonamento attivato!</div>
+    <div class="hero-sub">Il pagamento è andato a buon fine. Il tuo agente è attivo e pronto a lavorare per te 24/7.</div>
+    <div class="agent-pill" id="agent-pill" style="display:none;">
+      <div class="agent-pill-icon" id="success-icon">🤖</div>
+      <div>
+        <div id="success-name" style="font-weight:500;">Agente</div>
+        <div class="agent-pill-status">● Attivo</div>
+      </div>
+    </div>
+    <div class="email-notice">📧 Riceverai una email di conferma con il riepilogo.</div>
+  </div>
+
+  <!-- STEPS PROSSIMI PASSI -->
+  <div class="steps-card">
+    <div class="steps-title">
+      Cosa fare adesso
+      <span class="steps-title-badge">3 passi</span>
+    </div>
+    <div class="step-item" style="animation-delay:0.05s;">
+      <div class="step-num-circle">1</div>
+      <div class="step-content">
+        <div class="step-content-title">Segui le istruzioni qui sotto</div>
+        <div class="step-content-desc">Configura il tuo agente in pochi minuti seguendo i passaggi nella sezione "Setup".</div>
+      </div>
+    </div>
+    <div class="step-item" style="animation-delay:0.12s;">
+      <div class="step-num-circle">2</div>
+      <div class="step-content">
+        <div class="step-content-title">Verifica che sia operativo</div>
+        <div class="step-content-desc">Dopo la configurazione, fai un test rapido per assicurarti che l'agente risponda correttamente.</div>
+      </div>
+    </div>
+    <div class="step-item" style="animation-delay:0.20s;">
+      <div class="step-num-circle">3</div>
+      <div class="step-content">
+        <div class="step-content-title">Monitora dalla dashboard</div>
+        <div class="step-content-desc">Dalla tua dashboard puoi gestire tutti gli agenti attivi, gli abbonamenti e le impostazioni.</div>
+      </div>
     </div>
   </div>
 
-  <a href="dashboard-utente.html" class="btn">Vai alla dashboard →</a>
-  <a href="shop_your_agent.html" class="btn-ghost">Esplora altri agenti</a>
+  <!-- ISTRUZIONI SETUP -->
+  <div class="instructions-card" id="instructions-card">
+    <div class="instructions-header">
+      <div class="instructions-title">📋 Istruzioni di setup</div>
+      <button class="btn-copy" id="copy-btn" onclick="copyInstructions()" style="display:none;">
+        <span>📋</span> Copia
+      </button>
+    </div>
+    <div id="instructions-body">
+      <div class="skel-line" style="width:90%;"></div>
+      <div class="skel-line" style="width:75%;"></div>
+      <div class="skel-line" style="width:85%;"></div>
+      <div class="skel-line" style="width:60%;"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-grid">
+    <a href="dashboard-utente.html" class="btn-main">Vai alla dashboard →</a>
+    <a href="shop_your_agent.html" class="btn-ghost">Esplora altri agenti</a>
+  </div>
+
+  <div class="help-row">
+    Hai bisogno di aiuto? <a href="supporto.html">Contatta il supporto</a> oppure scrivi a <a href="mailto:support@shopyouragent.com">support@shopyouragent.com</a>
+  </div>
+
 </div>
 
 <script>
   const params = new URLSearchParams(window.location.search);
   const agentId = params.get('agent_id');
+  let rawInstructions = '';
 
-  async function loadAgentInfo() {
-    if (!agentId) return;
-    const { data } = await db.from('agents').select('nome, icona').eq('id', agentId).single();
-    if (!data) return;
-    document.getElementById('success-icon').textContent = data.icona || '🤖';
-    document.getElementById('success-name').textContent = data.nome;
-    document.getElementById('agent-box').style.display = 'flex';
+  async function init() {
+    // Auth not strictly required (Stripe redirects here), but useful for personalizing
+    const { data: { session } } = await db.auth.getSession();
+
+    if (!agentId) {
+      renderInstructions(null);
+      return;
+    }
+
+    const { data } = await db
+      .from('agents')
+      .select('nome, icona, istruzioni_setup')
+      .eq('id', agentId)
+      .single();
+
+    if (data) {
+      document.getElementById('success-icon').textContent = data.icona || '🤖';
+      document.getElementById('success-name').textContent = data.nome;
+      document.getElementById('agent-pill').style.display = 'inline-flex';
+      document.title = `${data.nome} attivato — Shop Your Agent`;
+      renderInstructions(data.istruzioni_setup);
+    } else {
+      renderInstructions(null);
+    }
   }
 
-  loadAgentInfo();
+  function renderInstructions(istruzioni) {
+    const body = document.getElementById('instructions-body');
+    const copyBtn = document.getElementById('copy-btn');
+
+    if (!istruzioni || !istruzioni.trim()) {
+      body.innerHTML = `
+        <div class="locked-notice">
+          <div class="lock-icon">📄</div>
+          <p>Le istruzioni specifiche per questo agente sono disponibili nella pagina dell'agente.<br>
+             Clicca su "Gestisci →" dalla tua dashboard per accedervi.</p>
+        </div>`;
+      return;
+    }
+
+    rawInstructions = istruzioni;
+    const lines = istruzioni.split('\n').filter(l => l.trim());
+    const isNumbered = lines.every(l => /^\d+\./.test(l.trim()));
+
+    body.innerHTML = lines.map((line, i) => {
+      const text = isNumbered ? line.replace(/^\d+\.\s*/, '') : line;
+      return `<div class="instr-step" style="animation:fadeUp 0.4s ease ${(i * 0.07).toFixed(2)}s both;">
+        <div class="instr-num">${i + 1}</div>
+        <div class="instr-text">${escHtml(text)}</div>
+      </div>`;
+    }).join('');
+
+    copyBtn.style.display = 'flex';
+  }
+
+  function copyInstructions() {
+    if (!rawInstructions) return;
+    navigator.clipboard.writeText(rawInstructions).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.innerHTML = '<span>✓</span> Copiato!';
+      btn.style.color = 'var(--success)';
+      btn.style.borderColor = 'rgba(95,255,154,0.3)';
+      setTimeout(() => {
+        btn.innerHTML = '<span>📋</span> Copia';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 2000);
+    }).catch(() => showToast('Copia non riuscita', 'error'));
+  }
+
+  init();
 </script>
 </body>
 </html>

@@ -1,16 +1,10 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
 const cors = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': SITE_URL,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-function decodeJwt(token: string): { sub: string } | null {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return { sub: payload.sub };
-  } catch {
-    return null;
-  }
-}
 
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
@@ -57,16 +51,18 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
-    const authHeader = req.headers.get('Authorization') ?? '';
-    const token = authHeader.replace('Bearer ', '');
-    const user = decodeJwt(token);
-    if (!user?.sub) throw new Error('Non autorizzato');
+    // Verify JWT signature via Supabase auth
+    const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
+    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) throw new Error('Non autorizzato');
 
     const { stripeSubscriptionId } = await req.json();
 
+    // Verify the subscription belongs to this verified user
     const subs = await dbGet('/subscriptions', {
       stripe_subscription_id: `eq.${stripeSubscriptionId}`,
-      user_id: `eq.${user.sub}`,
+      user_id: `eq.${user.id}`,
       stato: `eq.attiva`,
       select: 'id',
     });

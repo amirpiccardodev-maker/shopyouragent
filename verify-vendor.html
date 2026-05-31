@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Verifica email — Shop Your Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sya.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0ede8; --muted: #888; --accent: #c8f55a; --accent-dark: #9ec43a;
+    --error: #ff5f5f; --success: #5fff9a;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 2rem; position: relative; overflow: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200,245,90,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .logo {
+    position: fixed; top: 1.5rem; left: 2rem;
+    font-family: var(--font-display); font-size: 18px; font-weight: 800;
+    color: var(--text); text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3rem 2.5rem; width: 100%; max-width: 440px;
+    text-align: center; position: relative; z-index: 1;
+    animation: fadeUp 0.4s ease forwards;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+  /* Loading */
+  .state-loading .icon { font-size: 40px; margin-bottom: 1.25rem; animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Success */
+  .state-success .icon-circle {
+    width: 72px; height: 72px; background: rgba(95,255,154,0.1);
+    border: 1px solid rgba(95,255,154,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 28px;
+    animation: pop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+  }
+  @keyframes pop { from { opacity:0; transform:scale(0.4); } to { opacity:1; transform:scale(1); } }
+  .state-success { border-color: rgba(95,255,154,0.2); }
+
+  /* Error */
+  .state-error .icon-circle {
+    width: 72px; height: 72px; background: rgba(255,95,95,0.1);
+    border: 1px solid rgba(255,95,95,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem; font-size: 28px;
+  }
+  .state-error { border-color: rgba(255,95,95,0.2); }
+
+  h1 { font-family: var(--font-display); font-size: 24px; font-weight: 700; margin-bottom: 0.6rem; }
+  p { font-size: 14px; color: var(--muted); line-height: 1.75; margin-bottom: 1.5rem; }
+
+  .steps { text-align: left; background: var(--surface2); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.75rem; }
+  .step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); padding: 5px 0; }
+  .step-icon { font-size: 15px; flex-shrink: 0; }
+  .step strong { color: var(--text); font-weight: 500; }
+
+  .btn { display: block; width: 100%; background: var(--accent); color: #0a0a0a; font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 14px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; transition: background 0.2s; margin-bottom: 10px; }
+  .btn:hover { background: var(--accent-dark); }
+  .btn-ghost { display: block; width: 100%; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 14px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+<a href="index.html" class="logo">Shop<span>Your</span>Agent</a>
+
+<div class="card" id="card">
+  <!-- Loading state -->
+  <div class="state-loading">
+    <div class="icon">⏳</div>
+    <h1>Verifica in corso...</h1>
+    <p>Stiamo verificando la tua email. Attendi un momento.</p>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const vid = params.get('vid');
+
+  async function verify() {
+    const card = document.getElementById('card');
+
+    if (!token || !vid) {
+      showError(card, 'Link non valido', 'Il link di verifica è mancante o incompleto. Controlla l\'email e riprova.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/confirm-vendor-email?token=${encodeURIComponent(token)}&vid=${encodeURIComponent(vid)}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY },
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        showError(card, 'Verifica fallita', data.error);
+        return;
+      }
+
+      if (data.already) {
+        showSuccess(card, true);
+        return;
+      }
+
+      showSuccess(card, false);
+    } catch {
+      showError(card, 'Errore di connessione', 'Non è stato possibile completare la verifica. Riprova tra qualche minuto o contattaci.');
+    }
+  }
+
+  function showSuccess(card, already) {
+    card.className = 'card state-success';
+    card.innerHTML = `
+      <div class="icon-circle">✓</div>
+      <h1>${already ? 'Già verificata!' : 'Email verificata!'}</h1>
+      <p>${already
+        ? 'La tua email risulta già verificata. Puoi accedere alla tua dashboard vendor.'
+        : 'Ottimo! La tua email è stata verificata con successo. Il tuo account vendor è ora in coda per la revisione del team di Shop Your Agent.'
+      }</p>
+      ${!already ? `<div class="steps">
+        <div class="step"><span class="step-icon">✓</span><span><strong>Email verificata</strong> — Fatto!</span></div>
+        <div class="step"><span class="step-icon">⏳</span><span><strong>Revisione account</strong> — In corso (entro 24h)</span></div>
+        <div class="step"><span class="step-icon">🚀</span><span><strong>Pubblicazione agenti</strong> — Disponibile dopo approvazione</span></div>
+      </div>` : ''}
+      <a href="dashboard-vendor.html" class="btn">Vai alla dashboard →</a>
+      <a href="supporto.html" class="btn-ghost">Hai bisogno di aiuto?</a>
+    `;
+  }
+
+  function showError(card, title, message) {
+    card.className = 'card state-error';
+    card.innerHTML = `
+      <div class="icon-circle">✕</div>
+      <h1>${title}</h1>
+      <p>${message}</p>
+      <a href="dashboard-vendor.html" class="btn">Torna alla dashboard</a>
+      <a href="supporto.html" class="btn-ghost">Contatta il supporto</a>
+    `;
+  }
+
+  verify();
+</script>
+</body>
+</html>

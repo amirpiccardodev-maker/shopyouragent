@@ -394,8 +394,16 @@
       return;
     }
 
-    // Email confirmation disabled — insert profile and redirect
+    // Email confirmation disabled — insert profile, send welcome email, redirect
     await db.from('profiles').insert({ user_id: data.user.id, nome, cognome });
+
+    // Welcome email (fire and forget)
+    fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${data.session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ type: 'welcome', agentName: nome, vendorEmail: email }),
+    }).catch(() => {});
+
     showMsg('register-msg', 'Account creato! Benvenuto...', 'success');
     setTimeout(() => redirectToDashboard(data.user), 800);
   }

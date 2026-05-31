@@ -246,7 +246,7 @@
     <div class="page-title">Gestione Vendor</div>
     <div class="page-sub">Approva e gestisci gli sviluppatori sulla piattaforma</div>
     <div class="section-toolbar">
-      <div></div>
+      <button onclick="exportVendors()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">⬇ Esporta CSV</button>
       <input type="text" class="table-search" placeholder="Cerca vendor..." oninput="searchVendors(this.value)">
     </div>
     <table>
@@ -278,7 +278,10 @@
     <div class="page-title">Abbonamenti</div>
     <div class="page-sub">Tutti gli abbonamenti sulla piattaforma</div>
     <div class="section-toolbar">
-      <div></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="openManualSubModal()" style="background:rgba(200,245,90,0.1);border:1px solid rgba(200,245,90,0.2);color:var(--accent);font-family:var(--font-body);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all 0.2s;">+ Abbonamento manuale</button>
+        <button onclick="exportSubs()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:12px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">⬇ Esporta CSV</button>
+      </div>
       <input type="text" class="table-search" placeholder="Cerca agente..." oninput="searchSubs(this.value)">
     </div>
     <table>
@@ -310,6 +313,40 @@
     </div>
   </div>
 
+</div>
+
+<!-- MANUAL SUBSCRIPTION MODAL -->
+<div class="modal-overlay" id="manual-sub-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">Abbonamento manuale</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6;">Aggiungi un abbonamento senza pagamento Stripe (test, supporto, partnership).</p>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;font-weight:500;">User ID *</label>
+      <input type="text" id="msub-userid" placeholder="UUID utente (vedi sezione Utenti)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Trovalo nella sezione Utenti → Vedi → User ID</div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;font-weight:500;">Agente *</label>
+      <select id="msub-agentid" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;appearance:none;cursor:pointer;">
+        <option value="">Seleziona agente...</option>
+      </select>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;font-weight:500;">Stato</label>
+      <select id="msub-stato" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;appearance:none;cursor:pointer;">
+        <option value="attiva">Attiva</option>
+        <option value="annullata">Annullata</option>
+      </select>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px;font-weight:500;">Note (facoltativo)</label>
+      <input type="text" id="msub-note" placeholder="es. Account test, partnership, supporto" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-close" onclick="document.getElementById('manual-sub-modal').classList.remove('open')">Annulla</button>
+      <button class="btn-approve" id="msub-submit-btn" onclick="submitManualSub()" style="flex:2;padding:11px 20px;border-radius:8px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;">Aggiungi abbonamento</button>
+    </div>
+  </div>
 </div>
 
 <!-- DETAIL MODAL -->
@@ -570,8 +607,18 @@
   // ── Vendors section ────────────────────────────────────────────
   async function loadVendors() {
     try {
-      const { data: vendors } = await db.from('vendors').select('*, agents(id, attivo)').order('created_at', { ascending: false });
+      const [{ data: vendors }, { data: subs }] = await Promise.all([
+        db.from('vendors').select('*, agents(id, attivo)').order('created_at', { ascending: false }),
+        db.from('subscriptions').select('agent_id, stato, agents(vendor_id)').eq('stato', 'attiva'),
+      ]);
       allVendors = vendors || [];
+      // Attach active sub counts to each vendor
+      const subsMap = {};
+      (subs || []).forEach(s => {
+        const vid = s.agents?.vendor_id;
+        if (vid) subsMap[vid] = (subsMap[vid] || 0) + 1;
+      });
+      allVendors.forEach(v => { v._activeSubs = subsMap[v.id] || 0; });
       renderVendors(allVendors);
     } catch (err) {
       showToast('Errore nel caricamento vendor', 'error');
@@ -584,13 +631,30 @@
     tbody.innerHTML = vendors.map(v => {
       const agentsCount = (v.agents || []).length;
       const activeCount = (v.agents || []).filter(a => a.attivo).length;
-      _details['v_' + v.id] = { title: `${v.nome} ${v.cognome}`, rows: [['Email', v.email || ''], ['Bio', v.bio || '—'], ['Agenti totali', agentsCount], ['Agenti attivi', activeCount], ['Approvato', v.approvato ? 'Sì' : 'No'], ['Metodo payout', v.payout_method || '—'], ['Coordinate', v.payout_value || '—'], ['Intestatario', v.payout_name || '—'], ['ID', v.id]] };
+      const activeSubs = v._activeSubs || 0;
+      const emailBadge = v.email_verificata
+        ? `<span style="font-size:10px;background:rgba(95,255,154,0.1);color:#5fff9a;border:1px solid rgba(95,255,154,0.2);padding:2px 6px;border-radius:99px;margin-left:6px;">✓ email</span>`
+        : `<span style="font-size:10px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid rgba(255,170,0,0.2);padding:2px 6px;border-radius:99px;margin-left:6px;">⚠ no verifica</span>`;
+      _details['v_' + v.id] = { title: `${v.nome} ${v.cognome}`, rows: [
+        ['Email', v.email || '—'],
+        ['Email verificata', v.email_verificata ? 'Sì ✓' : 'No ✗'],
+        ['P.IVA', v.partita_iva || '—'],
+        ['Azienda', v.nome_azienda || '—'],
+        ['Bio', v.bio || '—'],
+        ['Agenti attivi', `${activeCount}/${agentsCount}`],
+        ['Abbonati attivi', activeSubs],
+        ['Approvato', v.approvato ? 'Sì' : 'No'],
+        ['Metodo payout', v.payout_method || '—'],
+        ['Coordinate', v.payout_value || '—'],
+        ['Intestatario', v.payout_name || '—'],
+        ['ID', v.id],
+      ]};
       return `
         <tr>
-          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong></td>
-          <td style="font-size:13px;color:var(--muted);">${escHtml(v.email || '—')}</td>
+          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong>${emailBadge}${v.nome_azienda ? `<br><span style="font-size:12px;color:var(--muted);">${escHtml(v.nome_azienda)}</span>` : ''}</td>
+          <td style="font-size:13px;color:var(--muted);">${escHtml(v.email || '—')}${v.partita_iva ? `<br><span style="font-size:11px;">P.IVA: ${escHtml(v.partita_iva)}</span>` : ''}</td>
           <td>${activeCount}/${agentsCount}</td>
-          <td>—</td>
+          <td>${activeSubs > 0 ? `<span style="color:var(--accent);font-weight:600;">${activeSubs}</span>` : '0'}</td>
           <td><span class="status-badge ${v.approvato ? 'active' : 'pending'}">${v.approvato ? 'Approvato' : 'In attesa'}</span></td>
           <td><div class="action-btns">
             ${!v.approvato ? `<button class="btn-approve" onclick="approveVendor('${v.id}', this)">✓ Approva</button>` : `<button class="btn-revoke" onclick="revokeVendor('${v.id}', this)">⊘ Revoca</button>`}
@@ -673,26 +737,93 @@
     const tbody = document.getElementById('payouts-tbody');
     try {
       const [{ data: vendors }, { data: subs }] = await Promise.all([
-        db.from('vendors').select('id, nome, cognome, email, payout_method, payout_value, payout_name').eq('approvato', true).order('nome'),
+        db.from('vendors').select('id, nome, cognome, email, payout_method, payout_value, payout_name, ultimo_pagamento, note_admin').eq('approvato', true).order('nome'),
         db.from('subscriptions').select('agent_id, stato, agents(vendor_id, prezzo_mensile)').eq('stato', 'attiva'),
       ]);
-      if (!vendors?.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nessun vendor approvato</td></tr>'; return; }
+      if (!vendors?.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nessun vendor approvato</td></tr>'; return; }
       const activeSubs = subs || [];
+      // Update header to 5 cols
+      const thead = tbody.closest('table').querySelector('thead tr');
+      if (thead && thead.children.length === 4) {
+        const th = document.createElement('th'); th.textContent = 'Azioni'; thead.appendChild(th);
+      }
       tbody.innerHTML = vendors.map(v => {
         const vendorSubs = activeSubs.filter(s => s.agents?.vendor_id === v.id);
         const guadagno = vendorSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
         const payoutInfo = v.payout_method
           ? `<div class="payout-coords"><strong>${escHtml(v.payout_method?.toUpperCase())}</strong> ${escHtml(v.payout_value || '—')}<br>${escHtml(v.payout_name || '—')}</div>`
           : `<span style="color:var(--muted);font-size:12px;">Non configurato</span>`;
+        const lastPay = v.ultimo_pagamento
+          ? `<div style="font-size:11px;color:var(--success);margin-top:4px;">✓ Ultimo: ${new Date(v.ultimo_pagamento).toLocaleDateString('it-IT')}</div>`
+          : `<div style="font-size:11px;color:var(--muted);margin-top:4px;">Mai pagato</div>`;
         return `<tr>
-          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(v.email || '')}</span></td>
+          <td><strong>${escHtml(v.nome)} ${escHtml(v.cognome)}</strong><br><span style="font-size:12px;color:var(--muted);">${escHtml(v.email || '')}</span>${v.note_admin ? `<br><span style="font-size:11px;color:var(--warning);">📝 ${escHtml(v.note_admin)}</span>` : ''}</td>
           <td>${payoutInfo}</td>
           <td>${vendorSubs.length}</td>
-          <td style="color:var(--accent);font-weight:600;">€${guadagno.toFixed(0)}</td>
+          <td style="color:var(--accent);font-weight:600;">€${guadagno.toFixed(0)}${lastPay}</td>
+          <td><button class="btn-approve" onclick="markPaymentSent('${v.id}', this)" style="white-space:nowrap;">✓ Segna pagato</button></td>
         </tr>`;
       }).join('');
     } catch (err) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Errore nel caricamento</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Errore nel caricamento</td></tr>';
+    }
+  }
+
+  async function markPaymentSent(vendorId, btn) {
+    btn.disabled = true;
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const { error } = await db.from('vendors').update({ ultimo_pagamento: today }).eq('id', vendorId);
+      if (error) throw error;
+      showToast('Pagamento segnato come inviato!', 'success');
+      await loadPayouts();
+    } catch (err) {
+      showToast('Errore: ' + (err.message || ''), 'error');
+      btn.disabled = false;
+    }
+  }
+
+  // ── Manual subscription ────────────────────────────────────────
+  function openManualSubModal() {
+    const sel = document.getElementById('msub-agentid');
+    sel.innerHTML = '<option value="">Seleziona agente...</option>';
+    const activeAgents = allAgents.filter(a => a.attivo);
+    activeAgents.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = `${a.icona || '🤖'} ${a.nome} — €${a.prezzo_mensile}/mese`;
+      sel.appendChild(opt);
+    });
+    document.getElementById('msub-userid').value = '';
+    document.getElementById('msub-note').value = '';
+    document.getElementById('msub-stato').value = 'attiva';
+    document.getElementById('manual-sub-modal').classList.add('open');
+  }
+
+  async function submitManualSub() {
+    const userId = document.getElementById('msub-userid').value.trim();
+    const agentId = document.getElementById('msub-agentid').value;
+    const stato = document.getElementById('msub-stato').value;
+    if (!userId || !agentId) { showToast('User ID e agente sono obbligatori', 'error'); return; }
+
+    const btn = document.getElementById('msub-submit-btn');
+    btn.disabled = true; btn.textContent = 'Aggiunta...';
+
+    try {
+      const { error } = await db.from('subscriptions').insert({
+        user_id: userId,
+        agent_id: agentId,
+        stato,
+        data_inizio: new Date().toISOString(),
+      });
+      if (error) throw error;
+      document.getElementById('manual-sub-modal').classList.remove('open');
+      showToast('Abbonamento aggiunto con successo!', 'success');
+      await loadSubs();
+    } catch (err) {
+      showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Aggiungi abbonamento';
     }
   }
 
@@ -760,6 +891,44 @@
       renderVendors(allVendors);
       await loadDashboard();
     });
+  }
+
+  // ── CSV Export ─────────────────────────────────────────────────
+  function downloadCSV(rows, filename) {
+    const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = rows.map(r => r.map(escape).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportVendors() {
+    if (!allVendors.length) { showToast('Nessun vendor da esportare', 'info'); return; }
+    const header = ['Nome', 'Cognome', 'Azienda', 'P.IVA', 'Email', 'Email verificata', 'Approvato', 'Metodo payout', 'Coordinate payout', 'Intestatario', 'Agenti attivi', 'Abbonati attivi'];
+    const rows = allVendors.map(v => [
+      v.nome, v.cognome, v.nome_azienda || '', v.partita_iva || '',
+      v.email, v.email_verificata ? 'Sì' : 'No', v.approvato ? 'Sì' : 'No',
+      v.payout_method || '', v.payout_value || '', v.payout_name || '',
+      (v.agents || []).filter(a => a.attivo).length, v._activeSubs || 0,
+    ]);
+    downloadCSV([header, ...rows], `vendor_${new Date().toISOString().slice(0,10)}.csv`);
+    showToast('Export CSV vendor avviato', 'success');
+  }
+
+  function exportSubs() {
+    if (!allSubs.length) { showToast('Nessun abbonamento da esportare', 'info'); return; }
+    const header = ['Agente', 'Prezzo mensile', 'Utente', 'Stato', 'Data inizio', 'Stripe Sub ID'];
+    const rows = allSubs.map(s => [
+      s.agents?.nome || '—', s.agents?.prezzo_mensile || 0,
+      s.profiles ? `${s.profiles.nome || ''} ${s.profiles.cognome || ''}`.trim() : s.user_id || '',
+      s.stato,
+      s.data_inizio ? new Date(s.data_inizio).toLocaleDateString('it-IT') : '—',
+      s.stripe_subscription_id || '',
+    ]);
+    downloadCSV([header, ...rows], `abbonamenti_${new Date().toISOString().slice(0,10)}.csv`);
+    showToast('Export CSV abbonamenti avviato', 'success');
   }
 
   init();

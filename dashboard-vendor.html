@@ -243,8 +243,12 @@
       <h2>Completa il tuo profilo vendor</h2>
       <p>Inserisci i tuoi dati per iniziare a pubblicare agenti su Shop Your Agent e guadagnare il 70% di ogni vendita.</p>
       <div class="onboarding-form">
-        <div class="field"><label>Nome</label><input type="text" id="ob-nome" placeholder="Mario"></div>
-        <div class="field"><label>Cognome</label><input type="text" id="ob-cognome" placeholder="Rossi"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>Nome *</label><input type="text" id="ob-nome" placeholder="Mario"></div>
+          <div class="field"><label>Cognome *</label><input type="text" id="ob-cognome" placeholder="Rossi"></div>
+        </div>
+        <div class="field"><label>Nome azienda / Studio (facoltativo)</label><input type="text" id="ob-azienda" placeholder="es. Studio Rossi Digital"></div>
+        <div class="field"><label>Partita IVA (facoltativo)</label><input type="text" id="ob-piva" placeholder="es. IT12345678901"></div>
         <div class="field"><label>Bio (facoltativo)</label><textarea id="ob-bio" placeholder="Descrivi brevemente la tua esperienza con gli agenti AI..."></textarea></div>
         <button class="btn-main" style="width:100%; margin-top:0.5rem;" onclick="createVendorProfile()">Completa profilo →</button>
       </div>
@@ -253,6 +257,12 @@
 
   <!-- DASHBOARD -->
   <div class="page-section" id="section-dashboard">
+    <!-- Banner verifica email -->
+    <div id="verify-email-banner" style="display:none;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.25);border-radius:10px;padding:12px 16px;margin-bottom:1.5rem;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:16px;">📧</span>
+      <span style="flex:1;font-size:13px;color:#ffcc55;min-width:200px;">Verifica la tua email per velocizzare l'approvazione del tuo account vendor. Controlla la casella di posta.</span>
+      <button onclick="resendVerification()" id="btn-resend-verify" style="background:rgba(255,170,0,0.15);border:1px solid rgba(255,170,0,0.3);color:#ffaa00;font-family:var(--font-body);font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;white-space:nowrap;">Reinvia email</button>
+    </div>
     <div class="page-header">
       <div>
         <div class="page-title">Dashboard Vendor</div>
@@ -293,7 +303,10 @@
         <div class="field"><label>Nome</label><input type="text" id="p-nome" placeholder="Mario"></div>
         <div class="field"><label>Cognome</label><input type="text" id="p-cognome" placeholder="Rossi"></div>
       </div>
+      <div class="field"><label>Nome azienda / Studio (facoltativo)</label><input type="text" id="p-azienda" placeholder="es. Studio Rossi Digital"></div>
+      <div class="field"><label>Partita IVA (facoltativo)</label><input type="text" id="p-piva" placeholder="es. IT12345678901"></div>
       <div class="field"><label>Bio (visibile agli acquirenti)</label><textarea id="p-bio" placeholder="Descrivi la tua esperienza con gli agenti AI..." style="min-height:80px;"></textarea></div>
+      <div id="verify-status-row" style="padding:10px 0;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:13px;"></div>
       <button class="btn-main" id="btn-save-profile" onclick="saveVendorProfile()">Salva profilo</button>
     </div>
     <div class="settings-block">
@@ -327,9 +340,9 @@
         <div class="revenue-sub">Abbonamenti attivi × prezzo × 70%</div>
       </div>
       <div class="revenue-card">
-        <div class="revenue-label">Guadagno totale</div>
+        <div class="revenue-label">Guadagno totale stimato</div>
         <div class="revenue-val" id="rev-totale">€0</div>
-        <div class="revenue-sub">Storico completo</div>
+        <div class="revenue-sub">Basato sui mesi di attività</div>
       </div>
       <div class="revenue-card">
         <div class="revenue-label">Abbonati attivi</div>
@@ -378,8 +391,9 @@
     <div class="field"><label>Descrizione completa *</label><textarea id="new-desc" placeholder="Descrivi cosa fa l'agente, come funziona, per chi è pensato..."></textarea></div>
     <div class="field"><label>Prezzo mensile (€) *</label><input type="number" id="new-prezzo" placeholder="29" min="1"></div>
     <div class="field"><label>Icona (emoji)</label><input type="text" id="new-icona" placeholder="🤖" maxlength="4"></div>
-    <div class="field"><label>URL Video Demo (YouTube / Vimeo)</label><input type="url" id="new-video-url" placeholder="https://youtube.com/watch?v=..."></div>
-    <div class="field"><label>Istruzioni di setup</label><textarea id="new-istruzioni" placeholder="Spiega passo per passo come configurare e usare l'agente...&#10;1. Primo passo&#10;2. Secondo passo&#10;..." style="min-height:120px;"></textarea></div>
+    <div class="field"><label>Stack tecnologico (facoltativo)</label><input type="text" id="new-tecnologia" placeholder="es. API custom, Make, Zapier, LLM, ecc."></div>
+    <div class="field"><label>URL Video Demo (YouTube / Vimeo) — facoltativo</label><input type="url" id="new-video-url" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="field"><label>Istruzioni di setup *</label><textarea id="new-istruzioni" placeholder="Spiega passo per passo come configurare e usare l'agente...&#10;1. Primo passo&#10;2. Secondo passo&#10;..." style="min-height:120px;"></textarea></div>
     <div class="toggle-row">
       <div class="toggle-label-wrap">
         <div class="toggle-label">⭐ Agente in evidenza</div>
@@ -474,6 +488,7 @@
       document.getElementById('new-desc').value = agent.descrizione || '';
       document.getElementById('new-prezzo').value = agent.prezzo_mensile;
       document.getElementById('new-icona').value = agent.icona || '';
+      document.getElementById('new-tecnologia').value = agent.tipo_tecnologia || '';
       document.getElementById('new-video-url').value = agent.video_demo_url || '';
       document.getElementById('new-istruzioni').value = agent.istruzioni_setup || '';
       document.getElementById('new-featured').checked = !!agent.featured;
@@ -481,7 +496,7 @@
       btn.textContent = 'Salva modifiche';
       btn.onclick = saveEdit;
     } else {
-      ['new-nome','new-desc-breve','new-desc','new-icona','new-video-url','new-istruzioni'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      ['new-nome','new-desc-breve','new-desc','new-icona','new-tecnologia','new-video-url','new-istruzioni'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('new-categoria').value = '';
       document.getElementById('new-prezzo').value = '';
       document.getElementById('new-featured').checked = false;
@@ -547,6 +562,19 @@
       document.getElementById('p-nome').value = vendor.nome || '';
       document.getElementById('p-cognome').value = vendor.cognome || '';
       document.getElementById('p-bio').value = vendor.bio || '';
+      document.getElementById('p-azienda').value = vendor.nome_azienda || '';
+      document.getElementById('p-piva').value = vendor.partita_iva || '';
+
+      // Stato verifica email
+      const verifyRow = document.getElementById('verify-status-row');
+      const verifyBanner = document.getElementById('verify-email-banner');
+      if (vendor.email_verificata) {
+        if (verifyRow) verifyRow.innerHTML = '<span style="color:#5fff9a;">✓</span> <span style="color:var(--muted);">Email verificata</span>';
+        if (verifyBanner) verifyBanner.style.display = 'none';
+      } else {
+        if (verifyRow) verifyRow.innerHTML = '<span style="color:#ffaa00;">⚠</span> <span style="color:var(--muted);">Email non ancora verificata —</span> <button onclick="resendVerification()" style="background:none;border:none;color:var(--accent);font-family:var(--font-body);font-size:13px;cursor:pointer;padding:0;">Invia link di verifica</button>';
+        if (verifyBanner) verifyBanner.style.display = 'flex';
+      }
 
       // Prefer vendor table payout data, fallback to user_metadata
       const meta = user.user_metadata || {};
@@ -575,6 +603,8 @@
     const nome = document.getElementById('ob-nome').value.trim();
     const cognome = document.getElementById('ob-cognome').value.trim();
     const bio = document.getElementById('ob-bio').value.trim();
+    const nomeAzienda = document.getElementById('ob-azienda').value.trim();
+    const partitaIva = document.getElementById('ob-piva').value.trim();
     if (!nome || !cognome) { showToast('Inserisci nome e cognome', 'error'); return; }
 
     const { data: { session } } = await db.auth.getSession();
@@ -584,6 +614,8 @@
     try {
       const { data, error } = await db.from('vendors').insert({
         user_id: session.user.id, nome, cognome, bio,
+        nome_azienda: nomeAzienda || null,
+        partita_iva: partitaIva || null,
         email: session.user.email, approvato: false
       }).select().single();
       if (error) throw error;
@@ -592,19 +624,46 @@
       document.getElementById('user-name').textContent = `${nome} ${cognome}`;
       document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();
 
+      // Notifica admin (fire and forget)
       fetch(`${SUPABASE_URL}/functions/v1/send-notification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
         body: JSON.stringify({ type: 'vendor_registered', agentName: `${nome} ${cognome}` }),
       }).catch(() => {});
 
-      showToast('Profilo creato! In attesa di approvazione (entro 24h).', 'info');
+      // Email verifica identità (fire and forget)
+      fetch(`${SUPABASE_URL}/functions/v1/send-vendor-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+      }).catch(() => {});
+
+      showToast('Profilo creato! Controlla la tua email per verificare l\'identità.', 'info');
       showSection('pending', null);
       document.getElementById('section-pending').classList.add('active');
     } catch (err) {
       showToast('Errore: ' + (err.message || 'Si è verificato un errore'), 'error');
     } finally {
       setBtnLoading(btn, false, 'Completa profilo →');
+    }
+  }
+
+  async function resendVerification() {
+    const btn = document.getElementById('btn-resend-verify');
+    if (btn) { btn.disabled = true; btn.textContent = 'Invio...'; }
+    try {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) { showToast('Effettua il login prima', 'error'); return; }
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-vendor-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': SUPABASE_ANON_KEY },
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      showToast('Email di verifica inviata! Controlla la casella.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Errore nell\'invio', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Reinvia email'; }
     }
   }
 
@@ -695,8 +754,17 @@
       const activeSubs = subs.filter(s => s.stato === 'attiva');
 
       const mensile = activeSubs.reduce((sum, s) => sum + parseFloat(s.agents?.prezzo_mensile || 0) * 0.7, 0);
+
+      // Stima storica: somma mesi attivi × prezzo × 70% per tutti gli abbonamenti (attivi + passati)
+      const totaleStorico = subs.reduce((sum, s) => {
+        const prezzo = parseFloat(s.agents?.prezzo_mensile || 0);
+        const start = s.data_inizio ? new Date(s.data_inizio) : new Date();
+        const mesi = Math.max(1, Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
+        return sum + prezzo * 0.7 * mesi;
+      }, 0);
+
       document.getElementById('rev-mensile').textContent = `€${mensile.toFixed(0)}`;
-      document.getElementById('rev-totale').textContent = `€${mensile.toFixed(0)}`;
+      document.getElementById('rev-totale').textContent = `€${totaleStorico.toFixed(0)}`;
       document.getElementById('rev-abbonati').textContent = activeSubs.length;
 
       const byAgent = {};
@@ -759,11 +827,12 @@
     const descBreve = document.getElementById('new-desc-breve').value.trim();
     const prezzo = document.getElementById('new-prezzo').value;
     const icona = document.getElementById('new-icona').value.trim();
+    const tecnologia = document.getElementById('new-tecnologia').value.trim();
     const videoUrl = document.getElementById('new-video-url').value.trim();
     const istruzioni = document.getElementById('new-istruzioni').value.trim();
     const featured = document.getElementById('new-featured').checked;
 
-    if (!nome || !categoria || !desc || !prezzo) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
+    if (!nome || !categoria || !desc || !prezzo || !istruzioni) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
     if (descBreve.length > DESC_BREVE_MAX) { showToast(`La descrizione breve supera i ${DESC_BREVE_MAX} caratteri`, 'error'); return; }
     if (videoUrl && !isValidVideoUrl(videoUrl)) { showToast('L\'URL video deve essere un link YouTube o Vimeo valido', 'error'); return; }
 
@@ -774,6 +843,7 @@
         vendor_id: currentVendorId, nome, categoria,
         descrizione: desc, descrizione_breve: descBreve,
         prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+        tipo_tecnologia: tecnologia || null,
         video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
         attivo: false, featured: featured
       });
@@ -798,11 +868,12 @@
     const descBreve = document.getElementById('new-desc-breve').value.trim();
     const prezzo = document.getElementById('new-prezzo').value;
     const icona = document.getElementById('new-icona').value.trim();
+    const tecnologia = document.getElementById('new-tecnologia').value.trim();
     const videoUrl = document.getElementById('new-video-url').value.trim();
     const istruzioni = document.getElementById('new-istruzioni').value.trim();
     const featured = document.getElementById('new-featured').checked;
 
-    if (!nome || !categoria || !desc || !prezzo) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
+    if (!nome || !categoria || !desc || !prezzo || !istruzioni) { showToast('Compila tutti i campi obbligatori (*)', 'error'); return; }
     if (descBreve.length > DESC_BREVE_MAX) { showToast(`La descrizione breve supera i ${DESC_BREVE_MAX} caratteri`, 'error'); return; }
     if (videoUrl && !isValidVideoUrl(videoUrl)) { showToast('L\'URL video deve essere un link YouTube o Vimeo valido', 'error'); return; }
 
@@ -814,6 +885,7 @@
       const { error } = await db.from('agents').update({
         nome, categoria, descrizione: desc, descrizione_breve: descBreve,
         prezzo_mensile: parseFloat(prezzo), icona: icona || '🤖',
+        tipo_tecnologia: tecnologia || null,
         video_demo_url: videoUrl || null, istruzioni_setup: istruzioni || null,
         featured: featured, attivo: false
       }).eq('id', editingAgentId);
@@ -848,11 +920,17 @@
     const nome = document.getElementById('p-nome').value.trim();
     const cognome = document.getElementById('p-cognome').value.trim();
     const bio = document.getElementById('p-bio').value.trim();
+    const nomeAzienda = document.getElementById('p-azienda').value.trim();
+    const partitaIva = document.getElementById('p-piva').value.trim();
     if (!nome || !cognome) { showToast('Nome e cognome sono obbligatori', 'error'); return; }
     const btn = document.getElementById('btn-save-profile');
     setBtnLoading(btn, true, 'Salva profilo');
     try {
-      const { error } = await db.from('vendors').update({ nome, cognome, bio }).eq('id', currentVendorId);
+      const { error } = await db.from('vendors').update({
+        nome, cognome, bio,
+        nome_azienda: nomeAzienda || null,
+        partita_iva: partitaIva || null,
+      }).eq('id', currentVendorId);
       if (error) throw error;
       document.getElementById('user-name').textContent = `${nome} ${cognome}`;
       document.getElementById('avatar-initials').textContent = nome.charAt(0).toUpperCase();

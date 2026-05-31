@@ -1,14 +1,13 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
 const cors = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': SITE_URL,
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function decodeJwt(token: string): { sub: string } | null {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return { sub: payload.sub };
-  } catch { return null; }
-}
+function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
+function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
 
 async function sendEmail(apiKey: string, to: string, subject: string, html: string) {
   const from = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
@@ -23,13 +22,15 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
   try {
-    const user = decodeJwt(req.headers.get('Authorization')?.replace('Bearer ', '') ?? '');
-    if (!user?.sub) throw new Error('Non autorizzato');
+    // Verify JWT signature via Supabase auth
+    const token = (req.headers.get('Authorization') ?? '').replace('Bearer ', '');
+    const supabaseAdmin = createClient(supabaseUrl(), supabaseSrk());
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) throw new Error('Non autorizzato');
 
-    const { type, agentName, vendorEmail } = await req.json();
+    const { type, agentName, vendorEmail, vendorName, buyerEmail } = await req.json();
     const RESEND_KEY = Deno.env.get('RESEND_API_KEY');
     const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'amirpiccardo@gmail.com';
-    const SITE_URL = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
 
     if (!RESEND_KEY) {
       return new Response(JSON.stringify({ ok: true, skipped: 'no RESEND_API_KEY' }), {
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
       await sendEmail(RESEND_KEY, vendorEmail,
         `Il tuo account vendor è stato approvato! 🎉`,
         `<p>Ciao <strong>${agentName}</strong>,</p>
-         <p>Il tuo account vendor su Shop Your Agent è stato approvato. Puoi ora pubblicare i tuoi agenti.</p>
+         <p>Il tuo account vendor su Shop Your Agent è stato approvato. Puoi ora pubblicare i tuoi agenti AI.</p>
          <p><a href="${SITE_URL}/dashboard-vendor.html">Accedi alla dashboard →</a></p>`
       );
     }
@@ -68,6 +69,29 @@ Deno.serve(async (req) => {
         `<p>Buone notizie! Il tuo agente <strong>${agentName}</strong> è stato approvato e pubblicato su Shop Your Agent.</p>
          <p>Gli utenti possono ora trovarlo e attivarlo direttamente dal catalogo.</p>
          <p><a href="${SITE_URL}/dashboard-vendor.html">Vai alla tua dashboard →</a></p>`
+      );
+    }
+
+    if (type === 'welcome' && agentName && vendorEmail) {
+      await sendEmail(RESEND_KEY, vendorEmail,
+        `Benvenuto su Shop Your Agent, ${agentName}! 🎉`,
+        `<p>Ciao <strong>${agentName}</strong>,</p>
+         <p>Benvenuto su Shop Your Agent — il marketplace italiano degli agenti AI.</p>
+         <p>Puoi subito esplorare il catalogo e attivare il tuo primo agente in pochi minuti, senza nessuna competenza tecnica.</p>
+         <p><a href="${SITE_URL}/shop_your_agent.html">Esplora il catalogo →</a></p>
+         <p style="margin-top:24px;font-size:13px;color:#666;">Hai domande? Consulta le <a href="${SITE_URL}/faq.html">FAQ</a> o scrivici a <a href="mailto:support@shopyouragent.com">support@shopyouragent.com</a>.</p>
+         <p>A presto,<br>Il team di Shop Your Agent</p>`
+      );
+    }
+
+    if (type === 'new_subscription' && agentName && vendorEmail) {
+      const buyer = buyerEmail || 'Un nuovo utente';
+      await sendEmail(RESEND_KEY, vendorEmail,
+        `Nuovo abbonamento per "${agentName}"! 💰`,
+        `<p>Ciao${vendorName ? ` <strong>${vendorName}</strong>` : ''},</p>
+         <p>${buyer} si è abbonato al tuo agente <strong>${agentName}</strong>.</p>
+         <p>Il guadagno del 70% ti verrà accreditato il 1° del mese.</p>
+         <p><a href="${SITE_URL}/dashboard-vendor.html">Vedi i tuoi guadagni →</a></p>`
       );
     }
 

@@ -1,6 +1,42 @@
 function supabaseUrl() { return Deno.env.get('SUPABASE_URL')!; }
 function supabaseSrk() { return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!; }
 
+async function sendVendorNewSubscriptionEmail(
+  agentId: string,
+  buyerEmail: string | null,
+  agentName: string
+) {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  if (!apiKey) return;
+
+  // Fetch vendor info via agent → vendor join
+  const vendorUrl = new URL(`${supabaseUrl()}/rest/v1/agents`);
+  vendorUrl.searchParams.set('id', `eq.${agentId}`);
+  vendorUrl.searchParams.set('select', 'vendor_id,vendors(nome,email)');
+  const vendorRes = await fetch(vendorUrl, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+  });
+  const agentData = await vendorRes.json();
+  const vendor = agentData?.[0]?.vendors;
+  if (!vendor?.email) return;
+
+  const from = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
+  const siteUrl = Deno.env.get('SITE_URL') || 'https://shopyouragent.onrender.com';
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: [vendor.email],
+      subject: `Nuovo abbonamento per "${agentName}"! 💰`,
+      html: `<p>Ciao${vendor.nome ? ` <strong>${vendor.nome}</strong>` : ''},</p>
+             <p>${buyerEmail || 'Un nuovo utente'} si è abbonato al tuo agente <strong>${agentName}</strong>.</p>
+             <p>Il guadagno del 70% ti verrà accreditato il 1° del mese.</p>
+             <p><a href="${siteUrl}/dashboard-vendor.html">Vedi i tuoi guadagni →</a></p>`,
+    }),
+  });
+}
+
 async function sendPurchaseConfirmation(toEmail: string, agentName: string) {
   const apiKey = Deno.env.get('RESEND_API_KEY');
   if (!apiKey) return;
@@ -43,6 +79,15 @@ async function verifyStripeSignature(payload: string, sigHeader: string, secret:
     for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ computed.charCodeAt(i);
     return diff === 0;
   });
+}
+
+async function dbGet(path: string, query: Record<string, string>) {
+  const url = new URL(`${supabaseUrl()}/rest/v1${path}`);
+  for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
+  const res = await fetch(url, {
+    headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+  });
+  return res.json();
 }
 
 async function dbPost(path: string, body: unknown) {
@@ -96,6 +141,13 @@ Deno.serve(async (req) => {
       const meta = session['metadata'] as Record<string, string> | null;
       if (!meta?.user_id || !meta?.agent_id) break;
 
+      // Idempotency check — Stripe delivers webhooks at least once
+      const existing = await dbGet('/subscriptions', {
+        stripe_subscription_id: `eq.${session['subscription']}`,
+        select: 'id',
+      });
+      if (Array.isArray(existing) && existing.length > 0) break;
+
       await dbPost('/subscriptions', {
         user_id: meta.user_id,
         agent_id: meta.agent_id,
@@ -105,19 +157,25 @@ Deno.serve(async (req) => {
         stripe_customer_id: session['customer'],
       });
 
-      // Send purchase confirmation email (fire and forget)
-      const customerEmail = (session['customer_details'] as Record<string, string> | null)?.email;
+      const customerEmail = (session['customer_details'] as Record<string, string> | null)?.email ?? null;
+
+      // Fetch agent name (needed for both emails)
+      const agentUrl = new URL(`${supabaseUrl()}/rest/v1/agents`);
+      agentUrl.searchParams.set('id', `eq.${meta.agent_id}`);
+      agentUrl.searchParams.set('select', 'nome');
+      const agentRes = await fetch(agentUrl, {
+        headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
+      });
+      const agentData = await agentRes.json();
+      const agentName = agentData?.[0]?.nome || 'Agente';
+
+      // Buyer confirmation email
       if (customerEmail) {
-        const agentUrl = new URL(`${supabaseUrl()}/rest/v1/agents`);
-        agentUrl.searchParams.set('id', `eq.${meta.agent_id}`);
-        agentUrl.searchParams.set('select', 'nome');
-        const agentRes = await fetch(agentUrl, {
-          headers: { apikey: supabaseSrk(), Authorization: `Bearer ${supabaseSrk()}` },
-        });
-        const agents = await agentRes.json();
-        const agentName = agents?.[0]?.nome || 'Agente';
         sendPurchaseConfirmation(customerEmail, agentName).catch(() => {});
       }
+
+      // Vendor notification email
+      sendVendorNewSubscriptionEmail(meta.agent_id, customerEmail, agentName).catch(() => {});
       break;
     }
 

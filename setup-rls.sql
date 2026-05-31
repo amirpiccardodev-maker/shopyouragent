@@ -102,7 +102,7 @@ CREATE POLICY "agents_delete" ON agents
 -- SUBSCRIPTIONS
 -- ============================================================
 DROP POLICY IF EXISTS "subscriptions_select" ON subscriptions;
-DROP POLICY IF EXISTS "subscriptions_insert" ON subscriptions;
+DROP POLICY IF EXISTS "subscriptions_insert" ON subscriptions; -- rimossa: solo service_role può inserire
 DROP POLICY IF EXISTS "subscriptions_update" ON subscriptions;
 
 CREATE POLICY "subscriptions_select" ON subscriptions
@@ -116,8 +116,12 @@ CREATE POLICY "subscriptions_select" ON subscriptions
     OR (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
   );
 
-CREATE POLICY "subscriptions_insert" ON subscriptions
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- INSERT: solo admin (via dashboard) o service_role (webhook Stripe).
+-- Gli utenti normali NON possono inserire abbonamenti direttamente.
+CREATE POLICY "subscriptions_insert_admin" ON subscriptions
+  FOR INSERT WITH CHECK (
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+  );
 
 CREATE POLICY "subscriptions_update" ON subscriptions
   FOR UPDATE USING (
